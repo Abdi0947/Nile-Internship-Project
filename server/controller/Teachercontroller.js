@@ -3,15 +3,17 @@ const Cloudinary = require("../lib/Cloudinary");
 const User = require("../model/Usermodel");
 
 module.exports.createTeacherprofile = async (req, res) => {
+  console.log(req.body)
+  console.log(req.user?._id);
   try {
     const userId = req.user?._id;
     const {
-      firstName,
-      lastName,
+      Firstname,
+      Lastname,
       email,
-      phone,
-      Address,
-      Dateofbirth,
+      Phone,
+      address,
+      dateOfBirth,
       gender,
       profileImage,
       subjects,
@@ -21,12 +23,12 @@ module.exports.createTeacherprofile = async (req, res) => {
     } = req.body;
 
     if (
-      !firstName ||
-      !lastName ||
+      !Firstname ||
+      !Lastname ||
       !email ||
-      !phone ||
-      !Address ||
-      !Dateofbirth ||
+      !Phone ||
+      !address ||
+      !dateOfBirth ||
       !gender 
 
    
@@ -65,18 +67,17 @@ module.exports.createTeacherprofile = async (req, res) => {
     }
 
     const newTeacher = new Teacher({
-      firstName,
-      lastName,
-      email,
-      phone,
-      Address,
-      Dateofbirth,
-      gender,
-      profileImage: uploadedImageUrl,
-      subjects,
-      attendance,
-      assignedClasses,
-  
+      firstName: Firstname,
+      lastName: Lastname,
+      email: email,
+      phone: Phone,
+      Address: address,
+      Dateofbirth: dateOfBirth,
+      gender: gender,
+      profileImage: profileImage,
+      subjects: subjects,
+      attendance: attendance,
+      assignedClasses: assignedClasses,
     });
 
     await newTeacher.save();

@@ -128,7 +128,7 @@ function App() {
           </Route>
 
           <Route path='/student' element={<StudentLayout />}>
-            <Route path='home' element={<StudentDashboard />} />
+            {/* <Route path='home' element={<StudentDashboard />} /> */}
             <Route path='dashboard' element={<StudentDashboard />} />
             <Route path='courses' element={<StudentCourses />} />
             <Route path='assignments' element={<StudentAssignmentDetails />} />
