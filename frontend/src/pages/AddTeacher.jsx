@@ -15,7 +15,7 @@ const validationSchema = yup.object({
     .number()
     .typeError("Phone must be a number")
     .required("Phone number is required"),
-  gender: yup.string().oneOf(["man", "women"]).required("Gender is required"),
+  gender: yup.string().oneOf(["Male", "Female"]).required("Gender is required"),
 });
 
 function AddTeacherPage() {
@@ -40,13 +40,16 @@ function AddTeacherPage() {
 
   const handleSubmit = (values) => {
     dispatch(AddTeacher(values));
-    formik.resetForm();
+
+    // formik.resetForm();
   };
 
   return (
     <>
       <TopNavbar />
-      <h1 className="mt-10 ml-20 font-medium text-3xl text-gray-500">Add Teacher</h1>
+      <h1 className="mt-10 ml-20 font-medium text-3xl text-gray-500">
+        Add Teacher
+      </h1>
       <hr className="mb-10 mt-5"></hr>
       <form
         onSubmit={formik.handleSubmit}
@@ -106,8 +109,8 @@ function AddTeacherPage() {
               className="w-full px-3 py-2 border rounded-md"
             >
               <option value="">Select gender</option>
-              <option value="man">Man</option>
-              <option value="women">Woman</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
             </select>
             {formik.touched.gender && formik.errors.gender && (
               <p className="text-red-500 text-sm">{formik.errors.gender}</p>
@@ -134,4 +137,4 @@ function AddTeacherPage() {
   );
 }
 
-export default AddTeacherPage; 
+export default AddTeacherPage;

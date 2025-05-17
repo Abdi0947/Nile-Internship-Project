@@ -19,16 +19,25 @@ const initialState={
 
 
 
-export const AddTeacher=createAsyncThunk('teacher/TeacherProfile',async(Teacher,{rejectWithValue})=>{
+export const AddTeacher = createAsyncThunk(
+  "teacher/TeacherProfile",
+  async (Teacher, { rejectWithValue }) => {
+    console.log(Teacher);
     try {
-       const response=await axiosInstance.post("teacher/TeacherProfile",Teacher,{ withCredentials: true,})
-       return response.data;
-  
-      
+      const response = await axiosInstance.post(
+        "teacher/TeacherProfile",
+        Teacher,
+        { withCredentials: true }
+      );
+      return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || "Teacher adding failed");
+      console.log(error)
+      return rejectWithValue(
+        error.response?.data?.message || "Teacher adding failed"
+      );
     }
-  })
+  }
+);
 
 
   export const RemoveTeacher=createAsyncThunk('teacher/deleteTeacher',async(TeacherId,{rejectWithValue})=>{
