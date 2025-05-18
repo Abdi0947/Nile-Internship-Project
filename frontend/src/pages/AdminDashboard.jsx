@@ -27,7 +27,9 @@ function AdminDashboard() {
   const dispatch = useDispatch();
   const { students, studentStats } = useSelector((state) => state.Student);
   const { fees } = useSelector((state) => state.Fee);
-  const { Timetables } = useSelector((state) => state.Timetable);
+  const { Timetables, isTimetablesLoading } = useSelector(
+      (state) => state.Timetables
+    );
   const { Authuser } = useSelector((state) => state.auth);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showStatsDetails, setShowStatsDetails] = useState(false);
