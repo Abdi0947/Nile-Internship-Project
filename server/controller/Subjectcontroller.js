@@ -4,12 +4,11 @@ const Subject = require('../model/Subjectmodel');
 
 module.exports.createSubject = async (req, res) => {
   try {
-    const { SubjectName, TeacherId} = req.body;
+    const { SubjectName} = req.body;
 
 
     const subject = new Subject({
-      SubjectName,
-      TeacherId,
+      SubjectName
   
     });
 

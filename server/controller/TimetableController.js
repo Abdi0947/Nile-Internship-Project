@@ -31,9 +31,8 @@ module.exports.createTimetable = async (req, res) => {
 module.exports.getAllTimetables = async (req, res) => {
   try {
     const timetables = await Timetable.find()
-      .populate('classID')
-      .populate('subjectID')
-      .populate('teacherID');
+      .populate("subjectId")
+      .populate("teacherId");
     res.json(timetables);
   } catch (err) {
     res.status(500).json({ error: err.message });
