@@ -17,15 +17,21 @@ const initialState = {
 
 // Fetch all Timetables
 export const fetchAllTimetables = createAsyncThunk(
-    'Timetable/getallTimetable',
-    async (_, { rejectWithValue }) => {
-        try {
-            const response = await axiosInstance.get("Timetable/getallTimetable", { withCredentials: true });
-            return response.data;
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.message || "Failed to fetch Timetables");
-        }
+  "Timetable/getallTimetable",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get("Timetable/getallTimetable", {
+        withCredentials: true,
+      });
+    //   console.log(response.data);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch Timetables"
+      );
     }
+  }
 );
 
 // Add a new Timetable
@@ -118,8 +124,11 @@ const TimetableSlice = createSlice({
                 state.error = null;
             })
             .addCase(fetchAllTimetables.fulfilled, (state, action) => {
+                console.log("🎯 Fetched Timetables:", action.payload);
                 state.isTimetablesLoading = false;
-                state.Timetables = action.payload.timetables || [];
+                state.Timetables = Array.isArray(action.payload)
+                  ? action.payload
+                  : [];
             })
             .addCase(fetchAllTimetables.rejected, (state, action) => {
                 state.isTimetablesLoading = false;
@@ -168,23 +177,16 @@ const TimetableSlice = createSlice({
             })
             .addCase(updateTimetable.fulfilled, (state, action) => {
                 state.isTimetableUpdating = false;
-                if (state.Timetables) {
-                    const index = state.Timetables.findIndex(
-                        Timetable => Timetable._id === action.payload._id
-                    );
-                    if (index !== -1) {
-                        state.Timetables[index] = action.payload;
-                    }
-                }
-                if (state.currentTimetable?._id === action.payload._id) {
-                    state.currentTimetable = action.payload;
+                const updated = action.payload;
+                const index = state.Timetables.findIndex(t => t._id === updated._id);
+                if (index !== -1) {
+                    state.Timetables[index] = updated;
                 }
             })
             .addCase(updateTimetable.rejected, (state, action) => {
                 state.isTimetableUpdating = false;
                 state.error = action.payload;
             })
-
             // Search Timetables
             .addCase(searchTimetables.pending, (state) => {
                 state.isSearching = true;

@@ -133,6 +133,7 @@ function AdminDashboard() {
       setTimeout(() => setIsRefreshing(false), 1000);
     });
   };
+  console.log("test")
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">

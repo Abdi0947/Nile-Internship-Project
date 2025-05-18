@@ -5,6 +5,7 @@ import TimetableReducer from "../features/TimeTable"
 import authReducer from "../features/Authentication"
 import FeeReducer from "../features/Fee"
 import StudentReducer from "../features/Student"
+import SubjectReducer from "../features/Subject"
 import NotificationReducer from "../features/Notification"
 import { ensureProfileImagePersistence } from "../lib/sessionPersistence";
 
@@ -39,11 +40,12 @@ const store = configureStore({
   reducer: {
     attendance: attendanceReducer,
     Teacher: TeacherReducer,
-    Timetable: TimetableReducer,
+    Timetables: TimetableReducer,
     auth: authReducer,
     Fee: FeeReducer,
     Student: StudentReducer,
-    notification: NotificationReducer
+    notification: NotificationReducer,
+    Subject: SubjectReducer
   },
   middleware: (getDefaultMiddleware) => 
     getDefaultMiddleware()
