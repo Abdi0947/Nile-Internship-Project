@@ -1,12 +1,29 @@
 import React from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import TopNavbar from '../components/Topnavbar';
-import { FiHome, FiBook, FiClipboard, FiCalendar, FiUser, FiSettings, FiBell } from 'react-icons/fi';
+import { FiHome, FiBook, FiClipboard, FiCalendar, FiUser, FiSettings, FiBell, FiLogOut } from 'react-icons/fi';
+import { motion } from 'framer-motion';
+import { logout } from "../features/Authentication";
+import toast from 'react-hot-toast';
 
 function StudentLayout() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { Authuser } = useSelector((state) => state.auth);
+
+  const handleLogout = async () => {
+    try {
+      await dispatch(logout()).unwrap();
+      toast.success('Logged out successfully');
+      setTimeout(() => {
+        navigate('/login', { replace: true });
+      }, 200);
+    } catch (error) {
+      toast.error('Logout failed');
+      console.error('Logout error:', error);
+    }
+  };
 
   const navigation = [
     { name: 'Dashboard', icon: FiHome, path: '/student/dashboard' },
@@ -27,51 +44,103 @@ function StudentLayout() {
       <TopNavbar />
       
       <div className="flex">
-        {/* Sidebar */}
-        <div className="hidden md:flex md:flex-shrink-0">
-          <div className="flex flex-col w-64">
-            <div className="flex flex-col flex-grow pt-5 pb-4 overflow-y-auto bg-white border-r">
-              <div className="flex items-center flex-shrink-0 px-4">
-                <h2 className="text-xl font-semibold text-gray-800">Student Portal</h2>
+        {/* Sidebar - Updated to be fixed and shorter */}
+        <div className="hidden md:block fixed h-[calc(100vh-3.5rem)] top-14 left-0 z-10">
+          <div className="flex flex-col w-64 h-full">
+            <div className="flex flex-col h-full bg-gradient-to-b from-blue-950 via-blue-900 to-gray-900 text-white shadow-xl">
+              <div className="flex items-center flex-shrink-0 px-4 py-3">
+                <h2 className="text-lg font-semibold text-white">Student Portal</h2>
               </div>
-              <div className="mt-5 flex-grow flex flex-col">
-                <nav className="flex-1 px-2 space-y-1">
+              
+              {/* User Profile Section - Made more compact */}
+              <div className="flex items-center px-4 py-2 border-b border-blue-700/30">
+                <div className="w-7 h-7 rounded-full overflow-hidden mr-2 border-2 border-blue-400">
+                  {Authuser?.ProfilePic ? (
+                    <img 
+                      src={Authuser.ProfilePic} 
+                      alt="Profile" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
+                      <span className="text-white font-bold text-xs">
+                        {Authuser?.firstName?.charAt(0) || 'A'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <p className="font-medium text-white text-xs">
+                    {`${Authuser?.firstName || ''} ${Authuser?.lastName || ''}`}
+                  </p>
+                  <p className="text-[10px] text-blue-300 capitalize">
+                    {Authuser?.role || 'Student'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Navigation - Made more compact */}
+              <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-700 scrollbar-track-transparent">
+                <nav className="py-2 px-2 space-y-0.5">
                   {navigation.map((item) => {
                     const Icon = item.icon;
                     return (
-                      <button
+                      <motion.button
                         key={item.name}
                         onClick={() => navigate(item.path)}
-                        className="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900 w-full"
+                        className="group flex items-center px-2 py-1.5 text-sm font-medium rounded-md text-gray-200 hover:bg-blue-800/30 hover:text-white w-full transition-colors duration-200"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                       >
-                        <Icon className="mr-3 h-6 w-6" />
-                        {item.name}
-                      </button>
+                        <Icon className="mr-2 h-5 w-5" />
+                        <span className="text-xs">{item.name}</span>
+                      </motion.button>
                     );
                   })}
                 </nav>
-              </div>
-              <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
-                <div className="flex items-center">
-                  <div>
-                    <img
-                      className="inline-block h-10 w-10 rounded-full"
-                      src={Authuser?.ProfilePic || 'https://via.placeholder.com/40'}
-                      alt=""
-                    />
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-gray-700">{Authuser?.firstName} {Authuser?.lastName}</p>
-                    <p className="text-xs font-medium text-gray-500">Student</p>
-                  </div>
+
+                {/* User Navigation - Made more compact */}
+                <div className="mt-2 px-2 space-y-0.5">
+                  {userNavigation.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <motion.button
+                        key={item.name}
+                        onClick={() => navigate(item.path)}
+                        className="group flex items-center px-2 py-1.5 text-sm font-medium rounded-md text-gray-200 hover:bg-blue-800/30 hover:text-white w-full transition-colors duration-200"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <Icon className="mr-2 h-5 w-5" />
+                        <span className="text-xs">{item.name}</span>
+                      </motion.button>
+                    );
+                  })}
                 </div>
+              </div>
+
+              {/* Logout Button - Made more compact */}
+              <div className="border-t border-blue-700/30 px-2 py-2">
+                <motion.button
+                  onClick={handleLogout}
+                  className="flex items-center w-full px-2 py-1.5 text-sm font-medium rounded-md text-red-300 hover:bg-red-500/20 hover:text-red-200 transition-colors duration-200"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <FiLogOut className="mr-2 h-5 w-5" />
+                  <span className="text-xs">Logout</span>
+                </motion.button>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Main content */}
-        <div className="flex-1">
+        {/* Main content - Updated to account for fixed sidebar */}
+        <div className="flex-1 md:ml-64">
           <main className="flex-1">
             <Outlet />
           </main>
