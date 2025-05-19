@@ -3,7 +3,7 @@ import TopNavbar from "../components/Topnavbar";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FiBookOpen, FiClipboard, FiCalendar, FiClock, FiBarChart2, FiAward, FiFileText, FiCheckSquare } from "react-icons/fi";
+import { FiBookOpen, FiClipboard, FiCalendar, FiClock, FiBarChart2, FiAward, FiFileText, FiCheckSquare, FiUpload } from "react-icons/fi";
 
 function StudentDashboard() {
   const { Authuser } = useSelector((state) => state.auth);
@@ -386,27 +386,39 @@ function StudentDashboard() {
                           <FiClipboard className="text-xl" />
                         }
                       </div>
-                      <div className="flex-grow">
-                        <h4 className="font-medium text-black">{assignment.title}</h4>
-                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-                          <p className="text-sm text-black">{assignment.course}</p>
-                          <span className={`text-xs mt-1 sm:mt-0 py-1 px-2 rounded-full ${
-                            getDaysRemaining(assignment.dueDate).includes('today') ? 
-                              'bg-red-100 text-red-700' : 
-                              getDaysRemaining(assignment.dueDate).includes('tomorrow') ?
-                                'bg-amber-100 text-amber-700' :
-                                'bg-blue-100 text-blue-700'
+                      <div className="flex-1">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="font-medium text-gray-800">{assignment.title}</h4>
+                            <p className="text-sm text-gray-500">{assignment.course}</p>
+                          </div>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            assignment.status === 'complete' ? 'bg-green-100 text-green-800' :
+                            assignment.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
+                            'bg-amber-100 text-amber-800'
                           }`}>
-                            {getDaysRemaining(assignment.dueDate)}
+                            {assignment.status.replace('-', ' ')}
                           </span>
                         </div>
-                        <div className="mt-2 flex space-x-2">
-                          <Link to={`/student/assignments/${assignment.id}`} className="text-xs text-blue-600 hover:text-blue-800">
+                        <div className="mt-2 flex items-center text-sm text-gray-500">
+                          <FiClock className="mr-1" />
+                          <span>Due {formatDateTime(assignment.dueDate)}</span>
+                        </div>
+                        <div className="mt-3 flex space-x-3">
+                          <Link
+                            to={`/student/assignments/${assignment.id}`}
+                            className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
+                          >
+                            <FiFileText className="mr-1" />
                             View Details
                           </Link>
                           {assignment.status !== 'complete' && (
-                            <Link to={`/student/assignments/${assignment.id}/submit`} className="text-xs text-green-600 hover:text-green-800">
-                              {assignment.status === 'in-progress' ? 'Continue' : 'Start Assignment'}
+                            <Link
+                              to={`/student/assignments/${assignment.id}/submit`}
+                              className="text-green-600 hover:text-green-800 text-sm font-medium flex items-center"
+                            >
+                              <FiUpload className="mr-1" />
+                              Submit
                             </Link>
                           )}
                         </div>

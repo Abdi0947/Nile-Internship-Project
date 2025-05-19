@@ -38,6 +38,11 @@ import StudentAssignmentSubmit from './pages/StudentAssignmentSubmit';
 import StudentCourseAssignments from './pages/StudentCourseAssignments';
 import StudentCourseDetails from './pages/StudentCourseDetails';
 import StudentLayout from './layouts/StudentLayout';
+import AssignmentDetails from './pages/AssignmentDetails';
+import SubmitAssignment from './pages/SubmitAssignment';
+import TeacherGradeAssignment from './pages/TeacherGradeAssignment';
+import TeacherGradeSubmission from './pages/TeacherGradeSubmission';
+import TeacherRequestPage from './pages/TeacherRequestPage';
 
 function App() {
   const dispatch = useDispatch();
@@ -104,6 +109,8 @@ function App() {
             <Route path='timetable' element={<Timetable />} />
             <Route path='TeachersAssignmentpage' element={<TeachersAssignmentpage />} />
             <Route path='TeachersAssignmentpage/:assignmentId' element={<AssignmentReviewPage />} />
+            <Route path='grade-assignments' element={<TeacherGradeAssignment />} />
+            <Route path='grade-assignments/:assignmentId' element={<TeacherGradeSubmission />} />
             <Route path='notifications' element={<Notificationpage />} />
             <Route path='Attendancepage' element={<Attendancepage/>}/>
             <Route path='TeacherSubject' element={<TeacherSubject/>}/>
@@ -117,6 +124,7 @@ function App() {
             <Route index element={<AdminDashboard />} />
             <Route path='admindashboard' element={<AdminDashboard />} />
             <Route path='AdminTeacher' element={<AdminTeacher/>} />
+            <Route path='teacher-requests' element={<TeacherRequestPage />} />
             <Route path='Timetable' element={<Timetable/>} />
             <Route path='fee' element={<FeePage/>} />
             <Route path='students' element={<StudentManagement/>} />
@@ -128,7 +136,7 @@ function App() {
           </Route>
 
           <Route path='/student' element={<StudentLayout />}>
-            {/* <Route path='home' element={<StudentDashboard />} /> */}
+            <Route path='home' element={<StudentDashboard />} />
             <Route path='dashboard' element={<StudentDashboard />} />
             <Route path='courses' element={<StudentCourses />} />
             <Route path='assignments' element={<StudentAssignmentDetails />} />
@@ -137,6 +145,8 @@ function App() {
             <Route path='account' element={<AccountSettings />} />
             <Route path='settings' element={<AccountSettings />} />
             <Route path='notifications' element={<Notificationpage />} />
+            <Route path='assignments/:id' element={<AssignmentDetails />} />
+            <Route path='assignments/:id/submit' element={<SubmitAssignment />} />
           </Route>
 
           {/* Add route for adding a teacher */}

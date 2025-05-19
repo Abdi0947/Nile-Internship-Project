@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import TopNavbar from "../components/Topnavbar";
 import { fetchAllStudents, calculateStudentStats } from "../features/Student";
 import { fetchAllTimetables } from "../features/TimeTable";
 import { fetchAllFees } from "../features/Fee";
 import { fetchNotifications } from "../features/Notification";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   FiPlusCircle, 
   FiUser, 
@@ -19,9 +19,12 @@ import {
   FiActivity,
   FiPieChart,
   FiBarChart2,
-  FiRefreshCw
+  FiRefreshCw,
+  FiUserPlus,
+  FiX
 } from "react-icons/fi";
 import ProfilePicture from "../components/ProfilePicture";
+import { toast } from "react-hot-toast";
 
 function AdminDashboard() {
   const dispatch = useDispatch();
@@ -33,6 +36,46 @@ function AdminDashboard() {
   const { Authuser } = useSelector((state) => state.auth);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showStatsDetails, setShowStatsDetails] = useState(false);
+  const navigate = useNavigate();
+  const [teachers, setTeachers] = useState([
+    {
+      id: 1,
+      name: 'John Doe',
+      email: 'john.doe@example.com',
+      phone: '+1234567890',
+      subject: 'Mathematics',
+      status: 'Active',
+      joinDate: '2024-01-15'
+    },
+    {
+      id: 2,
+      name: 'Jane Smith',
+      email: 'jane.smith@example.com',
+      phone: '+1987654321',
+      subject: 'Physics',
+      status: 'Active',
+      joinDate: '2024-02-01'
+    },
+    {
+      id: 3,
+      name: 'Michael Johnson',
+      email: 'michael.j@example.com',
+      phone: '+1122334455',
+      subject: 'Chemistry',
+      status: 'On Leave',
+      joinDate: '2024-01-20'
+    }
+  ]);
+  const [isAddTeacherModalOpen, setIsAddTeacherModalOpen] = useState(false);
+  const [newTeacher, setNewTeacher] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    subject: '',
+    qualification: '',
+    experience: ''
+  });
 
   // Animation variants
   const containerVariants = {
@@ -135,7 +178,43 @@ function AdminDashboard() {
       setTimeout(() => setIsRefreshing(false), 1000);
     });
   };
-  console.log("test")
+
+  const handleAddTeacher = async (e) => {
+    e.preventDefault();
+    // Here you would typically make an API call to add the teacher
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Add the new teacher to the list
+      const teacher = {
+        id: teachers.length + 1,
+        name: `${newTeacher.firstName} ${newTeacher.lastName}`,
+        email: newTeacher.email,
+        phone: newTeacher.phone,
+        subject: newTeacher.subject,
+        status: 'Active',
+        joinDate: new Date().toISOString()
+      };
+      
+      setTeachers([...teachers, teacher]);
+      setIsAddTeacherModalOpen(false);
+      setNewTeacher({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        subject: '',
+        qualification: '',
+        experience: ''
+      });
+      
+      // Show success message
+      toast.success('Teacher added successfully!');
+    } catch (error) {
+      toast.error('Failed to add teacher. Please try again.');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
@@ -545,7 +624,227 @@ function AdminDashboard() {
             </div>
           </motion.div>
         </div>
+
+        {/* Teachers List Section */}
+        <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+          <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800">Registered Teachers</h2>
+              <p className="text-sm text-gray-600 mt-1">{teachers.length} teachers registered</p>
+            </div>
+            <button
+              onClick={() => setIsAddTeacherModalOpen(true)}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <FiUserPlus className="mr-2" />
+              Add Teacher
+            </button>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Join Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {teachers.map((teacher) => (
+                  <tr key={teacher.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-10 w-10">
+                          <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                            <span className="text-blue-600 font-medium">
+                              {teacher.name.split(' ').map(n => n[0]).join('')}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">{teacher.name}</div>
+                          <div className="text-sm text-gray-500">{teacher.email}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{teacher.subject}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{teacher.phone}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        teacher.status === 'Active' 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {teacher.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(teacher.joinDate).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button
+                        onClick={() => navigate(`/admin/teacher/${teacher.id}`)}
+                        className="text-blue-600 hover:text-blue-900 mr-4"
+                      >
+                        View
+                      </button>
+                      <button
+                        onClick={() => navigate(`/admin/teacher/${teacher.id}/edit`)}
+                        className="text-indigo-600 hover:text-indigo-900"
+                      >
+                        Edit
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </motion.div>
+
+      {/* Add Teacher Modal */}
+      <AnimatePresence>
+        {isAddTeacherModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            >
+              <div className="p-6 border-b border-gray-200">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-semibold text-gray-800">Add New Teacher</h2>
+                  <button
+                    onClick={() => setIsAddTeacherModalOpen(false)}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <FiX className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
+
+              <form onSubmit={handleAddTeacher} className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      First Name
+                    </label>
+                    <input
+                      type="text"
+                      value={newTeacher.firstName}
+                      onChange={(e) => setNewTeacher({...newTeacher, firstName: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Last Name
+                    </label>
+                    <input
+                      type="text"
+                      value={newTeacher.lastName}
+                      onChange={(e) => setNewTeacher({...newTeacher, lastName: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      value={newTeacher.email}
+                      onChange={(e) => setNewTeacher({...newTeacher, email: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Phone
+                    </label>
+                    <input
+                      type="tel"
+                      value={newTeacher.phone}
+                      onChange={(e) => setNewTeacher({...newTeacher, phone: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Subject
+                    </label>
+                    <input
+                      type="text"
+                      value={newTeacher.subject}
+                      onChange={(e) => setNewTeacher({...newTeacher, subject: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Qualification
+                    </label>
+                    <input
+                      type="text"
+                      value={newTeacher.qualification}
+                      onChange={(e) => setNewTeacher({...newTeacher, qualification: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Experience
+                    </label>
+                    <input
+                      type="text"
+                      value={newTeacher.experience}
+                      onChange={(e) => setNewTeacher({...newTeacher, experience: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-6 flex justify-end space-x-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsAddTeacherModalOpen(false)}
+                    className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    Add Teacher
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
