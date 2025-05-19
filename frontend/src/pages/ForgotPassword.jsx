@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import toast from 'react-hot-toast';
 import AuthNavbar from "../components/AuthNavbar";
 import { useDarkMode } from "../context/DarkModeContext";
-import axiosInstance from "../lib/axios";
+import axios from "axios";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -64,7 +64,10 @@ const ForgotPassword = () => {
       // TODO: Replace with actual API endpoint when backend is ready
       // const response = await axiosInstance.post("/auth/forgot-password", { email });
       // Simulating API call for now
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const res = await axios.post(
+        "http://localhost:5003/api/auth/forgot-password",
+        { email }
+      );
       
       setIsEmailSent(true);
       toast.success("Password reset instructions have been sent to your email");

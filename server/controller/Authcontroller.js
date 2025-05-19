@@ -261,13 +261,13 @@ module.exports.ForgotPassword = async (req, res) => {
     }
 
     // 2) Generate the random reset token
-    const resetToken = user.createPasswordResetToken();
+    const token = crypto.randomBytes(32).toString("hex");
+    user.passwordResetToken = token;
+    user.passwordResetExpires = Date.now() + 3600000; // 1 hour
     await user.save({ validateBeforeSave: false });
 
     // 3) Send it to user's email / via gmail / check in Spam sometimes it is sent to Spam
-    const resetURL = `${req.protocol}://${req.get(
-      "host"
-    )}/api/auth/reset-password/${resetToken}`;
+    const resetURL = `http://localhost:5173/reset-password/${token}`;
 
     const message = `Forgot your password? Submit a PATCH request with your new password to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
 
@@ -320,13 +320,10 @@ module.exports.ForgotPassword = async (req, res) => {
 
 module.exports.ResetPassword = async (req, res) => {
   try {
-    const hashedToken = crypto
-      .createHash("sha256")
-      .update(req.params.token)
-      .digest("hex");
+    const { tokens } = req.params;
 
     const user = await User.findOne({
-      passwordResetToken: hashedToken,
+      passwordResetToken: tokens,
       passwordResetExpires: { $gt: Date.now() },
     });
 
@@ -336,17 +333,15 @@ module.exports.ResetPassword = async (req, res) => {
         message: "Token is invalid or has expired",
       });
     }
+    const hashed = await bcrypt.hash(req.body.password, 10);
 
-    user.password = req.body.password;
+    user.password = hashed;
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save();
 
-    const token = generateToken(res, user._id);
-
     res.status(200).json({
-      status: "success",
-      token,
+      status: "Password successfully changed!",
     });
   } catch (error) {
     res.status(500).json({

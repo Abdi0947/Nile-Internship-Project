@@ -19,7 +19,7 @@ const app = express();
 
 app.use(cors({
   origin: "http://localhost:5173",
-  methods: ["GET", "POST","PUT","DELETE"],
+  methods: ["GET", "POST","PUT","DELETE","PATCH"],
   credentials: true,
 }));
 
@@ -45,6 +45,3 @@ app.listen(PORT, () => {
   MongoDBconfig();
   console.log(`The server is running at port ${PORT}`);
 });
-
-
-

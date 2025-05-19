@@ -44,6 +44,7 @@ import SubmitAssignment from './pages/SubmitAssignment';
 import TeacherGradeAssignment from './pages/TeacherGradeAssignment';
 import TeacherGradeSubmission from './pages/TeacherGradeSubmission';
 import TeacherRequestPage from './pages/TeacherRequestPage';
+import ResetPassword from './pages/ResetPassword';
 
 function App() {
   const dispatch = useDispatch();
@@ -97,62 +98,81 @@ function App() {
     <DarkModeProvider>
       <Router>
         <Routes>
-          <Route path='/' element={<Landingpage />} />
-          <Route path='/register' element={<Register />} />
-          <Route path='/login' element={<Login />} />
-          <Route path='/forgotpassword' element={<ForgotPassword />} />
-          <Route path='/logout' element={<Navigate to="/login" replace />} />
-          
-          <Route path='/teacher' element={<Teacherpage />}>
-            <Route path='home' element={<TeacherDashboardpage />} />
-            <Route path='dashboard' element={<TeacherDashboardpage />} />
-            <Route path='account' element={<AccountSettings />} />
-            <Route path='settings' element={<AccountSettings />} />
-            <Route path='timetable' element={<Timetable />} />
-            <Route path='TeachersAssignmentpage' element={<TeachersAssignmentpage />} />
-            <Route path='TeachersAssignmentpage/:assignmentId' element={<AssignmentReviewPage />} />
-            <Route path='grade-assignments' element={<TeacherGradeAssignment />} />
-            <Route path='grade-assignments/:assignmentId' element={<TeacherGradeSubmission />} />
-            <Route path='notifications' element={<Notificationpage />} />
-            <Route path='Attendancepage' element={<Attendancepage/>}/>
-            <Route path='TeacherSubject' element={<TeacherSubject/>}/>
-            <Route path='classes' element={<TeacherClass/>}/>
-            <Route path='assignment/:assignmentId' element={<AssignmentDetailsPage />} />
-            <Route path='review/:teacherId' element={<TeacherReviewPage />} />
+          <Route path="/" element={<Landingpage />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/forgotpassword" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/logout" element={<Navigate to="/login" replace />} />
+
+          <Route path="/teacher" element={<Teacherpage />}>
+            <Route path="home" element={<TeacherDashboardpage />} />
+            <Route path="dashboard" element={<TeacherDashboardpage />} />
+            <Route path="account" element={<AccountSettings />} />
+            <Route path="settings" element={<AccountSettings />} />
+            <Route path="timetable" element={<Timetable />} />
+            <Route
+              path="TeachersAssignmentpage"
+              element={<TeachersAssignmentpage />}
+            />
+            <Route
+              path="TeachersAssignmentpage/:assignmentId"
+              element={<AssignmentReviewPage />}
+            />
+            <Route
+              path="grade-assignments"
+              element={<TeacherGradeAssignment />}
+            />
+            <Route
+              path="grade-assignments/:assignmentId"
+              element={<TeacherGradeSubmission />}
+            />
+            <Route path="notifications" element={<Notificationpage />} />
+            <Route path="Attendancepage" element={<Attendancepage />} />
+            <Route path="TeacherSubject" element={<TeacherSubject />} />
+            <Route path="classes" element={<TeacherClass />} />
+            <Route
+              path="assignment/:assignmentId"
+              element={<AssignmentDetailsPage />}
+            />
+            <Route path="review/:teacherId" element={<TeacherReviewPage />} />
           </Route>
 
-          <Route path='/Admin' element={<Adminpage/>}>
-            <Route path='home' element={<AdminDashboard />} />
+          <Route path="/Admin" element={<Adminpage />}>
+            <Route path="home" element={<AdminDashboard />} />
             <Route index element={<AdminDashboard />} />
-            <Route path='admindashboard' element={<AdminDashboard />} />
-            <Route path='AdminTeacher' element={<AdminTeacher/>} />
-            <Route path='teacher-requests' element={<TeacherRequestPage />} />
-            <Route path='Timetable' element={<Timetable/>} />
-            <Route path='fee' element={<FeePage/>} />
-            <Route path='students' element={<StudentManagement/>} />
-            <Route path='account' element={<AccountSettings />} />
-            <Route path='settings' element={<AccountSettings />} />
-            <Route path='notifications' element={<Notificationpage />} />
-            <Route path='student/:studentId' element={<StudentReviewPage />} />
-            <Route path='teacher/:teacherId' element={<TeacherReviewPage />} />
+            <Route path="admindashboard" element={<AdminDashboard />} />
+            <Route path="AdminTeacher" element={<AdminTeacher />} />
+            <Route path="teacher-requests" element={<TeacherRequestPage />} />
+            <Route path="Timetable" element={<Timetable />} />
+            <Route path="fee" element={<FeePage />} />
+            <Route path="students" element={<StudentManagement />} />
+            <Route path="account" element={<AccountSettings />} />
+            <Route path="settings" element={<AccountSettings />} />
+            <Route path="notifications" element={<Notificationpage />} />
+            <Route path="student/:studentId" element={<StudentReviewPage />} />
+            <Route path="teacher/:teacherId" element={<TeacherReviewPage />} />
           </Route>
 
-          <Route path='/student' element={<StudentLayout />}>
-            <Route path='home' element={<StudentDashboard />} />
-            <Route path='dashboard' element={<StudentDashboard />} />
-            <Route path='courses' element={<StudentCourses />} />
-            <Route path='assignments' element={<StudentAssignmentDetails />} />
-            <Route path='grades' element={<StudentGradeReport />} />
-            <Route path='timetable' element={<Timetable />} />
-            <Route path='account' element={<AccountSettings />} />
-            <Route path='settings' element={<AccountSettings />} />
-            <Route path='notifications' element={<Notificationpage />} />
-            <Route path='assignments/:id' element={<AssignmentDetails />} />
-            <Route path='assignments/:id/submit' element={<SubmitAssignment />} />
+          <Route path="/student" element={<StudentLayout />}>
+            <Route path="home" element={<StudentDashboard />} />
+            <Route path="dashboard" element={<StudentDashboard />} />
+            <Route path="courses" element={<StudentCourses />} />
+            <Route path="assignments" element={<StudentAssignmentDetails />} />
+            <Route path="grades" element={<StudentGradeReport />} />
+            <Route path="timetable" element={<Timetable />} />
+            <Route path="account" element={<AccountSettings />} />
+            <Route path="settings" element={<AccountSettings />} />
+            <Route path="notifications" element={<Notificationpage />} />
+            <Route path="assignments/:id" element={<AssignmentDetails />} />
+            <Route
+              path="assignments/:id/submit"
+              element={<SubmitAssignment />}
+            />
           </Route>
 
           {/* Add route for adding a teacher */}
-          <Route path='/admin/teachers/add' element={<AddTeacherPage />} />
+          <Route path="/admin/teachers/add" element={<AddTeacherPage />} />
         </Routes>
 
         <Toaster />

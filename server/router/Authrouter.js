@@ -18,7 +18,7 @@ router.put(
 router.put("/updateUserInfo",authmiddleware,updateUserInfo)
 
 router.post("/forgot-password", ForgotPassword);
-router.patch("/reset-password/:token", ResetPassword);
+router.patch("/reset-password/:tokens", ResetPassword);
 
 
 

@@ -5,15 +5,17 @@ import { gettingallTeachers } from "../features/Teacher";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FiBookOpen, FiUsers, FiClipboard, FiCalendar, FiClock, FiPlusCircle, FiCheckCircle, FiActivity, FiStar } from "react-icons/fi";
+import {
+  fetchAllStudents
+} from "../features/Student";
 
 function TeacherDashboardpage() {
   const { Authuser } = useSelector((state) => state.auth);
+  const { students } = useSelector((state) => state.Student);
   const dispatch = useDispatch();
   const { getallTeachers } = useSelector((state) => state.Teacher);
-  // console.log(Authuser);
   const isUserTeacher = getallTeachers?.some((item) => item.email === Authuser.email);
   console.log(getallTeachers);
-  // Mock data - would be replaced with actual data from the backend
 
   useEffect(() => {
       dispatch(gettingallTeachers());
@@ -24,6 +26,7 @@ function TeacherDashboardpage() {
     assignments: 8,
     upcomingClasses: 3
   });
+  console.log(students)
   
   const [recentAssignments] = useState([
     {
@@ -217,7 +220,7 @@ function TeacherDashboardpage() {
                   </div>
                   <div>
                     <p className="text-sm font-medium">Total Students</p>
-                    <p className="text-3xl font-bold">{stats.students}</p>
+                    <p className="text-3xl font-bold">{students?.length}</p>
                   </div>
                 </div>
                 <div className="flex justify-between items-center bg-gray-50 -mx-6 px-6 py-3 border-t">
