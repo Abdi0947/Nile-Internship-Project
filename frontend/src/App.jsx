@@ -10,6 +10,7 @@ import Notificationpage from './pages/Notificationpage';
 import TeacherSubject from './pages/TeacherSubject'
 import Register from './pages/Register';
 import Login from './pages/Login';
+import ForgotPassword from './pages/ForgotPassword';
 import AdminDashboard from './pages/AdminDashboard'
 import Attendancepage from './pages/Attendancepage'
 import Timetable from './pages/Timetable';
@@ -99,6 +100,7 @@ function App() {
           <Route path='/' element={<Landingpage />} />
           <Route path='/register' element={<Register />} />
           <Route path='/login' element={<Login />} />
+          <Route path='/forgotpassword' element={<ForgotPassword />} />
           <Route path='/logout' element={<Navigate to="/login" replace />} />
           
           <Route path='/teacher' element={<Teacherpage />}>
