@@ -7,6 +7,7 @@ export default function ResetPassword() {
   const { token } = useParams();
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [isSent, setIsSent] = useState(false)
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -15,8 +16,10 @@ export default function ResetPassword() {
         `http://localhost:5003/api/auth/reset-password/${token}`,
         { password }
       );
+      setIsSent(true)
       setMessage(res.data.status);
     } catch (err) {
+      setIsSent(false)
       setMessage(err.response.data.message);
     }
   };
@@ -46,9 +49,11 @@ export default function ResetPassword() {
         Reset Password
       </button>
 
-      {message && (
+      {isSent ? 
         <p className="mt-4 text-center text-sm text-green-600">{message}</p>
-      )}
+       : 
+        <p className="mt-4 text-center text-sm text-red-600">{message}</p>
+      }
     </form>
   );
 }

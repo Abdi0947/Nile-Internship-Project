@@ -9,20 +9,29 @@ module.exports.signup = async (req, res) => {
   try {
     const { firstName, lastName, email, password, role, ProfilePic } = req.body;
 
-    if (!firstName || !lastName || !email || !password || !role ) {
+    if (!firstName || !lastName || !email || !password || !role) {
       return res
         .status(400)
         .json({ error: "Please provide all neccessary information" });
     }
 
-   
-    const validRoles = ["Teacher", "Manager", "Admin", "Student", "teacher", "manager", "admin", "student", "administrative"];
+    const validRoles = [
+      "Teacher",
+      "Manager",
+      "Admin",
+      "Student",
+      "teacher",
+      "manager",
+      "admin",
+      "student",
+      "administrative",
+    ];
     if (!validRoles.includes(role)) {
       return res.status(400).json({
-        error: "The role should be one of: Teacher/teacher, Manager/manager, Admin/admin, or Student/student",
+        error:
+          "The role should be one of: Teacher/teacher, Manager/manager, Admin/admin, or Student/student",
       });
     }
-    
 
     const duplicatedUser = await User.findOne({ email });
     if (duplicatedUser) {
@@ -30,38 +39,40 @@ module.exports.signup = async (req, res) => {
     }
 
     const hashedpassword = await bcrypt.hash(password, 10);
-    
+
     let profilePicUrl = "";
-    
+
     // Upload profile picture to Cloudinary if provided
     if (ProfilePic) {
       try {
         // Check if Cloudinary is properly configured
-        const isCloudinaryConfigured = 
-          process.env.CLOUD_NAME && 
-          process.env.CLOUD_NAME !== 'your_cloud_name' &&
-          process.env.API_KEY && 
-          process.env.API_KEY !== 'your_cloudinary_api_key' &&
-          process.env.API_SECRET && 
-          process.env.API_SECRET !== 'your_cloudinary_api_secret';
-          
+        const isCloudinaryConfigured =
+          process.env.CLOUD_NAME &&
+          process.env.CLOUD_NAME !== "your_cloud_name" &&
+          process.env.API_KEY &&
+          process.env.API_KEY !== "your_cloudinary_api_key" &&
+          process.env.API_SECRET &&
+          process.env.API_SECRET !== "your_cloudinary_api_secret";
+
         if (isCloudinaryConfigured) {
           // Use Cloudinary if properly configured
           const uploadResponse = await Cloudinary.uploader.upload(ProfilePic, {
             folder: "profile_school_managment_system",
             upload_preset: "upload",
           });
-          console.log(uploadResponse)
+          console.log(uploadResponse);
           profilePicUrl = uploadResponse.secure_url;
         } else {
           // Fallback for local development - store image data directly
-          console.log("Cloudinary not configured correctly - using direct image data");
+          console.log(
+            "Cloudinary not configured correctly - using direct image data"
+          );
           profilePicUrl = ProfilePic;
         }
       } catch (cloudinaryError) {
         console.error("Cloudinary upload failed:", cloudinaryError);
         // Continue with data URL as profile pic if upload fails
-        if (ProfilePic.startsWith('data:image')) {
+        if (ProfilePic.startsWith("data:image")) {
           profilePicUrl = ProfilePic;
         }
       }
@@ -78,6 +89,26 @@ module.exports.signup = async (req, res) => {
 
     const savedUser = await newUser.save();
     const token = await generateToken(savedUser, res);
+
+    const welcomeHTML = `
+  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; background-color: #f9fafb; border-radius: 8px;">
+    <h2 style="color: #4f46e5;">Welcome to Our Platform!</h2>
+    <p style="color: #333;">Hi there,</p>
+    <p style="color: #333;">We're excited to have you on board. Feel free to explore and enjoy the features we offer.</p>
+    <a href="http://localhost:5173/" 
+       style="display: inline-block; margin-top: 20px; background-color: #4f46e5; color: white; padding: 12px 20px; border-radius: 5px; text-decoration: none;">
+      Get Started
+    </a>
+    <p style="margin-top: 20px; color: #999; font-size: 12px;">If you didn't create this account, please ignore this message.</p>
+  </div>
+`;
+    const message = "Welcom To School Mangement System!"
+    await sendEmail({
+      email: savedUser.email,
+      subject: "🎉 Welcome to Our App!",
+      message,
+      html: welcomeHTML,
+    });
 
     res.status(201).json({
       message: "Signup successful",
@@ -112,8 +143,13 @@ module.exports.login = async (req, res) => {
       console.log("[Auth Debug] No user found with email:", email);
       return res.status(400).json({ error: "No user found with this email" });
     }
-    
-    console.log("[Auth Debug] User found:", duplicatedUser.email, "Role:", duplicatedUser.role);
+
+    console.log(
+      "[Auth Debug] User found:",
+      duplicatedUser.email,
+      "Role:",
+      duplicatedUser.role
+    );
 
     const hasedpassword = await bcrypt.compare(
       password,
@@ -144,7 +180,7 @@ module.exports.login = async (req, res) => {
   } catch (error) {
     console.error("[Auth Debug] Login error:", error);
     res.status(400).json({
-      error: "Error in login: " + error.message
+      error: "Error in login: " + error.message,
     });
   }
 };
@@ -173,18 +209,18 @@ module.exports.updateProfile = async (req, res) => {
     if (ProfilePic) {
       try {
         console.log("Processing profile image upload...");
-        
+
         // Check if Cloudinary is properly configured
-        const isCloudinaryConfigured = 
-          process.env.CLOUD_NAME && 
-          process.env.CLOUD_NAME !== 'your_cloud_name' &&
-          process.env.API_KEY && 
-          process.env.API_KEY !== 'your_cloudinary_api_key' &&
-          process.env.API_SECRET && 
-          process.env.API_SECRET !== 'your_cloudinary_api_secret';
-        
-        let imageUrl = '';
-        
+        const isCloudinaryConfigured =
+          process.env.CLOUD_NAME &&
+          process.env.CLOUD_NAME !== "your_cloud_name" &&
+          process.env.API_KEY &&
+          process.env.API_KEY !== "your_cloudinary_api_key" &&
+          process.env.API_SECRET &&
+          process.env.API_SECRET !== "your_cloudinary_api_secret";
+
+        let imageUrl = "";
+
         if (isCloudinaryConfigured) {
           // Use Cloudinary if properly configured
           const uploadResponse = await Cloudinary.uploader.upload(ProfilePic, {
@@ -192,20 +228,22 @@ module.exports.updateProfile = async (req, res) => {
             transformation: [{ quality: "auto" }],
             fetch_format: "auto",
           });
-          
+
           imageUrl = uploadResponse.secure_url;
           console.log("Image uploaded to Cloudinary:", imageUrl);
         } else {
           // Fallback for local development - store image in user session
-          console.log("Cloudinary not configured correctly - using direct image data");
+          console.log(
+            "Cloudinary not configured correctly - using direct image data"
+          );
           // Store the image data directly temporarily (not ideal for production)
           imageUrl = ProfilePic;
         }
 
         // Add a unique identifier to prevent caching issues
-        const timestampedUrl = imageUrl.includes('?') ? 
-          `${imageUrl}&t=${Date.now()}` : 
-          `${imageUrl}?t=${Date.now()}`;
+        const timestampedUrl = imageUrl.includes("?")
+          ? `${imageUrl}&t=${Date.now()}`
+          : `${imageUrl}?t=${Date.now()}`;
 
         const updatedUser = await User.findOneAndUpdate(
           { _id: userId },
@@ -218,23 +256,27 @@ module.exports.updateProfile = async (req, res) => {
         }
 
         console.log("User profile updated successfully");
-        
+
         return res.status(200).json({
           message: "Profile updated successfully",
           updatedUser: {
             ...updatedUser.toObject(),
-            ProfilePic: timestampedUrl // Send back timestamped URL to client
-          }
+            ProfilePic: timestampedUrl, // Send back timestamped URL to client
+          },
         });
       } catch (cloudinaryError) {
         console.error("Cloudinary upload failed:", cloudinaryError);
-        
+
         // Provide more specific error message
         let errorMessage = "Image upload failed";
-        if (cloudinaryError.message && cloudinaryError.message.includes("Unknown API key")) {
-          errorMessage = "Cloudinary credentials not configured. Please update your .env file with valid Cloudinary credentials.";
+        if (
+          cloudinaryError.message &&
+          cloudinaryError.message.includes("Unknown API key")
+        ) {
+          errorMessage =
+            "Cloudinary credentials not configured. Please update your .env file with valid Cloudinary credentials.";
         }
-        
+
         return res.status(500).json({
           message: errorMessage,
           error: cloudinaryError.message,
@@ -245,7 +287,9 @@ module.exports.updateProfile = async (req, res) => {
     }
   } catch (error) {
     console.error("Error in update profile Controller", error.message);
-    res.status(500).json({ message: "Internal Server Error", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
   }
 };
 
@@ -363,12 +407,12 @@ module.exports.updateUserInfo = async (req, res) => {
     // Update the user information
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { 
-        firstName, 
-        lastName, 
+      {
+        firstName,
+        lastName,
         email,
         phone,
-        address
+        address,
       },
       { new: true }
     ).select("-password");
