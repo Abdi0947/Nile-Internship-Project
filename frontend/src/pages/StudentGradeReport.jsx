@@ -119,7 +119,7 @@ const StudentGradeReport = () => {
       <TopNavbar />
       
       <motion.div 
-        className="container mx-auto px-4 py-8"
+        className="container mx-auto px-4 py-8 mt-14"
         variants={pageVariants}
         initial="initial"
         animate="animate"

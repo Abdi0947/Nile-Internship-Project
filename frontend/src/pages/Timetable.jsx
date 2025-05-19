@@ -137,7 +137,7 @@ const Timetable = () => {
     <div className="block">
       <TopNavbar />
 
-      <div className="m-5 p-4 bg-white rounded-lg shadow-md">
+      <div className="m-5 p-4 bg-white rounded-lg shadow-md mt-14">
         <h1 className="text-2xl font-bold mb-4">Class Timetable</h1>
 
         {isTimetablesLoading ? (

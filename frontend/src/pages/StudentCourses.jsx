@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiUser, FiCalendar, FiBarChart2, FiFileText } from 'react-icons/fi';
+import TopNavbar from '../components/Topnavbar';
 
 const mockCourses = [
   {
@@ -36,8 +37,9 @@ const StudentCourses = () => {
   const [courses] = useState(mockCourses);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10">
-      <div className="container mx-auto px-4">
+    <div className="min-h-screen bg-gray-50">
+      <TopNavbar />
+      <div className="container mx-auto px-4 py-10 mt-14">
         <h1 className="text-3xl font-bold text-gray-800 mb-8">My Courses</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {courses.map(course => (
@@ -55,14 +57,6 @@ const StudentCourses = () => {
                   <span className="text-sm">{course.schedule}</span>
                 </div>
                 <p className="text-gray-600 text-sm mb-4 line-clamp-2">{course.description}</p>
-                <div className="flex justify-between pt-2 mt-4 border-t border-gray-100">
-                  <Link to={`/student/course/${course.id}`} className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center">
-                    View Details <FiBarChart2 className="ml-1" />
-                  </Link>
-                  <Link to={`/student/course/${course.id}/assignments`} className="text-green-600 hover:text-green-800 text-sm font-medium flex items-center">
-                    Assignments <FiFileText className="ml-1" />
-                  </Link>
-                </div>
               </div>
             </div>
           ))}
