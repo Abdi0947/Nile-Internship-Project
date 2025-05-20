@@ -452,11 +452,13 @@ module.exports.ForgotPassword = async (req, res) => {
     }
 
     // Generate reset token
-    const resetToken = user.createPasswordResetToken();
+    const tokens = crypto.randomBytes(32).toString("hex");
+    user.passwordResetToken = tokens;
+    user.passwordResetExpires = Date.now() + 3600000; // 1 hour
     await user.save({ validateBeforeSave: false });
 
     // Create reset URL
-    const resetURL = `http://localhost:5173/reset-password/${resetToken}`;
+    const resetURL = `http://localhost:5173/reset-password/${tokens}`;
 
     try {
       await sendEmail({
