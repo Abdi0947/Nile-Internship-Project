@@ -89,44 +89,83 @@ const Login = () => {
     if (!validateForm()) return;
 
     setLoginError("");
+    let retryCount = 0;
+    const maxRetries = 2;
     
-    try {
-      console.log('Remember me value before login dispatch:', rememberMe);
-      const resultAction = await dispatch(login({ email, password, rememberMe }));
-      
-      if (login.fulfilled.match(resultAction)) {
-        // Login successful
-        // toast.success('Login successful!');
+    const attemptLogin = async () => {
+      try {
+        console.log('Attempting login, attempt:', retryCount + 1);
+        const resultAction = await dispatch(login({ email, password, rememberMe }));
         
-        const user = resultAction.payload.user;
-        if (!user || !user.role) {
-          setLoginError("Login succeeded but user data is incomplete. Please try again.");
-          return;
+        if (login.fulfilled.match(resultAction)) {
+          const user = resultAction.payload.user;
+          if (!user || !user.role) {
+            setLoginError("Login succeeded but user data is incomplete. Please try again.");
+            return;
+          }
+          
+          const userRole = user.role;
+          let redirectPath;
+          
+          if (userRole.toLowerCase() === 'admin') {
+            redirectPath = '/admin/admindashboard';
+          } else {
+            redirectPath = getRedirectPathByRole(userRole);
+          }
+          
+          navigate(redirectPath);
+        } else if (login.rejected.match(resultAction)) {
+          const errorMessage = resultAction.payload || "Invalid email or password. Please try again.";
+          setLoginError(errorMessage);
+          toast.error('Login failed: ' + errorMessage);
         }
+      } catch (error) {
+        console.error("Login attempt error:", error);
         
-        const userRole = user.role;
-        
-        // Get redirect path based on user role
-        let redirectPath;
-        
-        // Directly handling role-based navigation to ensure admin goes to dashboard
-        if (userRole.toLowerCase() === 'admin') {
-          redirectPath = '/admin/admindashboard';
+        // Handle specific connection errors
+        if (error.code === 'ECONNRESET' || error.message.includes('ECONNRESET')) {
+          if (retryCount < maxRetries) {
+            retryCount++;
+            console.log(`Connection reset, retrying... (${retryCount}/${maxRetries})`);
+            toast.error('Connection lost. Retrying...');
+            // Wait for 1 second before retrying
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            return attemptLogin();
+          } else {
+            setLoginError("Connection issues. Please check your internet connection and try again.");
+            toast.error('Connection failed after multiple attempts. Please try again later.');
+          }
+        } else if (error.code === 'ERR_NETWORK') {
+          setLoginError("Network error. Please check your internet connection.");
+          toast.error('Network error. Please check your connection and try again.');
+        } else if (error.response) {
+          // Handle specific HTTP error responses
+          switch (error.response.status) {
+            case 401:
+              setLoginError("Invalid email or password.");
+              toast.error('Invalid email or password.');
+              break;
+            case 403:
+              setLoginError("Access denied. Please check your credentials.");
+              toast.error('Access denied. Please check your credentials.');
+              break;
+            case 500:
+              setLoginError("Server error. Please try again later.");
+              toast.error('Server error. Please try again later.');
+              break;
+            default:
+              setLoginError(error.response.data?.message || "An error occurred. Please try again.");
+              toast.error(error.response.data?.message || "An error occurred. Please try again.");
+          }
         } else {
-          redirectPath = getRedirectPathByRole(userRole);
+          setLoginError("An unexpected error occurred. Please try again.");
+          toast.error('An unexpected error occurred. Please try again.');
         }
-        
-        navigate(redirectPath);
-      } else if (login.rejected.match(resultAction)) {
-        // Login failed
-        const errorMessage = resultAction.payload || "Invalid email or password. Please try again.";
-        setLoginError(errorMessage);
-        toast.error('Login failed: ' + errorMessage);
       }
-    } catch (error) {
-      console.error("Error in Login:", error);
-      setLoginError("Network error. Please check your connection and try again.");
-    }
+    };
+
+    // Start the login attempt
+    await attemptLogin();
   };
 
   // Add Google Sign-In handler
@@ -270,11 +309,20 @@ const Login = () => {
                 <motion.button
                   variants={itemVariants}
                   type="submit"
-                  className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition-all shadow-md"
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.98 }}
+                  disabled={isUserLogin}
+                  className={`w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition-all shadow-md disabled:opacity-70 disabled:cursor-not-allowed`}
+                  whileHover={{ scale: isUserLogin ? 1 : 1.03 }}
+                  whileTap={{ scale: isUserLogin ? 1 : 0.98 }}
                 >
-                  Sign In
+                  {isUserLogin ? (
+                    <span className="flex items-center justify-center">
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Signing In...
+                    </span>
+                  ) : "Sign In"}
                 </motion.button>
 
                 <motion.div variants={itemVariants} className="flex items-center my-4">
