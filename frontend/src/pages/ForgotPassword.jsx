@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import AuthNavbar from "../components/AuthNavbar";
 import { useDarkMode } from "../context/DarkModeContext";
 import axios from "axios";
+import '../styles/email.css';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -114,6 +115,21 @@ const ForgotPassword = () => {
               <div className="flex justify-center mb-5 sm:mb-6">
                 <img src={CampanyLogo} alt="Logo" className="h-14 sm:h-16 w-auto" />
               </div>
+
+              {/* Welcome Banner */}
+              <div className="welcome-banner">
+                <div className="welcome-banner-content">
+                  <div className="welcome-banner-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                  </div>
+                  <h2 className="welcome-banner-title">Welcome to Secure Reset</h2>
+                  <p className="welcome-banner-subtitle">
+                    We're here to help you regain access to your account. Our secure password reset process ensures your account stays protected.
+                  </p>
+                </div>
+              </div>
               
               <motion.div variants={itemVariants} className="text-center mb-5 sm:mb-6">
                 <h2 className={`text-xl sm:text-2xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Forgot Password</h2>
@@ -164,30 +180,51 @@ const ForgotPassword = () => {
               ) : (
                 <motion.div 
                   variants={itemVariants}
-                  className="text-center"
+                  className="email-sent-container"
                 >
-                  <div className="mb-4 p-3 bg-green-500/20 border border-green-500/50 rounded-lg">
-                    <p className="text-green-300 text-sm">
-                      If an account exists with this email, you will receive password reset instructions shortly.
+                  <div className="email-sent-icon">
+                    <div className="email-sent-icon-circle">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                  </div>
+                  
+                  <div className="email-sent-message">
+                    <h3 className="email-sent-title">Check Your Email</h3>
+                    <p className="email-sent-description">
+                      We've sent password reset instructions to your email address. 
+                      Please check your inbox and follow the link to reset your password.
                     </p>
                   </div>
-                  <button
-                    onClick={() => setIsEmailSent(false)}
-                    className="text-sm text-green-400 hover:underline"
-                  >
-                    Try another email
-                  </button>
+
+                  <div className="email-sent-actions">
+                    <button
+                      onClick={() => setIsEmailSent(false)}
+                      className="email-sent-button email-sent-button-secondary"
+                    >
+                      Try Another Email
+                    </button>
+                    <Link
+                      to="/login"
+                      className="email-sent-button email-sent-button-primary"
+                    >
+                      Back to Login
+                    </Link>
+                  </div>
                 </motion.div>
               )}
 
-              <motion.div variants={itemVariants} className="mt-5 text-center">
-                <Link
-                  to="/login"
-                  className={`text-sm ${darkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-800'} hover:underline`}
-                >
-                  Back to Login
-                </Link>
-              </motion.div>
+              {!isEmailSent && (
+                <motion.div variants={itemVariants} className="mt-5 text-center">
+                  <Link
+                    to="/login"
+                    className={`text-sm ${darkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-800'} hover:underline`}
+                  >
+                    Back to Login
+                  </Link>
+                </motion.div>
+              )}
             </div>
           </div>
         </motion.div>

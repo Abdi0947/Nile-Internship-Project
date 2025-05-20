@@ -29,6 +29,23 @@ const UserSchema = new mongoose.Schema(
     ProfilePic: {
       type: String,
     },
+    approvalStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: function() {
+        return this.role.toLowerCase() === "teacher" ? "pending" : "approved";
+      }
+    },
+    approvalDate: {
+      type: Date
+    },
+    approvedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+    },
+    rejectionReason: {
+      type: String
+    },
     createdAt: {
       type: Date,
       default: Date.now,

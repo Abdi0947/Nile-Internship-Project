@@ -21,10 +21,16 @@ import {
   FiBarChart2,
   FiRefreshCw,
   FiUserPlus,
-  FiX
+  FiX,
+  FiCheckCircle,
+  FiXCircle,
+  FiAlertCircle,
+  FiArrowRight,
+  FiList
 } from "react-icons/fi";
 import ProfilePicture from "../components/ProfilePicture";
 import { toast } from "react-hot-toast";
+import axios from "axios";
 
 function AdminDashboard() {
   const dispatch = useDispatch();
@@ -76,6 +82,60 @@ function AdminDashboard() {
     qualification: '',
     experience: ''
   });
+  const [pendingTeachers, setPendingTeachers] = useState([
+    {
+      _id: '1',
+      firstName: 'Sarah',
+      lastName: 'Johnson',
+      email: 'sarah.johnson@school.edu',
+      ProfilePic: 'https://randomuser.me/api/portraits/women/1.jpg',
+      role: 'teacher',
+      approvalStatus: 'pending',
+      createdAt: '2024-03-15T10:30:00Z'
+    },
+    {
+      _id: '2',
+      firstName: 'Michael',
+      lastName: 'Chen',
+      email: 'michael.chen@school.edu',
+      ProfilePic: 'https://randomuser.me/api/portraits/men/2.jpg',
+      role: 'teacher',
+      approvalStatus: 'pending',
+      createdAt: '2024-03-14T15:45:00Z'
+    },
+    {
+      _id: '3',
+      firstName: 'Emily',
+      lastName: 'Rodriguez',
+      email: 'emily.rodriguez@school.edu',
+      ProfilePic: 'https://randomuser.me/api/portraits/women/3.jpg',
+      role: 'teacher',
+      approvalStatus: 'pending',
+      createdAt: '2024-03-13T09:15:00Z'
+    },
+    {
+      _id: '4',
+      firstName: 'David',
+      lastName: 'Kim',
+      email: 'david.kim@school.edu',
+      ProfilePic: 'https://randomuser.me/api/portraits/men/4.jpg',
+      role: 'teacher',
+      approvalStatus: 'pending',
+      createdAt: '2024-03-12T14:20:00Z'
+    },
+    {
+      _id: '5',
+      firstName: 'Lisa',
+      lastName: 'Patel',
+      email: 'lisa.patel@school.edu',
+      ProfilePic: 'https://randomuser.me/api/portraits/women/5.jpg',
+      role: 'teacher',
+      approvalStatus: 'pending',
+      createdAt: '2024-03-11T11:10:00Z'
+    }
+  ]);
+  const [isLoadingTeachers, setIsLoadingTeachers] = useState(false);
+  const [isPendingTeachersModalOpen, setIsPendingTeachersModalOpen] = useState(false);
 
   // Animation variants
   const containerVariants = {
@@ -213,6 +273,145 @@ function AdminDashboard() {
       toast.success('Teacher added successfully!');
     } catch (error) {
       toast.error('Failed to add teacher. Please try again.');
+    }
+  };
+
+  // Modify the fetchPendingTeachers function to use mock data for testing
+  useEffect(() => {
+    const fetchPendingTeachers = async () => {
+      setIsLoadingTeachers(true);
+      try {
+        // Simulate API call delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // For testing, we'll use the mock data instead of making an API call
+        // Comment out the actual API call for now
+        /*
+        const response = await axios.get('/api/auth/pending-teachers', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+
+        if (response.data && Array.isArray(response.data.teachers)) {
+          setPendingTeachers(response.data.teachers);
+          console.log('Successfully fetched pending teachers:', response.data.message);
+        } else {
+          console.error('Invalid response format:', response.data);
+          setPendingTeachers([]);
+          toast.error('Received invalid data format from server');
+        }
+        */
+        
+        // Using mock data for testing
+        console.log('Using mock data for pending teachers');
+        
+      } catch (error) {
+        console.error('Error fetching pending teachers:', error);
+        setPendingTeachers([]);
+        
+        if (error.response) {
+          switch (error.response.status) {
+            case 401:
+              toast.error('Please log in again to access this feature');
+              break;
+            case 403:
+              toast.error('You do not have permission to view pending teachers');
+              break;
+            case 404:
+              toast.error('No pending teachers found');
+              break;
+            default:
+              toast.error(error.response.data?.error || 'Failed to fetch pending teachers');
+          }
+        } else if (error.request) {
+          toast.error('No response from server. Please check your connection');
+        } else {
+          toast.error('Error fetching pending teachers: ' + error.message);
+        }
+      } finally {
+        setIsLoadingTeachers(false);
+      }
+    };
+
+    fetchPendingTeachers();
+  }, []);
+
+  // Add this function to handle teacher approval/rejection
+  const handleTeacherAction = async (teacherId, action, rejectionReason = '') => {
+    try {
+      // First, get the teacher's details from our pending teachers list
+      const teacher = pendingTeachers.find(t => t._id === teacherId);
+      if (!teacher) {
+        toast.error('Teacher not found');
+        return;
+      }
+
+      // For testing, we'll simulate the API call and email notification
+      setIsLoadingTeachers(true);
+      
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Simulate API call
+      const response = await axios.post('/api/auth/approve-teacher', {
+        teacherId,
+        action,
+        rejectionReason,
+        adminEmail: 'omermaruf07@gmail.com' // Add admin email for notification
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (response.data) {
+        // Update the pending teachers list
+        setPendingTeachers(prev => prev.filter(t => t._id !== teacherId));
+        
+        // Show success message with email notification info
+        const actionText = action === 'approve' ? 'approved' : 'rejected';
+        toast.success(
+          `Teacher ${actionText} successfully. Notification sent to ${teacher.email} and omermaruf07@gmail.com`,
+          { duration: 5000 }
+        );
+
+        // Log the action for testing
+        console.log(`Teacher ${actionText}:`, {
+          teacherId,
+          teacherEmail: teacher.email,
+          adminEmail: 'omermaruf07@gmail.com',
+          action,
+          rejectionReason,
+          timestamp: new Date().toISOString()
+        });
+      }
+    } catch (error) {
+      console.error(`Error ${action}ing teacher:`, error);
+      
+      // Handle specific error cases
+      if (error.response) {
+        switch (error.response.status) {
+          case 401:
+            toast.error('Please log in to perform this action');
+            break;
+          case 403:
+            toast.error('You do not have permission to approve/reject teachers');
+            break;
+          case 404:
+            toast.error('Teacher not found');
+            break;
+          default:
+            toast.error(error.response.data?.error || `Failed to ${action} teacher`);
+        }
+      } else if (error.request) {
+        toast.error('No response from server. Please check your connection.');
+      } else {
+        toast.error(`Error ${action}ing teacher: ${error.message}`);
+      }
+    } finally {
+      setIsLoadingTeachers(false);
     }
   };
 
@@ -448,49 +647,105 @@ function AdminDashboard() {
             </div>
           </motion.div>
           
-          {/* Quick Actions */}
-          <motion.div 
-            className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden"
+          {/* Pending Teachers Card */}
+          <motion.div
             variants={itemVariants}
-            whileHover={{ y: -5 }}
+            className="bg-white rounded-lg shadow-md p-6"
           >
-            <div className="p-1 bg-gradient-to-r from-amber-500 to-orange-600"></div>
-            <div className="p-6">
-              <div className="flex items-center mb-4">
-                <div className="p-3 rounded-full bg-amber-100 mr-4">
-                  <FiTarget className="text-amber-600 text-xl" />
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center">
+                <div className="p-3 rounded-full bg-orange-100 mr-4">
+                  <FiAlertCircle className="text-orange-600 text-xl" />
                 </div>
-                <h3 className="font-semibold text-black">Quick Actions</h3>
-              </div>
-              
-              <div className="space-y-3">
-                <Link to="/Admin/students" className="flex items-center p-2 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors group">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3 group-hover:bg-blue-200 transition-colors">
-                    <FiUser className="text-blue-600" />
-                  </div>
-                  <span className="text-black">Add New Student</span>
-                </Link>
-                
-                <Link to="/Admin/AdminTeacher" className="flex items-center p-2 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors group">
-                  <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-3 group-hover:bg-green-200 transition-colors">
-                    <FiUsers className="text-green-600" />
-                  </div>
-                  <span className="text-black">Manage Teachers</span>
-                </Link>
-                
-                <Link to="/Admin/Timetable" className="flex items-center p-2 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors group">
-                  <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center mr-3 group-hover:bg-purple-200 transition-colors">
-                    <FiCalendar className="text-purple-600" />
-                  </div>
-                  <span className="text-black">Schedule Classes</span>
-                </Link>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800">Pending Teachers</h3>
+                  <p className="text-3xl font-bold text-gray-900 mt-1">
+                    {isLoadingTeachers ? '...' : pendingTeachers?.length || 0}
+                  </p>
+                </div>
               </div>
             </div>
+            
+            {pendingTeachers?.length > 0 && (
+              <button
+                onClick={() => setIsPendingTeachersModalOpen(true)}
+                className="w-full mt-4 px-4 py-2 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100 transition-colors flex items-center justify-center"
+              >
+                <FiList className="mr-2" />
+                View All Pending Requests
+              </button>
+            )}
           </motion.div>
         </div>
         
         {/* Main Dashboard Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Pending Teachers Section */}
+          {!isLoadingTeachers && pendingTeachers?.length > 0 && (
+            <motion.div 
+              className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden lg:col-span-2"
+              variants={itemVariants}
+            >
+              <div className="p-6 border-b border-gray-100">
+                <div className="flex justify-between items-center">
+                  <h3 className="font-semibold text-lg flex items-center">
+                    <FiAlertCircle className="mr-2 text-orange-600" /> Pending Teacher Approvals
+                  </h3>
+                  <Link to="/admin/teacher-requests" className="text-orange-600 hover:text-orange-800 flex items-center text-sm font-medium">
+                    View All <FiPlusCircle className="ml-1" />
+                  </Link>
+                </div>
+              </div>
+              
+              <div className="p-6">
+                <div className="space-y-4">
+                  {pendingTeachers.slice(0, 3).map((teacher) => (
+                    <motion.div 
+                      key={teacher._id}
+                      className="flex items-center justify-between p-4 bg-orange-50 rounded-lg"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      whileHover={{ scale: 1.02 }}
+                    >
+                      <div className="flex items-center">
+                        <div className="mr-4">
+                          <ProfilePicture
+                            profilePic={teacher.ProfilePic}
+                            firstName={teacher.firstName}
+                            size="small"
+                            editable={false}
+                          />
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-black">
+                            {teacher.firstName} {teacher.lastName}
+                          </h4>
+                          <p className="text-sm text-gray-600">{teacher.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleTeacherAction(teacher._id, 'approve')}
+                          className="p-2 text-green-600 hover:bg-green-100 rounded-full transition-colors"
+                          title="Approve"
+                        >
+                          <FiCheckCircle className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => handleTeacherAction(teacher._id, 'reject')}
+                          className="p-2 text-red-600 hover:bg-red-100 rounded-full transition-colors"
+                          title="Reject"
+                        >
+                          <FiXCircle className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+          
           {/* Recent Students */}
           <motion.div 
             className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden lg:col-span-2"
@@ -841,6 +1096,101 @@ function AdminDashboard() {
                   </button>
                 </div>
               </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Pending Teachers Modal */}
+      <AnimatePresence>
+        {isPendingTeachersModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
+            >
+              <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+                <div className="flex items-center">
+                  <FiAlertCircle className="text-orange-600 text-xl mr-2" />
+                  <h2 className="text-xl font-semibold text-gray-800">Pending Teacher Requests</h2>
+                </div>
+                <button
+                  onClick={() => setIsPendingTeachersModalOpen(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <FiX className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="p-6 overflow-y-auto max-h-[calc(90vh-8rem)]">
+                {isLoadingTeachers ? (
+                  <div className="flex justify-center items-center h-32">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                  </div>
+                ) : pendingTeachers?.length > 0 ? (
+                  <div className="space-y-4">
+                    {pendingTeachers.map((teacher) => (
+                      <motion.div
+                        key={teacher._id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                      >
+                        <div className="flex items-center space-x-4">
+                          <img
+                            src={teacher.ProfilePic || 'https://via.placeholder.com/40'}
+                            alt={`${teacher.firstName} ${teacher.lastName}`}
+                            className="w-12 h-12 rounded-full object-cover"
+                          />
+                          <div>
+                            <h4 className="font-medium text-gray-900">
+                              {teacher.firstName} {teacher.lastName}
+                            </h4>
+                            <p className="text-sm text-gray-600">{teacher.email}</p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              Requested on {new Date(teacher.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => {
+                              handleTeacherAction(teacher._id, 'approve');
+                              setIsPendingTeachersModalOpen(false);
+                            }}
+                            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center"
+                          >
+                            <FiCheckCircle className="mr-2" />
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => {
+                              handleTeacherAction(teacher._id, 'reject');
+                              setIsPendingTeachersModalOpen(false);
+                            }}
+                            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center"
+                          >
+                            <FiXCircle className="mr-2" />
+                            Reject
+                          </button>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <FiAlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                    <p className="text-gray-500">No pending teacher requests</p>
+                  </div>
+                )}
+              </div>
             </motion.div>
           </motion.div>
         )}
