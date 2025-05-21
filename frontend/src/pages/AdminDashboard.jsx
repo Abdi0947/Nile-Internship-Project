@@ -674,7 +674,31 @@ function AdminDashboard() {
               </div>
             </div>
           </motion.div>
-          
+
+          {/* Teachers Count Card */}
+          <motion.div 
+            className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden"
+            variants={itemVariants}
+            whileHover={{ y: -5 }}
+          >
+            <div className="p-1 bg-gradient-to-r from-indigo-500 to-blue-600"></div>
+            <div className="p-6">
+              <div className="flex items-center mb-4">
+                <div className="p-3 rounded-full bg-indigo-100 mr-4">
+                  <FiUsers className="text-indigo-600 text-xl" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-black">Total Teachers</p>
+                  <p className="text-3xl font-bold text-black">{teachers.length}</p>
+                </div>
+              </div>
+              <div className="flex justify-between mt-4 bg-gray-50 -mx-6 px-6 py-3 border-t">
+                <span className="font-semibold">{teachers.length}</span>
+                <span className="text-sm ml-1">Available</span>
+              </div>
+            </div>
+          </motion.div>
+
           {/* Classes/Timetable Overview */}
           <motion.div 
             className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden"
