@@ -501,7 +501,7 @@ function AdminDashboard() {
       
       {/* Main Dashboard Container */}
       <motion.div 
-        className="p-3 md:p-5 lg:p-6 mt-6 max-w-5xl mx-auto"
+        className="p-2 md:p-3 lg:p-4 mt-2 max-w-5xl mx-auto"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
