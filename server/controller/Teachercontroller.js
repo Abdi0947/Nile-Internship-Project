@@ -1,5 +1,6 @@
 const Teacher = require("../model/Teachermodel");
 const Cloudinary = require("../lib/Cloudinary");
+const crypto = require("crypto");
 const User = require("../model/Usermodel");
 
 module.exports.createTeacherprofile = async (req, res) => {
@@ -30,9 +31,6 @@ module.exports.createTeacherprofile = async (req, res) => {
       !address ||
       !dateOfBirth ||
       !gender 
-
-   
-    
     ) {
       return res
         .status(400)
@@ -66,10 +64,17 @@ module.exports.createTeacherprofile = async (req, res) => {
       }
     }
 
+    const password = crypto
+      .randomBytes(8)
+      .toString("base64")
+      .slice(0, 8);
+
+      console.log(password)
     const newTeacher = new Teacher({
       firstName: Firstname,
       lastName: Lastname,
       email: email,
+      password: password,
       phone: Phone,
       Address: address,
       Dateofbirth: dateOfBirth,
