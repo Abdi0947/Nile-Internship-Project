@@ -11,7 +11,8 @@ import {
   FaLinkedinIn, 
   FaInstagram, 
   FaYoutube,
-  FaArrowRight 
+  FaArrowRight,
+  FaTelegram 
 } from "react-icons/fa";
 import { useDarkMode } from '../context/DarkModeContext';
 
@@ -130,6 +131,12 @@ const Footer = () => {
                   Register
                 </a>
               </li>
+              <li>
+                <a href="/terms" className={`${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'} flex items-center group`}>
+                  <FaArrowRight className="mr-2 h-3 w-3 text-green-400 group-hover:translate-x-1 transition-transform" />
+                  Terms & Conditions
+                </a>
+              </li>
             </ul>
           </motion.div>
           
@@ -188,6 +195,24 @@ const Footer = () => {
           variants={itemVariants}
           className={`border-t ${darkMode ? 'border-gray-800' : 'border-gray-300'} mt-12 pt-8 text-center`}
         >
+          {/* Contact Developers Section */}
+          <div className="mb-4">
+            <h4 className={`text-lg font-semibold mb-2 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Need Help?</h4>
+            <a 
+              href="https://t.me/abi_la" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className={`inline-flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
+                darkMode 
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                  : 'bg-blue-500 hover:bg-blue-600 text-white'
+              }`}
+            >
+              <FaTelegram className="text-xl" />
+              <span>Contact Developers on Telegram</span>
+            </a>
+          </div>
+
           <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
             © {new Date().getFullYear()} SchoolSmart. All rights reserved.
           </p>

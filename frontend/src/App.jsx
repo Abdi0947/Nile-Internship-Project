@@ -45,6 +45,7 @@ import TeacherGradeAssignment from './pages/TeacherGradeAssignment';
 import TeacherGradeSubmission from './pages/TeacherGradeSubmission';
 import TeacherRequestPage from './pages/TeacherRequestPage';
 import ResetPassword from './pages/ResetPassword';
+import TermsAndConditions from './pages/TermsAndConditions';
 
 function App() {
   const dispatch = useDispatch();
@@ -103,6 +104,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/forgotpassword" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/terms" element={<TermsAndConditions />} />
           <Route path="/logout" element={<Navigate to="/login" replace />} />
 
           <Route path="/teacher" element={<Teacherpage />}>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiLogOut, FiActivity, FiPieChart, FiBarChart } from "react-icons/fi";
+import { FiLogOut, FiActivity, FiPieChart, FiBarChart, FiMessageSquare } from "react-icons/fi";
 import { IoIosBook, IoIosPeople } from "react-icons/io";
 import { FaChalkboardTeacher, FaUserCircle, FaCalendarAlt, FaUserGraduate } from "react-icons/fa";
 import { MdDashboard, MdAssignmentTurnedIn, MdNotificationsActive, MdSettings } from "react-icons/md";
@@ -11,11 +11,13 @@ import CampanyLogo from '../assets/logo.png';
 import { motion, AnimatePresence } from 'framer-motion';
 import { logout } from "../features/Authentication";
 import toast from 'react-hot-toast';
+import { useDarkMode } from '../context/DarkModeContext';
 
 function Sidebar({ isOpen, setIsOpen }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+  const { darkMode } = useDarkMode();
   const [dropdowns, setDropdowns] = useState({
     classes: false,
     academic: false
@@ -504,38 +506,73 @@ function Sidebar({ isOpen, setIsOpen }) {
             onHover={() => setHoveredItem('notifications')}
             isHovered={hoveredItem === 'notifications'}
           />
-        </nav>
 
-        {/* Logout Section */}
-        <div className="mt-auto border-t border-blue-700/50 pt-3">
-          <motion.button 
-            onClick={handleLogout}
-            className="flex items-center w-full space-x-3 p-2 rounded-lg text-red-300 hover:bg-red-500/20 hover:text-red-200 transition-all duration-200"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onHoverStart={() => setHoveredItem('logout')}
-            onHoverEnd={() => setHoveredItem(null)}
+          {/* Contact Developers Link */}
+          <a 
+            href="https://t.me/abi_la" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className={`flex items-center w-full space-x-3 p-1.5 sm:p-2 rounded-lg transition-all duration-200 ${
+              darkMode 
+                ? 'text-blue-400 hover:bg-blue-800/30 hover:text-blue-300' 
+                : 'text-blue-600 hover:bg-blue-100 hover:text-blue-700'
+            }`}
+            onMouseEnter={() => setHoveredItem('contact')}
+            onMouseLeave={() => setHoveredItem(null)}
           >
             <motion.div
               variants={iconVariants}
-              animate={hoveredItem === 'logout' ? 'hover' : 'initial'}
+              animate={hoveredItem === 'contact' ? 'hover' : 'initial'}
+              className="text-base sm:text-lg min-w-[16px]"
             >
-              <FiLogOut className="text-lg min-w-[20px]" />
+              <FiMessageSquare />
             </motion.div>
             <AnimatePresence>
               {isOpen && (
                 <motion.span
-                  variants={linkVariants}
-                  animate={isOpen ? "open" : "closed"}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.2 }}
                   className="text-xs sm:text-sm"
                 >
-                  Logout
+                  Contact Developers
                 </motion.span>
               )}
             </AnimatePresence>
-          </motion.button>
-        </div>
+          </a>
+
+          {/* Logout Section */}
+          <div className="mt-auto border-t border-blue-700/50 pt-3">
+            <motion.button 
+              onClick={handleLogout}
+              className="flex items-center w-full space-x-3 p-2 rounded-lg text-red-300 hover:bg-red-500/20 hover:text-red-200 transition-all duration-200"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onHoverStart={() => setHoveredItem('logout')}
+              onHoverEnd={() => setHoveredItem(null)}
+            >
+              <motion.div
+                variants={iconVariants}
+                animate={hoveredItem === 'logout' ? 'hover' : 'initial'}
+              >
+                <FiLogOut className="text-lg min-w-[20px]" />
+              </motion.div>
+              <AnimatePresence>
+                {isOpen && (
+                  <motion.span
+                    variants={linkVariants}
+                    animate={isOpen ? "open" : "closed"}
+                    exit={{ opacity: 0, x: -10 }}
+                    className="text-xs sm:text-sm"
+                  >
+                    Logout
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.button>
+          </div>
+        </nav>
       </div>
     </motion.div>
   );
