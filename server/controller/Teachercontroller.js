@@ -1,12 +1,11 @@
 const Teacher = require("../model/Teachermodel");
 const Cloudinary = require("../lib/Cloudinary");
+const generator = require("generate-password");
 const User = require("../model/Usermodel");
 
 module.exports.createTeacherprofile = async (req, res) => {
   console.log(req.body)
-  console.log(req.user?._id);
   try {
-    const userId = req.user?._id;
     const {
       Firstname,
       Lastname,
@@ -24,15 +23,7 @@ module.exports.createTeacherprofile = async (req, res) => {
 
     if (
       !Firstname ||
-      !Lastname ||
-      !email ||
-      !Phone ||
-      !address ||
-      !dateOfBirth ||
-      !gender 
-
-   
-    
+      !Lastname
     ) {
       return res
         .status(400)
@@ -66,10 +57,21 @@ module.exports.createTeacherprofile = async (req, res) => {
       }
     }
 
+    const password = generator.generate({
+      length: 8,
+      numbers: true,
+      symbols: false,
+      uppercase: true,
+      lowercase: true,
+      strict: true, // ensures at least one character from each pool
+    });
+
+      console.log(password)
     const newTeacher = new Teacher({
       firstName: Firstname,
       lastName: Lastname,
       email: email,
+      password: password,
       phone: Phone,
       Address: address,
       Dateofbirth: dateOfBirth,

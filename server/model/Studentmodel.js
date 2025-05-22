@@ -1,72 +1,70 @@
 const mongoose = require("mongoose");
 
-const StudentSchema=new mongoose.Schema({
+const StudentSchema = new mongoose.Schema(
+  {
     firstName: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
+    },
+    lastName: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    phone: {
+      type: String,
+    },
+    Address: {
+      type: String,
+    },
+    Dateofbirth: {
+      type: Date,
+      required: true,
+    },
+    gender: {
+      type: String,
+      enum: ["Male", "Female"],
+    },
+
+    profileImage: {
+      type: String,
+    },
+
+    attendance: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "TeacherAttendance",
       },
-      lastName: {
-        type: String,
-        required: true,
+    ],
+
+    grades: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Grade",
       },
-      email: {
-        type: String,
-        required: true,
-        unique: true,
-      },
-      phone: {
-        type: String
-      },
-      Address: {
-        type: String
-      },
-      Dateofbirth: {
-        type: Date,
-        required: true,
-      },
-      gender: {
-        type: String,
-        enum:["Male","Female"]
+    ],
+    feeStatus: {
+      type: String,
+      enum: ["pending", "paid"],
+      default: "pending",
+    },
 
-      },
-
-      profileImage: {
-        type: String,
-       
-      },
-      
-      attendance:[{
-        type:mongoose.Schema.Types.ObjectId,
-        ref: 'TeacherAttendance',
-}],
-
- grades:[{
-    type:mongoose.Schema.Types.ObjectId,
-    ref:"Grade"
-
- }]
-,
-feeStatus:{
-    type:String,
-    enum: ['pending', 'paid'],
-    default: 'pending',
-
-},
-     
-
-      status:{
-        type:String,
-        enum: ['active', 'graduated', 'suspended'],
-        default: 'active',
-      }
-      
-
-
-
-
-},
-    { timestamps: true }
-)
+    status: {
+      type: String,
+      enum: ["active", "graduated", "suspended"],
+      default: "active",
+    },
+  },
+  { timestamps: true }
+);
 
 const Student= mongoose.model("Student", StudentSchema);
 

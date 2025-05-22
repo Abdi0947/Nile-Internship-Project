@@ -1,64 +1,65 @@
 const mongoose = require("mongoose");
 
-const TeacherSchema=new mongoose.Schema({
+const TeacherSchema = new mongoose.Schema(
+  {
     firstName: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
+    },
+    lastName: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    phone: {
+      type: String,
+    },
+    Address: {
+      type: String,
+    },
+    Dateofbirth: {
+      type: Date,
+      required: true,
+    },
+    gender: {
+      type: String,
+      enum: ["male", "female"],
+    },
+
+    profileImage: {
+      type: String,
+    },
+    subjects: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Subject",
       },
-      lastName: {
-        type: String,
-        required: true,
+    ],
+    attendance: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "TeacherAttendance",
       },
-      email: {
-        type: String,
-        required: true,
-        unique: true,
+    ],
+
+    assignedClasses: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Class",
       },
-      phone: {
-        type: String
-      },
-      Address: {
-        type: String
-      },
-      Dateofbirth: {
-        type: Date,
-        required: true,
-      },
-      gender: {
-        type: String,
-        enum:["Male","Female"]
+    ],
+  },
+  { timestamps: true }
+);
 
-      },
-
-      profileImage: {
-        type: String,
-       
-      },
-      subjects:[{
-        type:mongoose.Schema.Types.ObjectId,
-           ref:'Subject'
-       }],
-      attendance:[{
-        type:mongoose.Schema.Types.ObjectId,
-        ref: 'TeacherAttendance',
-}],
-
-      assignedClasses:[ {
-            type:mongoose.Schema.Types.ObjectId,
-            ref:"Class"
-        }
-      ],
-
-
-
-      
-
-
-
-},
-    { timestamps: true }
-)
-
-const Teacher= mongoose.model("Teacher", TeacherSchema);
+const Teacher = mongoose.model("Teacher", TeacherSchema);
 
 module.exports = Teacher;

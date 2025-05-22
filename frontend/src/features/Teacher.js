@@ -53,22 +53,26 @@ export const AddTeacher = createAsyncThunk(
 
   
   export const EditTeacher = createAsyncThunk(
-    'teacher/updateTeacher',
+    "teacher/updateTeacher",
     async ({ id, updatedData }, { rejectWithValue }) => {
       try {
         const response = await axiosInstance.put(
           `teacher/updateTeacher/${id}`,
-          { TeacherId: id, updatedData },
+          updatedData, 
           { withCredentials: true }
         );
         return response.data;
       } catch (error) {
-        const errorMessage = error.response?.data?.message || "Failed to update Teacher. Please try again.";
-        toast.error(errorMessage); 
+        console.log(error);
+        const errorMessage =
+          error.response?.data?.message ||
+          "Failed to update Teacher. Please try again.";
+        toast.error(errorMessage);
         return rejectWithValue(errorMessage);
       }
     }
   );
+  
 
 
 

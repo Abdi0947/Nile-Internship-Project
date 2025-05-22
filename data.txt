@@ -1,0 +1,26 @@
+Teacher daata
+
+{
+      id: 1,
+      name: "John Doe",
+      email: "john.doe@example.com",
+      phone: "+1234567890",
+      subject: "Mathematics",
+      status: "Active",
+      gender: "male",
+      joinDate: "2024-01-15",
+      assignedClasses: [
+        { id: "c1", name: "Class 10 - Mathematics", schedule: "MWF 9:00 AM" },
+        { id: "c2", name: "Class 11 - Mathematics", schedule: "TTh 11:00 AM" },
+      ],
+    }
+  // Add available classes data
+[
+
+    {
+      id: "c1",
+      name: "Class 10 - Mathematics",
+      schedule: "MWF 9:00 AM",
+      subject: "Mathematics",
+    },
+]
