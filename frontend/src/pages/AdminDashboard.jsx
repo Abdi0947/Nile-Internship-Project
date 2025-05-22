@@ -3,7 +3,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import TopNavbar from "../components/Topnavbar";
 import { fetchAllStudents, calculateStudentStats } from "../features/Student";
-import { AddTeacher } from "../features/Teacher";
+import {
+  AddTeacher,
+  gettingallTeachers,
+  RemoveTeacher,
+  EditTeacher,
+} from "../features/Teacher";
 import { fetchAllTimetables } from "../features/TimeTable";
 import { fetchAllFees } from "../features/Fee";
 import { fetchNotifications } from "../features/Notification";
@@ -36,6 +41,8 @@ import axios from "axios";
 function AdminDashboard() {
   const dispatch = useDispatch();
   const { students, studentStats } = useSelector((state) => state.Student);
+  const { getallTeachers } = useSelector((state) => state.Teacher);
+  console.log(getallTeachers);
   const { fees } = useSelector((state) => state.Fee);
   const { Timetables, isTimetablesLoading } = useSelector(
     (state) => state.Timetables
@@ -44,49 +51,7 @@ function AdminDashboard() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showStatsDetails, setShowStatsDetails] = useState(false);
   const navigate = useNavigate();
-  const [teachers, setTeachers] = useState([
-    {
-      id: 1,
-      name: "John Doe",
-      email: "john.doe@example.com",
-      phone: "+1234567890",
-      subject: "Mathematics",
-      status: "Active",
-      gender: "male",
-      joinDate: "2024-01-15",
-      assignedClasses: [
-        { id: "c1", name: "Class 10 - Mathematics", schedule: "MWF 9:00 AM" },
-        { id: "c2", name: "Class 11 - Mathematics", schedule: "TTh 11:00 AM" },
-      ],
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      email: "jane.smith@example.com",
-      phone: "+1987654321",
-      subject: "Physics",
-      status: "Active",
-      gender: "female",
-      joinDate: "2024-02-01",
-      assignedClasses: [
-        { id: "c3", name: "Class 10 - Physics", schedule: "MWF 10:00 AM" },
-        { id: "c4", name: "Class 12 - Physics", schedule: "TTh 2:00 PM" },
-      ],
-    },
-    {
-      id: 3,
-      name: "Michael Johnson",
-      email: "michael.j@example.com",
-      phone: "+1122334455",
-      subject: "Chemistry",
-      status: "On Leave",
-      gender: "male",
-      joinDate: "2024-01-20",
-      assignedClasses: [
-        { id: "c5", name: "Class 11 - Chemistry", schedule: "MWF 1:00 PM" },
-      ],
-    },
-  ]);
+  const [teachers, setTeachers] = useState(getallTeachers);
   const [isAddTeacherModalOpen, setIsAddTeacherModalOpen] = useState(false);
   const [newTeacher, setNewTeacher] = useState({
     firstName: "",
@@ -254,7 +219,7 @@ function AdminDashboard() {
   };
 
   const handleAssignClasses = (teacher) => {
-    setSelectedTeacher(teacher);
+    setSelectedTeacher(availableClasses);
     setTempAssignedClasses(teacher.assignedClasses);
     setIsAssignModalOpen(true);
   };
@@ -288,6 +253,7 @@ function AdminDashboard() {
     dispatch(fetchAllFees());
     dispatch(fetchAllTimetables());
     dispatch(fetchNotifications());
+    dispatch(gettingallTeachers());
   }, [dispatch]);
 
   useEffect(() => {
@@ -359,6 +325,7 @@ function AdminDashboard() {
       dispatch(fetchAllStudents()),
       dispatch(fetchAllFees()),
       dispatch(fetchAllTimetables()),
+      dispatch(gettingallTeachers()),
     ]).finally(() => {
       setTimeout(() => setIsRefreshing(false), 1000);
     });
@@ -368,7 +335,6 @@ function AdminDashboard() {
     e.preventDefault();
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      
       const teacherData = {
         Firstname: `${newTeacher.firstName}`,
         Lastname: `${newTeacher.lastName}`,
@@ -383,32 +349,13 @@ function AdminDashboard() {
         joinDate: new Date().toISOString(),
         assignedClasses: newTeacher.assignedClasses,
       };
-
-      const teacher = {
-        id: teachers.length + 1,
-        name: `${newTeacher.firstName} ${newTeacher.lastName}`,
-        email: newTeacher.email,
-        phone: newTeacher.phone,
-        subject: newTeacher.subject,
-        address: newTeacher.address,
-        gender: newTeacher.gender,
-        qualification: newTeacher.qualification,
-        status: "Active",
-        joinDate: new Date().toISOString(),
-        assignedClasses: newTeacher.assignedClasses,
-      };
-
       dispatch(AddTeacher(teacherData))
         .unwrap()
         .then(() => {
-          window.location.reload();
-        })
-        .catch((error) => {
-          toast.error(error || "Failed to add student");
+          setIsAddTeacherModalOpen(false);
+          dispatch(gettingallTeachers());
+          toast.success("Teacher added successfully!");
         });
-
-      setTeachers([...teachers, teacher]);
-      setIsAddTeacherModalOpen(false);
       setNewTeacher({
         firstName: "",
         lastName: "",
@@ -416,14 +363,14 @@ function AdminDashboard() {
         phone: "",
         subject: "",
         address: "",
+        birthdate: "",
         gender: "",
         qualification: "",
         experience: "",
         assignedClasses: [],
       });
-
-      toast.success("Teacher added successfully!");
     } catch (error) {
+      console.log(error);
       toast.error("Failed to add teacher. Please try again.");
     }
   };
@@ -434,11 +381,7 @@ function AdminDashboard() {
   };
 
   const handleEditTeacher = (teacher) => {
-    setEditingTeacher({
-      ...teacher,
-      firstName: teacher.name.split(" ")[0],
-      lastName: teacher.name.split(" ").slice(1).join(" "),
-    });
+    setEditingTeacher(teacher);
     setIsEditModalOpen(true);
   };
 
@@ -451,44 +394,45 @@ function AdminDashboard() {
     e.preventDefault();
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
+      const id = editingTeacher._id
+      console.log(editingTeacher.firstName)
+      const updatedData = {
+        firstName: editingTeacher.firstName,
+        lastName: editingTeacher.lastName,
+        email: editingTeacher.email,
+        phone: editingTeacher.phone,
+        Address: editingTeacher.address,
+        Dateofbirth: editingTeacher.birthdate,
+        gender: editingTeacher.gender,
+        qualification: editingTeacher.qualification,
+        status: "Active",
+        joinDate: new Date().toISOString(),
+        assignedClasses: editingTeacher.assignedClasses,
+      };
+      dispatch(EditTeacher({ id, updatedData }))
+        .unwrap()
+        .then(() => {
+          setIsEditModalOpen(false);
+          setEditingTeacher(null);
+          dispatch(gettingallTeachers());
+          toast.success("Teacher added successfully!");
+        });
 
-      setTeachers(
-        teachers.map((teacher) =>
-          teacher.id === editingTeacher.id
-            ? {
-                ...teacher,
-                name: `${editingTeacher.firstName} ${editingTeacher.lastName}`,
-                email: editingTeacher.email,
-                phone: editingTeacher.phone,
-                subject: editingTeacher.subject,
-                gender: editingTeacher.gender,
-                address: editingTeacher.address,
-                qualification: editingTeacher.qualification,
-                experience: editingTeacher.experience,
-              }
-            : teacher
-        )
-      );
-
-      setIsEditModalOpen(false);
-      setEditingTeacher(null);
+      
       toast.success("Teacher updated successfully!");
     } catch (error) {
+      console.log(error)
       toast.error("Failed to update teacher. Please try again.");
     }
   };
 
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = async (teacher) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      setTeachers(
-        teachers.filter((teacher) => teacher.id !== viewingTeacher.id)
-      );
+      dispatch(RemoveTeacher(teacher._id));
       setIsDeleteModalOpen(false);
-      setViewingTeacher(null);
       toast.success("Teacher deleted successfully!");
     } catch (error) {
+      console.log(error);
       toast.error("Failed to delete teacher. Please try again.");
     }
   };
@@ -580,6 +524,7 @@ function AdminDashboard() {
       setViewingStudent(null);
       toast.success("Student deleted successfully!");
     } catch (error) {
+      console.log(error);
       toast.error("Failed to delete student. Please try again.");
     }
   };
@@ -883,12 +828,12 @@ function AdminDashboard() {
                     Total Teachers
                   </p>
                   <p className="text-3xl font-bold text-black">
-                    {teachers.length}
+                    {getallTeachers?.length}
                   </p>
                 </div>
               </div>
               <div className="flex justify-between mt-4 bg-gray-50 -mx-6 px-6 py-3 border-t">
-                <span className="font-semibold">{teachers.length}</span>
+                <span className="font-semibold">{getallTeachers?.length}</span>
                 <span className="text-sm ml-1">Available</span>
               </div>
             </div>
@@ -1147,7 +1092,7 @@ function AdminDashboard() {
                   Registered Teachers
                 </h2>
                 <p className="text-sm text-gray-600 mt-1">
-                  {teachers.length} teachers registered
+                  {getallTeachers?.length} teachers registered
                 </p>
               </div>
               <button
@@ -1181,90 +1126,92 @@ function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {teachers.map((teacher) => (
-                    <tr key={teacher.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10">
-                            <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                              <span className="text-blue-600 font-medium">
-                                {teacher.name
-                                  .split(" ")
-                                  .map((n) => n[0])
-                                  .join("")}
-                              </span>
+                  {Array.isArray(getallTeachers) &&
+                    getallTeachers?.map((teacher) => (
+                      <tr key={teacher?._id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 h-10 w-10">
+                              <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                <span className="text-blue-600 font-medium">
+                                  {teacher?.firstName?.[0] || ""}
+                                  {teacher?.lastName?.[0] || ""}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">
+                                {teacher?.firstName} {teacher?.lastName}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {teacher?.email}
+                              </div>
                             </div>
                           </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {teacher.name}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {teacher.email}
-                            </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {teacher?.subject}
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {teacher.subject}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 capitalize">
-                          {teacher.gender}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="space-y-1">
-                          {teacher.assignedClasses.map((cls) => (
-                            <div key={cls.id} className="text-sm">
-                              <span className="text-gray-900">{cls.name}</span>
-                              <span className="text-gray-500 text-xs block">
-                                {cls.schedule}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex flex-col space-y-2">
-                          <button
-                            onClick={() => handleViewTeacher(teacher)}
-                            className="text-blue-600 hover:text-blue-900 flex items-center px-2 py-1 rounded hover:bg-blue-50"
-                            title="View Details"
-                          >
-                            <FiUser className="w-4 h-4 mr-1" />
-                            View
-                          </button>
-                          <button
-                            onClick={() => handleEditTeacher(teacher)}
-                            className="text-indigo-600 hover:text-indigo-900 flex items-center px-2 py-1 rounded hover:bg-indigo-50"
-                            title="Edit Teacher"
-                          >
-                            <FiActivity className="w-4 h-4 mr-1" />
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleAssignClasses(teacher)}
-                            className="text-green-600 hover:text-green-900 flex items-center px-2 py-1 rounded hover:bg-green-50"
-                            title="Assign Classes"
-                          >
-                            <FiList className="w-4 h-4 mr-1" />
-                            Assign
-                          </button>
-                          <button
-                            onClick={() => handleDeleteTeacher(teacher)}
-                            className="text-red-600 hover:text-red-900 flex items-center px-2 py-1 rounded hover:bg-red-50"
-                            title="Delete Teacher"
-                          >
-                            <FiXCircle className="w-4 h-4 mr-1" />
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 capitalize">
+                            {teacher?.gender}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="space-y-1">
+                            {Array.isArray(teacher?.assignedClasses) &&
+                              teacher.assignedClasses.map((cls) => (
+                                <div key={cls.id} className="text-sm">
+                                  <span className="text-gray-900">
+                                    {cls.name}
+                                  </span>
+                                  <span className="text-gray-500 text-xs block">
+                                    {cls.schedule}
+                                  </span>
+                                </div>
+                              ))}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <div className="flex flex-col space-y-2">
+                            <button
+                              onClick={() => handleViewTeacher(teacher)}
+                              className="text-blue-600 hover:text-blue-900 flex items-center px-2 py-1 rounded hover:bg-blue-50"
+                              title="View Details"
+                            >
+                              <FiUser className="w-4 h-4 mr-1" />
+                              View
+                            </button>
+                            <button
+                              onClick={() => handleEditTeacher(teacher)}
+                              className="text-indigo-600 hover:text-indigo-900 flex items-center px-2 py-1 rounded hover:bg-indigo-50"
+                              title="Edit Teacher"
+                            >
+                              <FiActivity className="w-4 h-4 mr-1" />
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleAssignClasses(teacher)}
+                              className="text-green-600 hover:text-green-900 flex items-center px-2 py-1 rounded hover:bg-green-50"
+                              title="Assign Classes"
+                            >
+                              <FiList className="w-4 h-4 mr-1" />
+                              Assign
+                            </button>
+                            <button
+                              onClick={() => handleDeleteTeacher(teacher)}
+                              className="text-red-600 hover:text-red-900 flex items-center px-2 py-1 rounded hover:bg-red-50"
+                              title="Delete Teacher"
+                            >
+                              <FiXCircle className="w-4 h-4 mr-1" />
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>
@@ -1766,7 +1713,7 @@ function AdminDashboard() {
                         Name
                       </h3>
                       <p className="mt-1 text-lg text-gray-900">
-                        {viewingTeacher.name}
+                        {viewingTeacher?.firstName} {viewingTeacher?.lastName}
                       </p>
                     </div>
                     <div>
@@ -1808,7 +1755,7 @@ function AdminDashboard() {
                         Address
                       </h3>
                       <p className="mt-1 text-gray-900">
-                        {viewingTeacher.address}
+                        {viewingTeacher?.Address}
                       </p>
                     </div>
                     <div>
@@ -2016,7 +1963,7 @@ function AdminDashboard() {
                       Address
                     </label>
                     <textarea
-                      value={editingTeacher.address}
+                      value={editingTeacher.Address}
                       onChange={(e) =>
                         setEditingTeacher({
                           ...editingTeacher,
@@ -2119,8 +2066,8 @@ function AdminDashboard() {
                   Delete Teacher
                 </h3>
                 <p className="text-sm text-gray-500 text-center mb-6">
-                  Are you sure you want to delete {viewingTeacher.name}? This
-                  action cannot be undone.
+                  Are you sure you want to delete {viewingTeacher?.firstName}{" "}
+                  {viewingTeacher?.lastName}? This action cannot be undone.
                 </p>
                 <div className="flex justify-end space-x-3">
                   <button
@@ -2135,7 +2082,7 @@ function AdminDashboard() {
                   </button>
                   <button
                     type="button"
-                    onClick={handleConfirmDelete}
+                    onClick={() => handleConfirmDelete(viewingTeacher)}
                     className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                   >
                     Delete
