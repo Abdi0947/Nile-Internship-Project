@@ -378,24 +378,30 @@ function AdminDashboard() {
   const threeDaysLater = new Date(today);
   threeDaysLater.setDate(today.getDate() + 3);
 
-  const upcomingEvents =
-    Timetables?.filter((event) => {
-      const eventDate = new Date(event.startTime);
-      return eventDate >= today && eventDate <= threeDaysLater;
-    })
-      .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
-      .slice(0, 5) || [];
+  const upcomingEvents = Timetables
+  ?.filter((event) => new Date(event.startTime) >= new Date())
+  .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
+  .slice(0, 5) || [];
+
+
 
   // Format date for timetable events
-  const formatEventDate = (dateString) => {
+  console.log("Filtered upcoming events:", upcomingEvents);
+  function formatEventDate(dateString) {
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return "Invalid Date";
+    }
+  
     return date.toLocaleString("en-US", {
+      weekday: "short",
       month: "short",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
     });
-  };
+  }
+  
 
   // Get current time of day for greeting
   const getGreeting = () => {
@@ -1002,10 +1008,11 @@ function AdminDashboard() {
                     animate="pulse"
                   >
                     <p className="text-sm font-medium text-black">
-                      Next: {formatEventDate(upcomingEvents[0].startTime)}
+                      Next: {upcomingEvents[0] ? formatEventDate(upcomingEvents[0].startTime) : "No event"}
+
                     </p>
                     <p className="font-medium truncate text-black">
-                      {upcomingEvents[0].title}
+                    {`${upcomingEvents[0].subjectId?.SubjectName} with ${upcomingEvents[0].teacherId?.firstName}`}
                     </p>
                   </motion.div>
                   {upcomingEvents.length > 1 && (
@@ -1171,7 +1178,7 @@ function AdminDashboard() {
                         </div>
                         <div>
                           <p className="font-medium text-black">
-                            {event.title}
+                          {`${event?.subjectId?.SubjectName} with Mrs. ${upcomingEvents[0].teacherId?.firstName}`}
                           </p>
                           <p className="text-sm text-black">
                             {formatEventDate(event.startTime)}
