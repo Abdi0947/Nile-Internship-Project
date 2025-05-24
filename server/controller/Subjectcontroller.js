@@ -29,9 +29,7 @@ module.exports.createSubject = async (req, res) => {
 module.exports.getAllSubjects = async (req, res) => {
   try {
     const subjects = await Subject.find()
-      .populate('TeacherId', 'name') // Populating teacher info
-      .populate('ClassId', 'className') // Populating class info
-      .exec();
+      .populate("ClassId")
 
     res.status(200).json(subjects);
   } catch (err) {

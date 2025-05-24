@@ -2526,7 +2526,7 @@ function AdminDashboard() {
                         Grade
                       </h3>
                       <p className="mt-1 text-gray-900">
-                        {viewingStudent.grade}
+                        {viewingStudent?.classId?.ClassName}
                       </p>
                     </div>
                   </div>

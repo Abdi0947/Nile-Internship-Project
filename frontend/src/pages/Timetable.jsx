@@ -41,6 +41,7 @@ const Timetable = () => {
     dispatch(gettingallTeachers());
     dispatch(getAllSubjects());
   }, [dispatch]);
+  console.log(subjects)
   // Handle date click to open modal for new event
   const handleDateClick = (info) => {
     setIsEditMode(false);
@@ -125,10 +126,10 @@ const Timetable = () => {
   };
 
   const convertToFullCalendarEvent = (timetable) => ({
-    id: timetable._id,
-    title: `${timetable.subjectId.SubjectName} - ${timetable.teacherId.firstName}`,
-    start: timetable.startTime,
-    end: timetable.endTime,
+    id: timetable?._id,
+    title: `${timetable?.subjectId?.SubjectName} - ${timetable?.teacherId?.firstName}`,
+    start: timetable?.startTime,
+    end: timetable?.endTime,
   });
 
   const events = Timetables?.map(convertToFullCalendarEvent) || [];
@@ -184,8 +185,8 @@ const Timetable = () => {
                     className="w-full p-2 border rounded"
                   >
                     <option value="">Select Subject</option>
-                    {subjects.map((subject) => (
-                      <option key={subject._id} value={subject._id}>
+                    {subjects?.map((subject) => (
+                      <option key={subject._id} value={subject?._id}>
                         {subject.SubjectName}
                       </option>
                     ))}
