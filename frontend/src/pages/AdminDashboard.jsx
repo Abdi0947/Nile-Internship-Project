@@ -664,7 +664,7 @@ function AdminDashboard() {
       <TopNavbar />
 
       {/* Main Dashboard Container */}
-      <motion.div
+      <motion.div 
         className="p-2 md:p-3 lg:p-4 mt-2 max-w-5xl mx-auto"
         variants={containerVariants}
         initial="hidden"
@@ -727,7 +727,7 @@ function AdminDashboard() {
         </motion.div>
 
         {/* Stats Overview Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6 sm:mx-2">
           {/* Student Stats */}
           <motion.div
             className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden"
