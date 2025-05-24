@@ -94,6 +94,7 @@ const Timetable = () => {
         toast.success("Timetable updated successfully");
       } else {
         // Create new event
+        console.log(data.teacherId);
         const newEvent = {
           subjectId: data.subjectId,
           teacherId: data.teacherId,
