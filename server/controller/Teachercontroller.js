@@ -4,6 +4,56 @@ const generator = require("generate-password");
 const User = require("../model/Usermodel");
 const Class = require("../model/Classmodel")
 const Subject = require("../model/Subjectmodel")
+const crypto = require("crypto");
+const sendEmail = require("../lib/email");
+
+
+// Add this email template function at the top of the file
+const getWelcomeEmailTemplate = (user) => `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Student Management System</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%); padding: 30px; text-align: center; color: white; }
+        .content { padding: 20px; background: #f9fafb; }
+        .button { display: inline-block; padding: 12px 24px; background: #4ade80; color: white; text-decoration: none; border-radius: 5px; }
+        .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome to Student Management System! 🎓</h1>
+        </div>
+        <div class="content">
+            <h2>Hello ${user.firstName} ${user.lastName},</h2>
+            <p>Welcome to our platform! We're excited to have you join our community.</p>
+            <p>Your account has been successfully created with the following details:</p>
+            <ul>
+                <li>Email: ${user.email}</li>
+                <li>Paswword: ${user.password}</li>
+                <li>Role: ${user.role}</li>
+                <li>Account Created: ${new Date().toLocaleDateString()}</li>
+            </ul>
+            <p>To get started, please click the button below:</p>
+            <p style="text-align: center;">
+                <a href="http://localhost:5173/login" class="button">Login to Your Account</a>
+            </p>
+            <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
+        </div>
+        <div class="footer">
+            <p>This is an automated message, please do not reply to this email.</p>
+            <p>© ${new Date().getFullYear()} Student Management System. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+`;
 
 module.exports.createTeacherprofile = async (req, res) => {
   console.log(req.body)
@@ -12,7 +62,7 @@ module.exports.createTeacherprofile = async (req, res) => {
       Firstname,
       Lastname,
       email,
-      Phone,
+      phone,
       address,
       dateOfBirth,
       gender,
@@ -24,6 +74,7 @@ module.exports.createTeacherprofile = async (req, res) => {
       assignedClasses,
       Classes,
     } = req.body;
+    console.log(phone);
 
     if (!Firstname || !Lastname) {
       return res
@@ -83,7 +134,7 @@ module.exports.createTeacherprofile = async (req, res) => {
       lastName: Lastname,
       email: email,
       password: password,
-      phone: Phone,
+      phone,
       Address: address,
       Dateofbirth: dateOfBirth,
       gender: gender,
@@ -144,6 +195,13 @@ module.exports.createTeacherprofile = async (req, res) => {
     
     newTeacher.classId = oldClass._id;
     await newTeacher.save();
+
+    await sendEmail({
+      email: newTeacher.email,
+      subject: "Welcome to Student Management System! 🎓",
+      message: `Welcome ${newTeacher.firstName}! Your account has been successfully created.`,
+      html: getWelcomeEmailTemplate(newTeacher),
+    });
 
     res.status(201).json({
       message: "Teacher profile created successfully",
@@ -331,3 +389,8 @@ module.exports.searchTeacher = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+module.exports.editProfile = async (req, res) => {
+  console.log(req.body)
+  console.log(req.params.TeacherId);
+}

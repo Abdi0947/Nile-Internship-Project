@@ -387,11 +387,8 @@ const Register = () => {
                     onChange={handleChange}
                     className="w-full p-2 bg-gray-700/50 border border-gray-600 rounded-lg outline-none text-white focus:ring-1 focus:ring-green-400 focus:border-transparent transition-all duration-300 text-sm"
                   >
-                    <option value="">-- Select Role --</option>
+                    <option value="">-- Select Role (as Admin only) --</option>
                     <option value="Admin">Admin</option>
-                    <option value="Teacher">Teacher</option>
-                    <option value="Student">Student</option>
-                    <option value="Manager">Administrative</option>
                   </select>
                   {errors.role && <p className="text-red-400 text-xs mt-1">{errors.role}</p>}
                 </motion.div>

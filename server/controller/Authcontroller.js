@@ -1,4 +1,5 @@
 const User = require("../model/Usermodel");
+const Teacher = require("../model/Teachermodel")
 const bcrypt = require("bcryptjs");
 const generateToken = require("../lib/Tokengenerator");
 const Cloudinary = require("../lib/Cloudinary");
@@ -288,43 +289,65 @@ module.exports.login = async (req, res) => {
     }
 
     const user = await User.findOne({ email });
+    const teacher = await Teacher.findOne({ email });
 
-    if (!user) {
+    if (!user && !teacher) {
       console.log("[Auth Debug] No user found with email:", email);
       return res.status(400).json({ error: "No user found with this email" });
     }
 
-    // Check approval status for teachers
-    if (user.role.toLowerCase() === 'teacher' && user.approvalStatus !== 'approved') {
-      return res.status(403).json({ 
-        error: user.approvalStatus === 'pending' 
-          ? "Your account is pending approval. Please wait for admin approval." 
-          : "Your account has been rejected. Please contact the administration."
+    if (teacher) {
+
+      if (teacher.password !== password) {
+        return res.status(400).json({ error: "Invalid password" });
+      }
+      const token = await generateToken(teacher, res);
+      console.log("[Auth Debug] Login successful, token generated");
+
+      console.log(teacher.phone);
+      return res.status(200).json({
+        message: "login successful",
+        user: {
+          id: teacher.id,
+          firstName: teacher.firstName,
+          lastName: teacher.lastName,
+          email: teacher.email,
+          role: teacher.role,
+          address: teacher.Address,
+          phone: teacher.phone,
+          ProfilePic: teacher.ProfilePic,
+          approvalStatus: teacher.approvalStatus,
+          token,
+        },
       });
     }
 
-    const hasedpassword = await bcrypt.compare(password, user.password);
+    if (user) {
+      const hasedpassword = await bcrypt.compare(password, user.password);
 
-    if (!hasedpassword) {
-      return res.status(400).json({ error: "Invalid credentials" });
+      if (!hasedpassword) {
+        return res.status(400).json({ error: "Invalid credentials" });
+      }
+
+      const token = await generateToken(user, res);
+      console.log("[Auth Debug] Login successful, token generated");
+
+      return res.status(200).json({
+        message: "login successful",
+        user: {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          role: user.role,
+          ProfilePic: user.ProfilePic,
+          approvalStatus: user.approvalStatus,
+          token,
+        },
+      });
     }
 
-    const token = await generateToken(user, res);
-    console.log("[Auth Debug] Login successful, token generated");
-
-    return res.status(200).json({
-      message: "login successful",
-      user: {
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        role: user.role,
-        ProfilePic: user.ProfilePic,
-        approvalStatus: user.approvalStatus,
-        token,
-      },
-    });
+    
   } catch (error) {
     console.error("[Auth Debug] Login error:", error);
     res.status(400).json({

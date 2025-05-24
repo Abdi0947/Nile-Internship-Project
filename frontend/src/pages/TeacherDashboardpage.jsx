@@ -126,7 +126,7 @@ function TeacherDashboardpage() {
     // {isUserTeacher ? }
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       <TopNavbar />
-      {isUserTeacher ? (
+      
         <motion.div
           className="p-6 md:p-8"
           variants={containerVariants}
@@ -470,18 +470,6 @@ function TeacherDashboardpage() {
             </motion.div>
           </div>
         </motion.div>
-      ) : (
-        <div>
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-          </div>
-          <div className="flex flex-col justify-center items-center">
-            <p>Hi teacher {Authuser?.firstName}</p>
-            <p>Please Wait until adimn approve You!</p>
-            <p>It may take sometime you can came back later!</p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

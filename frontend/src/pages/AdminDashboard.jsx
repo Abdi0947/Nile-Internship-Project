@@ -442,11 +442,10 @@ function AdminDashboard() {
   const handleAddTeacher = async (e) => {
     e.preventDefault();
     try {
-      console.log(newTeacher.subject);
+      console.log(newTeacher.phone);
       const subjecClassData = availableClasses.filter(
         (cl) => cl.id === newTeacher.subject
       )[0];
-      await new Promise((resolve) => setTimeout(resolve, 1000));
       const teacherData = {
         Firstname: `${newTeacher.firstName}`,
         Lastname: `${newTeacher.lastName}`,

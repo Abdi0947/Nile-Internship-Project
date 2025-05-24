@@ -44,6 +44,10 @@ const TeacherSchema = new mongoose.Schema(
     experience: {
       type: Number,
     },
+    role: {
+      type: String,
+      default: "teacher",
+    },
 
     subjects: {
       type: mongoose.Schema.Types.ObjectId,

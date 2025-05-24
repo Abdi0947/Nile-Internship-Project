@@ -81,6 +81,26 @@ export const AddTeacher = createAsyncThunk(
       }
     }
   );
+  export const editTeacherProfile = createAsyncThunk(
+    "teacher/editTeacherProfile",
+    async ({ id, updatedData }, { rejectWithValue }) => {
+      try {
+        const response = await axiosInstance.put(
+          `teacher/editTeacherProfile/${id}`,
+          updatedData,
+          { withCredentials: true }
+        );
+        return response.data;
+      } catch (error) {
+        console.log(error);
+        const errorMessage =
+          error.response?.data?.error ||
+          "Failed to update Teacher. Please try again.";
+        toast.error(errorMessage);
+        return rejectWithValue(errorMessage);
+      }
+    }
+  );
   
 
 
@@ -125,105 +145,79 @@ reducers:{},
 extraReducers:(builder)=>{
   builder
 
+    .addCase(gettingallTeachers.pending, (state) => {
+      state.isallTeacherget = true;
+    })
+    .addCase(gettingallTeachers.fulfilled, (state, action) => {
+      state.isallTeacherget = false;
+      state.getallTeachers = action.payload || [];
+    })
 
+    .addCase(gettingallTeachers.rejected, (state, action) => {
+      state.isallTeacherget = false;
+      toast.error(action.payload || "Error In adding Teacher logout");
+    })
 
- .addCase( gettingallTeachers.pending,(state)=>{
+    .addCase(RemoveTeacher.pending, (state) => {
+      state.isTeacherremove = true;
+    })
 
-    state.isallTeacherget=true
-    
-  })
-  .addCase(gettingallTeachers.fulfilled, (state, action) => {
-    state.isallTeacherget = false;
-    state.getallTeachers = action.payload || [];
-  })
-  
- 
-  .addCase( gettingallTeachers.rejected,(state,action)=>{
-     state.isallTeacherget=false
-   toast.error( action.payload|| 'Error In adding Teacher logout');
-  })
+    .addCase(RemoveTeacher.fulfilled, (state, action) => {
+      state.isTeacherremove = false;
+      state.getallTeachers = state.getallTeachers.filter(
+        (Teacher) => Teacher._id !== action.meta.arg
+      );
+    })
 
+    .addCase(RemoveTeacher.rejected, (state, action) => {
+      state.isTeacherremove = false;
+    })
 
-  .addCase(RemoveTeacher.pending,(state)=>{
+    .addCase(AddTeacher.pending, (state) => {
+      state.isTeacheradd = true;
+    })
+    .addCase(AddTeacher.fulfilled, (state, action) => {
+      state.isTeacheradd = false;
+      state.getallTeachers.push(action.payload);
+    })
 
-    state.isTeacherremove=true
-  
-  })
-  
+    .addCase(AddTeacher.rejected, (state, action) => {
+      state.isTeacheradd = false;
+    })
 
-  .addCase(RemoveTeacher.fulfilled, (state, action) => {
-    state.isTeacherremove = false;
-    state. getallTeachers = state. getallTeachers.filter(Teacher => Teacher._id !== action.meta.arg);
-  })
-  
-  
- 
-  .addCase( RemoveTeacher.rejected,(state,action)=>{
-     state.isTeacherremove=false
+    .addCase(SearchTeacher.pending, (state) => {
+      state.issearchdata = true;
+    })
+    .addCase(SearchTeacher.fulfilled, (state, action) => {
+      state.issearchdata = false;
+      state.searchdata = action.payload;
+    })
 
-  })
+    .addCase(SearchTeacher.rejected, (state, action) => {
+      state.issearchdata = false;
+    })
 
+    .addCase(EditTeacher.pending, (state) => {
+      state.iseditedTeacher = true;
+    })
+    .addCase(EditTeacher.fulfilled, (state, action) => {
+      state.iseditedTeacher = false;
+      state.editedTeacher = action.payload;
+    })
 
-
-  .addCase(AddTeacher.pending,(state)=>{
-
-    state.isTeacheradd=true
-  
-  })
-  .addCase(AddTeacher.fulfilled,(state,action)=>{
-   state.isTeacheradd=false
-   state.getallTeachers.push(action.payload);
-  })
-  
- 
-  .addCase(AddTeacher.rejected,(state,action)=>{
-     state.isTeacheradd=false   
-
-  
-  })
-
-
-
-
-  .addCase(  SearchTeacher.pending,(state)=>{
-     state.issearchdata=true
-
-  
-  })
-  .addCase( SearchTeacher.fulfilled,(state,action)=>{
-    state.issearchdata=false 
-    state.searchdata=action.payload
- 
- 
-  })
-  
- 
-  .addCase(   SearchTeacher.rejected,(state,action)=>{
-    state.issearchdata=false
-  
-  })
-
-
-
-
-  .addCase(EditTeacher.pending,(state)=>{
-    state.iseditedTeacher=true
-
- 
- })
- .addCase(EditTeacher.fulfilled,(state,action)=>{
-   state.iseditedTeacher=false 
-   state.editedTeacher=action.payload
-
-
- })
- 
-
- .addCase( EditTeacher.rejected,(state,action)=>{
-   state.iseditedTeacher=false
-  
- })
-
+    .addCase(EditTeacher.rejected, (state, action) => {
+      state.iseditedTeacher = false;
+    })
+    .addCase(editTeacherProfile.pending, (state) => {
+      state.iseditedTeacher = true;
+    })
+    .addCase(editTeacherProfile.fulfilled, (state, action) => {
+      state.iseditedTeacher = false;
+      state.editedTeacher = action.payload;
+    })
+    .addCase(editTeacherProfile.rejected, (state, action) => {
+      state.iseditedTeacher = false;
+    });
 
 
 
