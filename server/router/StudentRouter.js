@@ -8,7 +8,8 @@ const {
   UpdateProfile,
   DeleteProfile,
   GetAcadamicRecords,
-  getallStudents
+  getallStudents,
+  EditProfile
 
 } = require("../controller/StudentController");
 
@@ -22,6 +23,7 @@ router.post(
 router.get("/getallStudentprofile",getallStudents)
 
 router.delete("/profile/:userId", DeleteProfile);
+router.put("/updateProfile/:StudentId", EditProfile);
 
 router.get("/academic-records", GetAcadamicRecords);
 

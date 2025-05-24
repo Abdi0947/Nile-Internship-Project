@@ -37,23 +37,26 @@ const TeacherSchema = new mongoose.Schema(
     profileImage: {
       type: String,
     },
-    subjects: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Subject",
-      },
-    ],
+    qualification: {
+      type: String,
+    },
+
+    experience: {
+      type: Number,
+    },
+
+    subjects: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Subject",
+    },
+    classId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Class",
+    },
     attendance: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "TeacherAttendance",
-      },
-    ],
-
-    assignedClasses: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Class",
       },
     ],
   },

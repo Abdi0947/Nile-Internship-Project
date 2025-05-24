@@ -2,7 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import TopNavbar from "../components/Topnavbar";
-import { fetchAllStudents, calculateStudentStats } from "../features/Student";
+import {
+  fetchAllStudents,
+  calculateStudentStats,
+  addStudent,
+  removeStudent,
+  updateStudent,
+} from "../features/Student";
 import {
   AddTeacher,
   gettingallTeachers,
@@ -36,11 +42,12 @@ import {
 } from "react-icons/fi";
 import ProfilePicture from "../components/ProfilePicture";
 import { toast } from "react-hot-toast";
-import axios from "axios";
+import { getAllClasses } from "../features/Class.js";
 
 function AdminDashboard() {
   const dispatch = useDispatch();
   const { students, studentStats } = useSelector((state) => state.Student);
+  const { classes } = useSelector((state) => state.Class);
   const { getallTeachers } = useSelector((state) => state.Teacher);
   console.log(getallTeachers);
   const { fees } = useSelector((state) => state.Fee);
@@ -72,7 +79,20 @@ function AdminDashboard() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [editingTeacher, setEditingTeacher] = useState(null);
+  const [editingTeacher, setEditingTeacher] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    subject: "",
+    subjects: "",
+    address: "",
+    gender: "",
+    classId: "",
+    qualification: "",
+    experience: "",
+    assignedClasses: [],
+  });
   const [viewingTeacher, setViewingTeacher] = useState(null);
   const [isAddStudentModalOpen, setIsAddStudentModalOpen] = useState(false);
   const [isViewStudentModalOpen, setIsViewStudentModalOpen] = useState(false);
@@ -107,7 +127,6 @@ function AdminDashboard() {
     { value: "", label: "Select Gender" },
     { value: "male", label: "Male" },
     { value: "female", label: "Female" },
-    { value: "other", label: "Other" },
   ];
 
   const gradeOptions = [
@@ -151,53 +170,111 @@ function AdminDashboard() {
 
   // Add available classes data
   const availableClasses = [
+    { id: "", name: "Select Class" },
     {
       id: "c1",
       name: "Class 10 - Mathematics",
+      ClassName: "Grade 10",
       schedule: "MWF 9:00 AM",
-      subject: "Mathematics",
+      subject: "MATHEMATICS10",
     },
     {
       id: "c2",
       name: "Class 11 - Mathematics",
+      ClassName: "Grade 11",
       schedule: "TTh 11:00 AM",
-      subject: "Mathematics",
+      subject: "MATHEMATICS11",
     },
     {
       id: "c3",
       name: "Class 10 - Physics",
+      ClassName: "Grade 10",
       schedule: "MWF 10:00 AM",
-      subject: "Physics",
+      subject: "PHYSICS10",
     },
     {
       id: "c4",
       name: "Class 12 - Physics",
+      ClassName: "Grade 12",
       schedule: "TTh 2:00 PM",
-      subject: "Physics",
+      subject: "PHYSICS12",
     },
     {
       id: "c5",
       name: "Class 11 - Chemistry",
+      ClassName: "Grade 11",
       schedule: "MWF 1:00 PM",
-      subject: "Chemistry",
+      subject: "CHEMISTRY11",
     },
     {
       id: "c6",
       name: "Class 12 - Chemistry",
+      ClassName: "Grade 12",
       schedule: "TTh 3:00 PM",
-      subject: "Chemistry",
+      subject: "CHEMISTRY11",
     },
     {
       id: "c7",
       name: "Class 10 - Biology",
+      ClassName: "Grade 10",
       schedule: "MWF 11:00 AM",
-      subject: "Biology",
+      subject: "BIOLOGY10",
     },
     {
       id: "c8",
       name: "Class 11 - Biology",
+      ClassName: "Grade 11",
       schedule: "TTh 1:00 PM",
-      subject: "Biology",
+      subject: "BIOLOGY11",
+    },
+    {
+      id: "c9",
+      name: "Class 10 - English",
+      ClassName: "Grade 10",
+      schedule: "TTh 1:00 PM",
+      subject: "ENGLISH10",
+    },
+    {
+      id: "c10",
+      name: "Class 11 - English",
+      ClassName: "Grade 11",
+      schedule: "TTh 1:00 PM",
+      subject: "ENGLISH11",
+    },
+    {
+      id: "c11",
+      name: "Class 12 - English",
+      ClassName: "Grade 12",
+      schedule: "TTh 1:00 PM",
+      subject: "ENGLISH12",
+    },
+    {
+      id: "c12",
+      name: "Class 12 - Biology",
+      ClassName: "Grade 12",
+      schedule: "TTh 1:00 PM",
+      subject: "BIOLOGY12",
+    },
+    {
+      id: "c13",
+      name: "Class 11 - Physics",
+      ClassName: "Grade 1a",
+      schedule: "TTh 1:00 PM",
+      subject: "PHYSICS11",
+    },
+    {
+      id: "c14",
+      name: "Class 12 - Mathematics",
+      ClassName: "Grade 12",
+      schedule: "TTh 1:00 PM",
+      subject: "MATHEMATICS12",
+    },
+    {
+      id: "c15",
+      name: "Class 10 - Chemistry",
+      ClassName: "Grade 1a",
+      schedule: "TTh 1:00 PM",
+      subject: "CHEMISTRY10",
     },
   ];
 
@@ -219,8 +296,8 @@ function AdminDashboard() {
   };
 
   const handleAssignClasses = (teacher) => {
-    setSelectedTeacher(availableClasses);
-    setTempAssignedClasses(teacher.assignedClasses);
+    setSelectedTeacher(teacher);
+    setTempAssignedClasses(teacher);
     setIsAssignModalOpen(true);
   };
 
@@ -241,10 +318,10 @@ function AdminDashboard() {
   };
 
   // Filter available classes based on selected teacher's subject
-  const getFilteredClasses = () => {
-    if (!selectedTeacher) return [];
+  const getFilteredClasses = (subject) => {
+    if (!subject) return [];
     return availableClasses.filter(
-      (cls) => cls.subject === selectedTeacher.subject
+      (cls) => cls.subject.toLowerCase() === subject.toLowerCase()
     );
   };
 
@@ -254,13 +331,37 @@ function AdminDashboard() {
     dispatch(fetchAllTimetables());
     dispatch(fetchNotifications());
     dispatch(gettingallTeachers());
-  }, [dispatch]);
+    dispatch(getAllClasses());
+  }, [dispatch, viewingStudent]);
+
+  console.log(classes);
 
   useEffect(() => {
     if (students.length > 0) {
       dispatch(calculateStudentStats());
     }
   }, [students, dispatch]);
+
+  useEffect(() => {
+    if (
+      !editingTeacher?.subject &&
+      editingTeacher?.subjects &&
+      editingTeacher?.classId
+    ) {
+      const match = availableClasses.find(
+        (cl) =>
+          cl.subject === editingTeacher.subjects.SubjectName &&
+          cl.ClassName === editingTeacher.classId.ClassName
+      );
+
+      if (match) {
+        setEditingTeacher((prev) => ({
+          ...prev,
+          subject: match.id,
+        }));
+      }
+    }
+  }, [editingTeacher?.subjects, editingTeacher?.classId, availableClasses]);
 
   // Calculate fees stats
   const totalFees = fees?.reduce((sum, fee) => sum + fee.amount, 0) || 0;
@@ -334,41 +435,47 @@ function AdminDashboard() {
   const handleAddTeacher = async (e) => {
     e.preventDefault();
     try {
+      console.log(newTeacher.subject);
+      const subjecClassData = availableClasses.filter(
+        (cl) => cl.id === newTeacher.subject
+      )[0];
       await new Promise((resolve) => setTimeout(resolve, 1000));
       const teacherData = {
         Firstname: `${newTeacher.firstName}`,
         Lastname: `${newTeacher.lastName}`,
         email: newTeacher.email,
         phone: newTeacher.phone,
-        subject: newTeacher.subject,
+        subjects: subjecClassData.subject,
         address: newTeacher.address,
         dateOfBirth: newTeacher.birthdate,
         gender: newTeacher.gender,
         qualification: newTeacher.qualification,
         status: "Active",
         joinDate: new Date().toISOString(),
-        assignedClasses: newTeacher.assignedClasses,
+        Classes: subjecClassData.ClassName,
+        experience: newTeacher.experience,
       };
       dispatch(AddTeacher(teacherData))
         .unwrap()
         .then(() => {
           setIsAddTeacherModalOpen(false);
           dispatch(gettingallTeachers());
+          dispatch(getAllClasses());
           toast.success("Teacher added successfully!");
+          setNewTeacher({
+            firstName: "",
+            lastName: "",
+            email: "",
+            phone: "",
+            subject: "",
+            address: "",
+            birthdate: "",
+            gender: "",
+            qualification: "",
+            experience: "",
+            assignedClasses: [],
+          });
         });
-      setNewTeacher({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-        subject: "",
-        address: "",
-        birthdate: "",
-        gender: "",
-        qualification: "",
-        experience: "",
-        assignedClasses: [],
-      });
     } catch (error) {
       console.log(error);
       toast.error("Failed to add teacher. Please try again.");
@@ -394,8 +501,12 @@ function AdminDashboard() {
     e.preventDefault();
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      const id = editingTeacher._id
-      console.log(editingTeacher.firstName)
+      const id = editingTeacher._id;
+
+      const subjecClassData = availableClasses.filter(
+        (cl) => cl.id === editingTeacher.subject
+      )[0];
+      console.log(editingTeacher.subject);
       const updatedData = {
         firstName: editingTeacher.firstName,
         lastName: editingTeacher.lastName,
@@ -403,11 +514,13 @@ function AdminDashboard() {
         phone: editingTeacher.phone,
         Address: editingTeacher.address,
         Dateofbirth: editingTeacher.birthdate,
+        subjects: subjecClassData.subject,
         gender: editingTeacher.gender,
         qualification: editingTeacher.qualification,
+        experience: editingTeacher.experience,
         status: "Active",
         joinDate: new Date().toISOString(),
-        assignedClasses: editingTeacher.assignedClasses,
+        classId: subjecClassData.ClassName,
       };
       dispatch(EditTeacher({ id, updatedData }))
         .unwrap()
@@ -418,10 +531,9 @@ function AdminDashboard() {
           toast.success("Teacher added successfully!");
         });
 
-      
       toast.success("Teacher updated successfully!");
     } catch (error) {
-      console.log(error)
+      console.log(error);
       toast.error("Failed to update teacher. Please try again.");
     }
   };
@@ -459,33 +571,43 @@ function AdminDashboard() {
   const handleAddStudent = async (e) => {
     e.preventDefault();
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      const student = {
-        id: students.length + 1,
-        ...newStudent,
-        status: "Active",
-        enrollmentDate: new Date().toISOString(),
-      };
-
-      dispatch({ type: "student/addStudent", payload: student });
-      setIsAddStudentModalOpen(false);
-      setNewStudent({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-        gender: "",
-        address: "",
-        grade: "",
-        parentName: "",
-        parentPhone: "",
+      console.log(newStudent.birthdate);
+      const studentData = {
+        firstName: newStudent.firstName,
+        lastName: newStudent.lastName,
+        email: newStudent.email,
+        phone: newStudent.phone,
+        gender: newStudent.gender,
+        Dateofbirth: newStudent.birthdate,
+        address: newStudent.address,
+        grade: newStudent.grade,
+        parentName: newStudent.parentName,
+        parentPhone: newStudent.parentPhone,
         enrollmentDate: new Date().toISOString().split("T")[0],
         status: "Active",
-      });
-
-      toast.success("Student added successfully!");
+      };
+      dispatch(addStudent(studentData))
+        .unwrap()
+        .then(() => {
+          setIsAddStudentModalOpen(false);
+          dispatch(fetchAllStudents());
+          toast.success("Student added successfully!");
+          setNewStudent({
+            firstName: "",
+            lastName: "",
+            email: "",
+            phone: "",
+            gender: "",
+            address: "",
+            grade: "",
+            parentName: "",
+            parentPhone: "",
+            enrollmentDate: new Date().toISOString().split("T")[0],
+            status: "Active",
+          });
+        });
     } catch (error) {
+      console.log(error);
       toast.error("Failed to add student. Please try again.");
     }
   };
@@ -493,36 +615,44 @@ function AdminDashboard() {
   const handleUpdateStudent = async (e) => {
     e.preventDefault();
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      dispatch({
-        type: "student/updateStudent",
-        payload: {
-          id: editingStudent.id,
-          ...editingStudent,
-        },
-      });
-
+      const id = editingStudent?._id;
+      console.log(editingStudent?.Dateofbirth);
+      const updatedData = {
+        firstName: editingStudent.firstName,
+        lastName: editingStudent.lastName,
+        email: editingStudent.email,
+        phone: editingStudent.phone,
+        gender: editingStudent.gender,
+        Dateofbirth: editingStudent.Dateofbirth,
+        address: editingStudent.address,
+        classId: editingStudent.classId,
+        parentName: editingStudent.parentName,
+        parentPhone: editingStudent.parentPhone,
+        enrollmentDate: new Date().toISOString().split("T")[0],
+        status: "Active",
+      };
+      dispatch(updateStudent({ id, updatedData }))
+        .unwrap()
+        .then(() => {
+          setIsAddStudentModalOpen(false);
+          dispatch(fetchAllStudents());
+          toast.success("Student added successfully!");
+        });
       setIsEditStudentModalOpen(false);
       setEditingStudent(null);
       toast.success("Student updated successfully!");
     } catch (error) {
+      console.log(error);
       toast.error("Failed to update student. Please try again.");
     }
   };
 
-  const handleConfirmDeleteStudent = async () => {
+  const handleConfirmDeleteStudent = async (student) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      dispatch({
-        type: "student/deleteStudent",
-        payload: viewingStudent.id,
-      });
-
+      dispatch(removeStudent(student._id));
       setIsDeleteStudentModalOpen(false);
       setViewingStudent(null);
-      toast.success("Student deleted successfully!");
+      toast.success("student deleted successfully!");
     } catch (error) {
       console.log(error);
       toast.error("Failed to delete student. Please try again.");
@@ -926,49 +1056,54 @@ function AdminDashboard() {
             <div className="p-6">
               {students.length > 0 ? (
                 <div className="divide-y divide-gray-100">
-                  {students.slice(0, 5).map((student, index) => (
-                    <motion.div
-                      key={student._id}
-                      className="flex items-center py-4 first:pt-0 last:pb-0"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      whileHover={{
-                        backgroundColor: "rgba(243, 244, 246, 0.6)",
-                      }}
-                    >
-                      <div className="mr-4 flex-shrink-0 w-12 h-12 border-2 border-gray-200 rounded-full overflow-hidden">
-                        <ProfilePicture
-                          profilePic={student.profileImage}
-                          firstName={student.firstName}
-                          size="small"
-                          editable={false}
-                        />
-                      </div>
-                      <div className="flex-grow">
-                        <h4 className="font-medium text-black">
-                          {student.firstName} {student.lastName}
-                        </h4>
-                        <div className="flex items-center gap-4">
-                          <p className="text-sm text-black">{student.email}</p>
-                          <span
-                            className={`text-xs px-2 py-1 rounded-full ${
-                              student.status === "active"
-                                ? "bg-green-100"
-                                : student.status === "suspended"
-                                ? "bg-red-100"
-                                : "bg-blue-100"
-                            }`}
-                          >
-                            {student.status || "Active"}
-                          </span>
+                  {Array.isArray(students) &&
+                    students.slice(0, 5).map((student, index) => (
+                      <motion.div
+                        key={student?._id}
+                        className="flex items-center py-4 first:pt-0 last:pb-0"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        whileHover={{
+                          backgroundColor: "rgba(243, 244, 246, 0.6)",
+                        }}
+                      >
+                        <div className="mr-4 flex-shrink-0 w-12 h-12 border-2 border-gray-200 rounded-full overflow-hidden">
+                          <div className="flex-shrink-0 h-10 w-10">
+                            <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                              <span className="text-blue-600 font-medium">
+                                {student?.firstName?.[0] || ""}
+                                {student?.lastName?.[0] || ""}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex-shrink-0">
-                        {/* Details button removed as requested */}
-                      </div>
-                    </motion.div>
-                  ))}
+                        <div className="flex-grow">
+                          <h4 className="font-medium text-black">
+                            {student?.firstName} {student?.lastName}
+                          </h4>
+                          <div className="flex items-center gap-4">
+                            <p className="text-sm text-black">
+                              {student?.email}
+                            </p>
+                            <span
+                              className={`text-xs px-2 py-1 rounded-full ${
+                                student?.status === "active"
+                                  ? "bg-green-100"
+                                  : student?.status === "suspended"
+                                  ? "bg-red-100"
+                                  : "bg-blue-100"
+                              }`}
+                            >
+                              {student?.status || "Active"}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex-shrink-0">
+                          {/* Details button removed as requested */}
+                        </div>
+                      </motion.div>
+                    ))}
                 </div>
               ) : (
                 <div className="text-center py-8">
@@ -1151,7 +1286,7 @@ function AdminDashboard() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
-                            {teacher?.subject}
+                            {teacher?.subjects?.SubjectName}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -1161,17 +1296,14 @@ function AdminDashboard() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="space-y-1">
-                            {Array.isArray(teacher?.assignedClasses) &&
-                              teacher.assignedClasses.map((cls) => (
-                                <div key={cls.id} className="text-sm">
-                                  <span className="text-gray-900">
-                                    {cls.name}
-                                  </span>
-                                  <span className="text-gray-500 text-xs block">
-                                    {cls.schedule}
-                                  </span>
-                                </div>
-                              ))}
+                            <div className="text-sm">
+                              <span className="text-gray-900">
+                                {teacher?.classId?.ClassName}
+                              </span>
+                              <span className="text-gray-500 text-xs block">
+                                {teacher?.subjects?.SubjectName}
+                              </span>
+                            </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -1262,83 +1394,84 @@ function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {students.map((student) => (
-                    <tr key={student.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10">
-                            <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                              <span className="text-blue-600 font-medium">
-                                {student.firstName[0]}
-                                {student.lastName[0]}
-                              </span>
+                  {Array.isArray(students) &&
+                    students.map((student) => (
+                      <tr key={student?._id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 h-10 w-10">
+                              <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                <span className="text-blue-600 font-medium">
+                                  {student?.firstName[0] || ""}
+                                  {student?.lastName[0] || ""}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">
+                                {student?.firstName} {student?.lastName}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {student?.email}
+                              </div>
                             </div>
                           </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {student.firstName} {student.lastName}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {student?.classId?.ClassName || ""}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {student?.phone}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 capitalize">
+                            {student?.gender}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm">
+                            <div className="text-gray-900">
+                              {student?.parentName}
                             </div>
-                            <div className="text-sm text-gray-500">
-                              {student.email}
+                            <div className="text-gray-500">
+                              {student?.parentPhone}
                             </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {student.grade}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {student.phone}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 capitalize">
-                          {student.gender}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm">
-                          <div className="text-gray-900">
-                            {student.parentName}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() => handleViewStudent(student)}
+                              className="text-blue-600 hover:text-blue-900 flex items-center px-2 py-1 rounded hover:bg-blue-50"
+                              title="View Details"
+                            >
+                              <FiUser className="w-4 h-4 mr-1" />
+                              View
+                            </button>
+                            <button
+                              onClick={() => handleEditStudent(student)}
+                              className="text-indigo-600 hover:text-indigo-900 flex items-center px-2 py-1 rounded hover:bg-indigo-50"
+                              title="Edit Student"
+                            >
+                              <FiActivity className="w-4 h-4 mr-1" />
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteStudent(student)}
+                              className="text-red-600 hover:text-red-900 flex items-center px-2 py-1 rounded hover:bg-red-50"
+                              title="Delete Student"
+                            >
+                              <FiXCircle className="w-4 h-4 mr-1" />
+                              Delete
+                            </button>
                           </div>
-                          <div className="text-gray-500">
-                            {student.parentPhone}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex items-center space-x-2">
-                          <button
-                            onClick={() => handleViewStudent(student)}
-                            className="text-blue-600 hover:text-blue-900 flex items-center px-2 py-1 rounded hover:bg-blue-50"
-                            title="View Details"
-                          >
-                            <FiUser className="w-4 h-4 mr-1" />
-                            View
-                          </button>
-                          <button
-                            onClick={() => handleEditStudent(student)}
-                            className="text-indigo-600 hover:text-indigo-900 flex items-center px-2 py-1 rounded hover:bg-indigo-50"
-                            title="Edit Student"
-                          >
-                            <FiActivity className="w-4 h-4 mr-1" />
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteStudent(student)}
-                            className="text-red-600 hover:text-red-900 flex items-center px-2 py-1 rounded hover:bg-red-50"
-                            title="Delete Student"
-                          >
-                            <FiXCircle className="w-4 h-4 mr-1" />
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>
@@ -1431,6 +1564,8 @@ function AdminDashboard() {
                     </label>
                     <input
                       type="tel"
+                      pattern="^(\+251|0)?[1-9][0-9]{8}$"
+                      placeholder="e.g., 0912345678 or +251912345678"
                       value={newTeacher.phone}
                       onChange={(e) =>
                         setNewTeacher({ ...newTeacher, phone: e.target.value })
@@ -1439,12 +1574,12 @@ function AdminDashboard() {
                       required
                     />
                   </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Subject
                     </label>
-                    <input
-                      type="text"
+                    <select
                       value={newTeacher.subject}
                       onChange={(e) => {
                         setNewTeacher({
@@ -1455,7 +1590,13 @@ function AdminDashboard() {
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required
-                    />
+                    >
+                      {availableClasses.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1538,7 +1679,7 @@ function AdminDashboard() {
                       Experience
                     </label>
                     <input
-                      type="text"
+                      type="number"
                       value={newTeacher.experience}
                       onChange={(e) =>
                         setNewTeacher({
@@ -1550,105 +1691,6 @@ function AdminDashboard() {
                       placeholder="e.g., 5 years"
                       required
                     />
-                  </div>
-                  {/* Class Assignment Section */}
-                  <div className="md:col-span-2">
-                    <div className="border rounded-lg p-4 bg-gray-50">
-                      <h3 className="text-lg font-medium text-gray-900 mb-4">
-                        Assign Classes
-                      </h3>
-
-                      {newTeacher.subject ? (
-                        <div className="space-y-4">
-                          <p className="text-sm text-gray-600">
-                            Available classes for {newTeacher.subject}:
-                          </p>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {getFilteredClasses().map((cls) => (
-                              <div
-                                key={cls.id}
-                                className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                                  newTeacher.assignedClasses.some(
-                                    (ac) => ac.id === cls.id
-                                  )
-                                    ? "bg-blue-50 border-blue-200"
-                                    : "bg-white border-gray-200 hover:bg-gray-50"
-                                }`}
-                                onClick={() => handleClassAssignment(cls.id)}
-                              >
-                                <div className="flex items-center justify-between">
-                                  <div>
-                                    <h4 className="font-medium text-gray-900">
-                                      {cls.name}
-                                    </h4>
-                                    <p className="text-sm text-gray-500">
-                                      {cls.schedule}
-                                    </p>
-                                  </div>
-                                  <div
-                                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                                      newTeacher.assignedClasses.some(
-                                        (ac) => ac.id === cls.id
-                                      )
-                                        ? "bg-blue-500 border-blue-500"
-                                        : "border-gray-300"
-                                    }`}
-                                  >
-                                    {newTeacher.assignedClasses.some(
-                                      (ac) => ac.id === cls.id
-                                    ) && (
-                                      <FiCheckCircle className="w-4 h-4 text-white" />
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                          {getFilteredClasses().length === 0 && (
-                            <p className="text-sm text-gray-500 italic">
-                              No classes available for {newTeacher.subject}
-                            </p>
-                          )}
-                        </div>
-                      ) : (
-                        <p className="text-sm text-gray-500 italic">
-                          Please select a subject to view available classes
-                        </p>
-                      )}
-
-                      {newTeacher.assignedClasses.length > 0 && (
-                        <div className="mt-4 pt-4 border-t border-gray-200">
-                          <h4 className="text-sm font-medium text-gray-900 mb-2">
-                            Selected Classes (
-                            {newTeacher.assignedClasses.length})
-                          </h4>
-                          <div className="space-y-2">
-                            {newTeacher.assignedClasses.map((cls) => (
-                              <div
-                                key={cls.id}
-                                className="flex items-center justify-between p-2 bg-white rounded border border-gray-200"
-                              >
-                                <div>
-                                  <p className="text-sm font-medium text-gray-900">
-                                    {cls.name}
-                                  </p>
-                                  <p className="text-xs text-gray-500">
-                                    {cls.schedule}
-                                  </p>
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={() => handleClassAssignment(cls.id)}
-                                  className="text-red-600 hover:text-red-800"
-                                >
-                                  <FiX className="w-4 h-4" />
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
                   </div>
                 </div>
 
@@ -1721,7 +1763,7 @@ function AdminDashboard() {
                         Email
                       </h3>
                       <p className="mt-1 text-gray-900">
-                        {viewingTeacher.email}
+                        {viewingTeacher?.email}
                       </p>
                     </div>
                     <div>
@@ -1729,7 +1771,7 @@ function AdminDashboard() {
                         Phone
                       </h3>
                       <p className="mt-1 text-gray-900">
-                        {viewingTeacher.phone}
+                        {viewingTeacher?.phone}
                       </p>
                     </div>
                     <div>
@@ -1737,7 +1779,7 @@ function AdminDashboard() {
                         Subject
                       </h3>
                       <p className="mt-1 text-gray-900">
-                        {viewingTeacher.subject}
+                        {viewingTeacher?.subjects?.SubjectName}
                       </p>
                     </div>
                   </div>
@@ -1747,7 +1789,7 @@ function AdminDashboard() {
                         Gender
                       </h3>
                       <p className="mt-1 text-gray-900 capitalize">
-                        {viewingTeacher.gender}
+                        {viewingTeacher?.gender}
                       </p>
                     </div>
                     <div>
@@ -1763,7 +1805,7 @@ function AdminDashboard() {
                         Qualification
                       </h3>
                       <p className="mt-1 text-gray-900 capitalize">
-                        {viewingTeacher.qualification}
+                        {viewingTeacher?.qualification}
                       </p>
                     </div>
                     <div>
@@ -1771,7 +1813,7 @@ function AdminDashboard() {
                         Experience
                       </h3>
                       <p className="mt-1 text-gray-900">
-                        {viewingTeacher.experience}
+                        {viewingTeacher?.experience} year
                       </p>
                     </div>
                   </div>
@@ -1782,20 +1824,14 @@ function AdminDashboard() {
                     Assigned Classes
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {viewingTeacher.assignedClasses.map((cls) => (
-                      <div
-                        key={cls.id}
-                        className="p-3 bg-gray-50 rounded-lg border border-gray-200"
-                      >
-                        <p className="font-medium text-gray-900">{cls.name}</p>
-                        <p className="text-sm text-gray-500">{cls.schedule}</p>
-                      </div>
-                    ))}
-                    {viewingTeacher.assignedClasses.length === 0 && (
-                      <p className="text-sm text-gray-500 italic">
-                        No classes assigned
+                    <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <p className="font-medium text-gray-900">
+                        {viewingTeacher?.classId?.ClassName}
                       </p>
-                    )}
+                      <p className="text-sm text-gray-500">
+                        {viewingTeacher?.subjects?.SubjectName}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
@@ -1857,7 +1893,7 @@ function AdminDashboard() {
                     </label>
                     <input
                       type="text"
-                      value={editingTeacher.firstName}
+                      value={editingTeacher?.firstName}
                       onChange={(e) =>
                         setEditingTeacher({
                           ...editingTeacher,
@@ -1874,7 +1910,7 @@ function AdminDashboard() {
                     </label>
                     <input
                       type="text"
-                      value={editingTeacher.lastName}
+                      value={editingTeacher?.lastName}
                       onChange={(e) =>
                         setEditingTeacher({
                           ...editingTeacher,
@@ -1891,7 +1927,7 @@ function AdminDashboard() {
                     </label>
                     <input
                       type="email"
-                      value={editingTeacher.email}
+                      value={editingTeacher?.email}
                       onChange={(e) =>
                         setEditingTeacher({
                           ...editingTeacher,
@@ -1908,7 +1944,8 @@ function AdminDashboard() {
                     </label>
                     <input
                       type="tel"
-                      value={editingTeacher.phone}
+                      pattern="^(\+251|0)?[1-9][0-9]{8}$"
+                      value={editingTeacher?.phone}
                       onChange={(e) =>
                         setEditingTeacher({
                           ...editingTeacher,
@@ -1919,23 +1956,27 @@ function AdminDashboard() {
                       required
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Subject
-                    </label>
-                    <input
-                      type="text"
-                      value={editingTeacher.subject}
-                      onChange={(e) =>
-                        setEditingTeacher({
-                          ...editingTeacher,
-                          subject: e.target.value,
-                        })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      required
-                    />
-                  </div>
+                  <select
+                    value={editingTeacher.subject || ""}
+                    onChange={(e) =>
+                      setEditingTeacher({
+                        ...editingTeacher,
+                        subject: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  >
+                    <option value="" disabled>
+                      Select subject
+                    </option>
+                    {availableClasses.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.name}
+                      </option>
+                    ))}
+                  </select>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Gender
@@ -2002,7 +2043,7 @@ function AdminDashboard() {
                       Experience
                     </label>
                     <input
-                      type="text"
+                      type="number"
                       value={editingTeacher.experience}
                       onChange={(e) =>
                         setEditingTeacher({
@@ -2112,7 +2153,7 @@ function AdminDashboard() {
               <div className="p-6 border-b border-gray-200">
                 <div className="flex justify-between items-center">
                   <h2 className="text-xl font-semibold text-gray-800">
-                    Assign Classes to {selectedTeacher.name}
+                    Assign Classes to {selectedTeacher?.firstName}
                   </h2>
                   <button
                     onClick={() => {
@@ -2126,7 +2167,7 @@ function AdminDashboard() {
                   </button>
                 </div>
                 <p className="text-sm text-gray-600 mt-1">
-                  Subject: {selectedTeacher.subject}
+                  Subject: {selectedTeacher?.subjects?.SubjectName}
                 </p>
               </div>
 
@@ -2138,53 +2179,26 @@ function AdminDashboard() {
                       Available Classes
                     </h3>
                     <div className="space-y-2">
-                      {getFilteredClasses().map((cls) => (
-                        <div
-                          key={cls.id}
-                          className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                            tempAssignedClasses.some((ac) => ac.id === cls.id)
-                              ? "bg-blue-50 border-blue-200"
-                              : "bg-white border-gray-200 hover:bg-gray-50"
-                          }`}
-                          onClick={() => handleClassAssignment(cls.id)}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h4 className="font-medium text-gray-900">
-                                {cls.name}
-                              </h4>
-                              <p className="text-sm text-gray-500">
-                                {cls.schedule}
-                              </p>
-                            </div>
-                            <div
-                              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                                tempAssignedClasses.some(
-                                  (ac) => ac.id === cls.id
-                                )
-                                  ? "bg-blue-500 border-blue-500"
-                                  : "border-gray-300"
-                              }`}
-                            >
-                              {tempAssignedClasses.some(
-                                (ac) => ac.id === cls.id
-                              ) && (
-                                <FiCheckCircle className="w-4 h-4 text-white" />
-                              )}
-                            </div>
+                      <div
+                        className="p-3 rounded-lg border cursor-pointer transition-colors
+                              bg-blue-50 border-blue-200"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-medium text-gray-900">
+                              {selectedTeacher?.classId?.ClassName}
+                            </h4>
+                            <p className="text-sm text-gray-500">
+                              {selectedTeacher?.subjects?.SubjectName}
+                            </p>
                           </div>
                         </div>
-                      ))}
-                      {getFilteredClasses().length === 0 && (
-                        <p className="text-sm text-gray-500 italic">
-                          No classes available for {selectedTeacher.subject}
-                        </p>
-                      )}
+                      </div>
                     </div>
                   </div>
 
                   {/* Selected Classes */}
-                  <div className="space-y-4">
+                  {/* <div className="space-y-4">
                     <h3 className="text-lg font-medium text-gray-900">
                       Selected Classes ({tempAssignedClasses.length})
                     </h3>
@@ -2217,28 +2231,7 @@ function AdminDashboard() {
                         </p>
                       )}
                     </div>
-                  </div>
-                </div>
-
-                <div className="mt-6 flex justify-end space-x-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsAssignModalOpen(false);
-                      setSelectedTeacher(null);
-                      setTempAssignedClasses([]);
-                    }}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSaveAssignments}
-                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
-                    Save Assignments
-                  </button>
+                  </div> */}
                 </div>
               </div>
             </motion.div>
@@ -2341,7 +2334,7 @@ function AdminDashboard() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Grade
+                      Class
                     </label>
                     <select
                       value={newStudent.grade}
@@ -2351,9 +2344,10 @@ function AdminDashboard() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required
                     >
-                      {gradeOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
+                      <option value="">Select Class</option>
+                      {classes?.map((option) => (
+                        <option key={option?._id} value={option?._id}>
+                          {option?.ClassName}
                         </option>
                       ))}
                     </select>
@@ -2376,6 +2370,23 @@ function AdminDashboard() {
                         </option>
                       ))}
                     </select>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Birthdate
+                    </label>
+                    <input
+                      type="date"
+                      value={newStudent.birthdate}
+                      onChange={(e) =>
+                        setNewStudent({
+                          ...newStudent,
+                          birthdate: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -2677,26 +2688,32 @@ function AdminDashboard() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Grade
+                      Class
                     </label>
                     <select
-                      value={editingStudent.grade}
+                      value={
+                        editingStudent?.classId?._id ||
+                        editingStudent?.classId ||
+                        ""
+                      }
                       onChange={(e) =>
                         setEditingStudent({
                           ...editingStudent,
-                          grade: e.target.value,
+                          classId: e.target.value,
                         })
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required
                     >
-                      {gradeOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
+                      <option value="">Select Class</option>
+                      {classes?.map((option) => (
+                        <option key={option?._id} value={option?._id}>
+                          {option?.ClassName}
                         </option>
                       ))}
                     </select>
                   </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Gender
@@ -2719,6 +2736,30 @@ function AdminDashboard() {
                       ))}
                     </select>
                   </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Birthdate
+                    </label>
+                    <input
+                      type="date"
+                      value={
+                        editingStudent?.Dateofbirth
+                          ? new Date(editingStudent.Dateofbirth)
+                              .toISOString()
+                              .split("T")[0]
+                          : ""
+                      }
+                      onChange={(e) =>
+                        setEditingStudent({
+                          ...editingStudent,
+                          Dateofbirth: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Address
@@ -2837,7 +2878,7 @@ function AdminDashboard() {
                   </button>
                   <button
                     type="button"
-                    onClick={handleConfirmDeleteStudent}
+                    onClick={() => handleConfirmDeleteStudent(viewingStudent)}
                     className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                   >
                     Delete

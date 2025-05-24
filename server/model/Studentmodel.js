@@ -22,7 +22,7 @@ const StudentSchema = new mongoose.Schema(
     phone: {
       type: String,
     },
-    Address: {
+    address: {
       type: String,
     },
     Dateofbirth: {
@@ -31,7 +31,13 @@ const StudentSchema = new mongoose.Schema(
     },
     gender: {
       type: String,
-      enum: ["Male", "Female"],
+      enum: ["male", "female"],
+    },
+    parentName: {
+      type: String,
+    },
+    parentPhone: {
+      type: String,
     },
 
     profileImage: {
@@ -45,12 +51,10 @@ const StudentSchema = new mongoose.Schema(
       },
     ],
 
-    grades: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Grade",
-      },
-    ],
+    classId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Class",
+    },
     feeStatus: {
       type: String,
       enum: ["pending", "paid"],
@@ -66,6 +70,6 @@ const StudentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Student= mongoose.model("Student", StudentSchema);
+const Student = mongoose.model("Student", StudentSchema);
 
 module.exports = Student;

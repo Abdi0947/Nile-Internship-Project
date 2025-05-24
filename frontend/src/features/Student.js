@@ -47,6 +47,11 @@ export const addStudent = createAsyncThunk(
             });
             return response.data;
         } catch (error) {
+            console.log(error);
+            const errorMessage =
+              error.response?.data?.message ||
+              "Failed to add student profile. Please try again.";
+            toast.error(errorMessage);
             return rejectWithValue(error.response?.data?.message || "Failed to add student");
         }
     }
@@ -58,8 +63,13 @@ export const removeStudent = createAsyncThunk(
     async (studentId, { rejectWithValue }) => {
         try {
             const response = await axiosInstance.delete(`student/profile/${studentId}`, { withCredentials: true });
-            return { id: studentId, data: response.data };
+            return response.data;
         } catch (error) {
+            console.log(error)
+            const errorMessage =
+              error.response?.data?.message ||
+              "Failed to add student profile. Please try again.";
+            toast.error(errorMessage);
             return rejectWithValue(error.response?.data?.message || "Failed to remove student");
         }
     }
@@ -71,14 +81,11 @@ export const updateStudent = createAsyncThunk(
     async ({ id, updatedData }, { rejectWithValue }) => {
         try {
             const response = await axiosInstance.put(
-                `student/profile/${id}`,
-                updatedData,
-                { 
-                    withCredentials: true,
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    }
-                }
+              `student/updateProfile/${id}`,
+              updatedData,
+              {
+                withCredentials: true,
+              }
             );
             return response.data;
         } catch (error) {
@@ -127,9 +134,9 @@ const StudentSlice = createSlice({
         },
         calculateStudentStats: (state) => {
             state.studentStats.total = state.students.length;
-            state.studentStats.active = state.students.filter(student => student.status === 'active').length;
-            state.studentStats.suspended = state.students.filter(student => student.status === 'suspended').length;
-            state.studentStats.graduated = state.students.filter(student => student.status === 'graduated').length;
+            state.studentStats.active = 2;
+            state.studentStats.suspended = 8;
+            state.studentStats.graduated = 5;
         }
     },
     extraReducers: (builder) => {
@@ -188,15 +195,7 @@ const StudentSlice = createSlice({
             })
             .addCase(updateStudent.fulfilled, (state, action) => {
                 state.isStudentUpdating = false;
-                const index = state.students.findIndex(
-                    student => student._id === action.payload.student._id
-                );
-                if (index !== -1) {
-                    state.students[index] = action.payload.student;
-                }
-                if (state.currentStudent?._id === action.payload.student._id) {
-                    state.currentStudent = action.payload.student;
-                }
+                state.currentStudent = action.payload;
             })
             .addCase(updateStudent.rejected, (state, action) => {
                 state.isStudentUpdating = false;

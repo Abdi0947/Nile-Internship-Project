@@ -10,6 +10,7 @@ const Timetablerouter=require('./router/Timetablerouter')
 const Feerouter=require('./router/Feerouter')
 const Studentrouter=require('./router/StudentRouter')
 const Subjectrouter=require('./router/Subjectrouter')
+const ClassRouter = require('./router/ClassRouter')
 require("dotenv").config();
 const PORT = process.env.PORT || 5003;
 const cookieParser = require("cookie-parser");
@@ -40,6 +41,7 @@ app.use("/api/Timetable",Timetablerouter)
 app.use("/api/Fee",Feerouter)
 app.use("/api/student",Studentrouter)
 app.use("/api/Subject",Subjectrouter)
+app.use("/api/class", ClassRouter)
 
 app.listen(PORT, () => {
   MongoDBconfig();

@@ -32,6 +32,10 @@ export const AddTeacher = createAsyncThunk(
       return response.data;
     } catch (error) {
       console.log(error)
+      const errorMessage =
+        error.response?.data?.error ||
+        "Failed to add Teacher. Please try again.";
+      toast.error(errorMessage);
       return rejectWithValue(
         error.response?.data?.message || "Teacher adding failed"
       );
@@ -47,6 +51,11 @@ export const AddTeacher = createAsyncThunk(
   
       
     } catch (error) {
+      console.log(error)
+      const errorMessage =
+        error.response?.data?.error ||
+        "Failed to add Teacher. Please try again.";
+      toast.error(errorMessage);
       return rejectWithValue(error.response?.data?.message || "Teacher remove failed");
     }
   })
@@ -65,7 +74,7 @@ export const AddTeacher = createAsyncThunk(
       } catch (error) {
         console.log(error);
         const errorMessage =
-          error.response?.data?.message ||
+          error.response?.data?.error ||
           "Failed to update Teacher. Please try again.";
         toast.error(errorMessage);
         return rejectWithValue(errorMessage);
