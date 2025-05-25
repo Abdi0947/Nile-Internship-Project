@@ -36,7 +36,7 @@ const getWelcomeEmailTemplate = (user) => `
             <p>Your account has been successfully created with the following details:</p>
             <ul>
                 <li>Email: ${user.email}</li>
-                <li>Paswword: ${user.password}</li>
+                <li>Password: ${user.password}</li>
                 <li>Role: ${user.role}</li>
                 <li>Account Created: ${new Date().toLocaleDateString()}</li>
             </ul>
@@ -393,4 +393,27 @@ module.exports.searchTeacher = async (req, res) => {
 module.exports.editProfile = async (req, res) => {
   console.log(req.body)
   console.log(req.params.TeacherId);
+  try {
+    const {firstName, lastName, email, phone, address} = req.body;
+    const oldTeacher = await Teacher.findOne({_id: req.params.TeacherId});
+    oldTeacher.firstName = firstName;
+    await oldTeacher.save()
+
+    oldTeacher.lastName = lastName;
+    await oldTeacher.save()
+
+    oldTeacher.email = email;
+    await oldTeacher.save()
+
+    oldTeacher.phone = phone;
+    await oldTeacher.save()
+
+    oldTeacher.Address = address;
+    await oldTeacher.save()
+
+    return res.status(200).json(oldTeacher);
+  } catch (error) {
+    console.error("Update error:", error);
+    res.status(500).json({ message: "Server error while updating teacher" });
+  }
 }
