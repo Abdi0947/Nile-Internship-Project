@@ -54,6 +54,49 @@ const getWelcomeEmailTemplate = (user) => `
 </body>
 </html>
 `;
+const passwordChanged = (user) => `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Changed - Student Management System</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%); padding: 30px; text-align: center; color: white; }
+        .content { padding: 20px; background: #f9fafb; }
+        .button { display: inline-block; padding: 12px 24px; background: #4ade80; color: white; text-decoration: none; border-radius: 5px; }
+        .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Password Changed Successfully</h1>
+        </div>
+        <div class="content">
+            <h2>Hello ${user.firstName} ${user.lastName},</h2>
+            <p>We wanted to let you know that your account password was successfully changed.</p>
+            <p>If you made this change, no further action is needed.</p>
+            <p>If you did <strong>not</strong> make this change, please reset your password immediately or contact support.</p>
+            <ul>
+                <li>Email: ${user.email}</li>
+                <li>Role: ${user.role}</li>
+                <li>Password changed on: ${new Date().toLocaleDateString()}</li>
+            </ul>
+            <p style="text-align: center;">
+                <a href="http://localhost:5173/login" class="button">Login to Your Account</a>
+            </p>
+        </div>
+        <div class="footer">
+            <p>This is an automated message, please do not reply to this email.</p>
+            <p>© ${new Date().getFullYear()} Student Management System. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+`;
 
 module.exports.createTeacherprofile = async (req, res) => {
   console.log(req.body)
@@ -441,6 +484,14 @@ module.exports.editPassword = async (req, res) => {
 
     oldPassword.password = confirmPassword
     await oldPassword.save();
+
+    await sendEmail({
+      email: oldPassword.email,
+      subject: "Your Password Has Been Changed 🔐",
+      message: `Hello ${oldPassword.firstName}, your password was successfully updated. If you did not request this change, please contact support immediately.`,
+      html: passwordChanged(oldPassword),
+    });
+    
 
     return res.status(200).json(oldPassword);
   } catch (error) {
