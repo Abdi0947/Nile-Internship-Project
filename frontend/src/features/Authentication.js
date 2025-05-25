@@ -96,35 +96,41 @@ export const logout = createAsyncThunk(
 );
 
 export const updateUserInfo = createAsyncThunk(
-  'auth/updateUserInfo',
+  "auth/updateUserInfo",
   async (userData, { rejectWithValue, getState }) => {
     try {
+      const state = getState();
       const storedUser = getSafeUserData();
-      const token = getState().auth.token;
-      const rememberMe = getState().auth.rememberMe;
+      const token = state.auth.token;
+      const rememberMe = state.auth.rememberMe;
 
-      if (!storedUser || !token) {
-        return rejectWithValue('User not authenticated. Please log in again.');
+      // if (!storedUser || !token) {
+      //   return rejectWithValue("User not authenticated. Please log in again.");
+      // }
+
+      // Store profile image in localStorage if it’s a base64 image
+      if (userData.ProfilePic && userData.ProfilePic.startsWith("data:image")) {
+        localStorage.setItem("profileImage", userData.ProfilePic);
       }
 
-      // If this update includes a profile picture, save it to localStorage as well
-      if (userData.ProfilePic && userData.ProfilePic.startsWith('data:image')) {
-        // Store profile image in localStorage to ensure persistence
-        localStorage.setItem('profileImage', userData.ProfilePic);
-        console.log('Saved profile image to localStorage');
+      // Determine endpoint based on role
+      const userRole = storedUser.role;
+      let endpoint;
+      if (userRole === "teacher") {
+        endpoint = `teacher/editTeacherProfile/${storedUser.id || storedUser._id}`;
+      } else {
+        endpoint = `auth/updateUserInfo`;
       }
 
-      const response = await axiosInstance.put(
-        'auth/updateUserInfo',
-        userData,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (userData.ProfilePic) {
+      const response = await axiosInstance.put(endpoint, userData, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // If profile image update is needed
+      if (userData.ProfilePic && userRole !== "teacher") {
         await axiosInstance.put(
           "auth/updateProfile",
           { ProfilePic: userData.ProfilePic },
@@ -137,25 +143,20 @@ export const updateUserInfo = createAsyncThunk(
         );
       }
 
-      const updatedData = response.data;
+      const updatedUser = response.data?.updatedUser || response.data;
 
-      if (updatedData && updatedData.updatedUser) {
-        // If this update was for a profile image, ensure it's saved with the user data
-        if (userData.ProfilePic) {
-          updatedData.updatedUser.ProfilePic = userData.ProfilePic;
-        }
-        
-        // Update storage with the complete user data
-        storeUserData(updatedData.updatedUser, rememberMe);
-        
-        return updatedData.updatedUser;
-      } else {
-        throw new Error('Unexpected response structure');
+      // Append ProfilePic if needed
+      if (userData.ProfilePic) {
+        updatedUser.ProfilePic = userData.ProfilePic;
       }
+
+      storeUserData(updatedUser, rememberMe);
+
+      return updatedUser;
     } catch (error) {
-      console.error('Update user info error:', error);
+      console.error("Update user info error:", error);
       return rejectWithValue(
-        error.response?.data?.message || 'Failed to update profile information'
+        error.response?.data?.message || "Failed to update profile information"
       );
     }
   }

@@ -1,21 +1,22 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axiosInstance from "../lib/axios";
 import toast, { Toaster } from 'react-hot-toast';
+import { getSafeUserData, storeUserData, clearAuthData, getRememberMePreference } from "../lib/utils";
 
 
 
-const initialState={
-    getallTeachers:null,
-    isallTeacherget:false,
-    isTeacheradd:false,
-    isTeacherremove:false,
-    searchdata:null,
-    issearchdata:false,
-    editedTeacher:null,
-    iseditedTeacher:false,
- 
-  
-}
+const initialState = {
+  getallTeachers: null,
+  isallTeacherget: false,
+  isTeacheradd: false,
+  isTeacherremove: false,
+  searchdata: null,
+  issearchdata: false,
+  editedTeacher: null,
+  iseditedTeacher: false,
+  // 👇 ADD THIS
+  Authuser: getSafeUserData() || null, // Or null initially
+};
 
 
 
@@ -81,15 +82,17 @@ export const AddTeacher = createAsyncThunk(
       }
     }
   );
-  export const editTeacherProfile = createAsyncThunk(
-    "teacher/editTeacherProfile",
-    async ({ id, updatedData }, { rejectWithValue }) => {
+  export const editPassword = createAsyncThunk(
+    "teacher/editPassword",
+    async ({ id, values}, { rejectWithValue }) => {
       try {
         const response = await axiosInstance.put(
-          `teacher/editTeacherProfile/${id}`,
-          updatedData,
+          `teacher/editPassword/${id}`,
+          values,
           { withCredentials: true }
         );
+        console.log(response.data);
+        // storeUserData(response.data);
         return response.data;
       } catch (error) {
         console.log(error);
@@ -208,17 +211,7 @@ extraReducers:(builder)=>{
     .addCase(EditTeacher.rejected, (state, action) => {
       state.iseditedTeacher = false;
     })
-    .addCase(editTeacherProfile.pending, (state) => {
-      state.iseditedTeacher = true;
-    })
-    .addCase(editTeacherProfile.fulfilled, (state, action) => {
-      state.iseditedTeacher = false;
-      state.editedTeacher = action.payload;
-    })
-    .addCase(editTeacherProfile.rejected, (state, action) => {
-      state.iseditedTeacher = false;
-    });
-
+    
 
 
 

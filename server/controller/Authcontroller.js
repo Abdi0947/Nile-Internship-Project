@@ -312,6 +312,7 @@ module.exports.login = async (req, res) => {
           firstName: teacher.firstName,
           lastName: teacher.lastName,
           email: teacher.email,
+          password: teacher.password,
           role: teacher.role,
           address: teacher.Address,
           phone: teacher.phone,

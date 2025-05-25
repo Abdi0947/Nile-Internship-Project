@@ -5,7 +5,8 @@ import { FiSave, FiX, FiBell, FiLock, FiUser, FiCamera } from "react-icons/fi";
 import { motion } from "framer-motion";
 import TopNavbar from "../components/Topnavbar";
 import { useDispatch, useSelector } from "react-redux";
-import { editTeacherProfile } from "../features/Teacher";
+import { editPassword } from "../features/Teacher";
+import {updateUserInfo} from '../features/Authentication'
 import toast from "react-hot-toast";
 import ProfilePicture from "../components/ProfilePicture";
 
@@ -65,7 +66,7 @@ const AccountSettingsTeacher = () => {
         ProfilePic: imageData,
       };
 
-      await dispatch(editTeacherProfile({id,updatedUserData})).unwrap();
+      // await dispatch(editTeacherProfile({id,updatedUserData})).unwrap();
       setProfileImageKey(Date.now());
       toast.success("Profile picture updated successfully");
     } catch (error) {
@@ -163,12 +164,11 @@ const AccountSettingsTeacher = () => {
     }));
   };
 
-  const handleProfileUpdate = async (values) => {
+  const handleProfileUpdate = async (userData) => {
     try {
       // Update profile information
-      const id = Authuser?.id;
-      console.log(Authuser)
-      await dispatch(editTeacherProfile({ id, updatedData: values })).unwrap();
+      console.log(Authuser);
+      await dispatch(updateUserInfo(userData)).unwrap();
 
       setShowSavedMessage(true);
       setTimeout(() => setShowSavedMessage(false), 3000);
@@ -181,6 +181,8 @@ const AccountSettingsTeacher = () => {
   const handlePasswordChange = async (values) => {
     try {
       // Implement password change API call here
+      const id = Authuser.id || Authuser._id
+      dispatch(editPassword({id, values }));
       toast.success("Password changed successfully");
       passwordForm.resetForm();
     } catch (error) {
@@ -353,7 +355,9 @@ const AccountSettingsTeacher = () => {
                       className="w-full px-3 py-2 pb-2 border rounded-md focus:ring-blue-500 focus:border-blue-500"
                       readOnly
                     />
-                    <span className="text-sm text-slate-400">Only Admin can change email</span>
+                    <span className="text-sm text-slate-400">
+                      Only Admin can change email
+                    </span>
                     {profileForm.touched.email && profileForm.errors.email && (
                       <p className="text-red-500 text-xs mt-1">
                         {profileForm.errors.email}

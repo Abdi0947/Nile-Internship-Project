@@ -417,3 +417,34 @@ module.exports.editProfile = async (req, res) => {
     res.status(500).json({ message: "Server error while updating teacher" });
   }
 }
+
+module.exports.editPassword = async (req, res) => {
+  
+  try {
+    const id = req.params.TeacherId;
+    const {currentPassword, newPassword, confirmPassword} = req.body
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return res.status(404).json({ error: "Provide all infromation" });
+    }
+
+    const oldPassword = await Teacher.findOne({_id: id})
+
+    
+    if (!oldPassword) {
+      return res.status(404).json({ error: "Teacher not found" });
+    }
+
+    if(oldPassword.password !== currentPassword) {
+      return res.status(404).json({ error: "Wrong current password. Please enter correct password" });
+    }
+
+    oldPassword.password = confirmPassword
+    await oldPassword.save();
+
+    return res.status(200).json(oldPassword);
+  } catch (error) {
+    console.error("Update error:", error);
+    res.status(500).json({ message: "Server error while updating teacher" });
+  }
+}
