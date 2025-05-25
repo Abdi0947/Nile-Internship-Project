@@ -25,6 +25,10 @@ const StudentSchema = new mongoose.Schema(
     address: {
       type: String,
     },
+    role: {
+      type: String,
+      default: "Student",
+    },
     Dateofbirth: {
       type: Date,
       required: true,
