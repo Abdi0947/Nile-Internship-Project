@@ -35,11 +35,12 @@ export const getSubjectById = createAsyncThunk(
   async (subjectId, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(
-        `/Subject//getsingleSubject//${subjectId}`,
+        `/Subject/getsingleSubject/${subjectId}`,
         { withCredentials: true }
       );
       return response.data;
     } catch (error) {
+      console.log(error);
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch subject"
       );
@@ -61,6 +62,17 @@ const SubjectSlice = createSlice({
         state.loading = false;
       })
       .addCase(getAllSubjects.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(getSubjectById.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getSubjectById.fulfilled, (state, action) => {
+        state.subjects = action.payload;
+        state.loading = false;
+      })
+      .addCase(getSubjectById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

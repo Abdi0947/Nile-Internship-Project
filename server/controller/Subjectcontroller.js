@@ -42,9 +42,7 @@ module.exports.getAllSubjects = async (req, res) => {
 module.exports.getSubjectById = async (req, res) => {
   try {
     const subject = await Subject.findById(req.params.id)
-      .populate('TeacherId', 'name')
-      .populate('ClassId', 'className')
-      .exec();
+      .populate('ClassId')
 
     if (!subject) {
       return res.status(404).json({ message: 'Subject not found' });
