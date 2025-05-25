@@ -8,10 +8,15 @@ import { FiBookOpen, FiUsers, FiClipboard, FiCalendar, FiClock, FiPlusCircle, Fi
 import {
   fetchAllStudents
 } from "../features/Student";
+import {
+  createAssignment,
+  getAssignmentsByTeacherId,
+} from "../features/Assignment";
 
 function TeacherDashboardpage() {
   const { Authuser } = useSelector((state) => state.auth);
   const { students } = useSelector((state) => state.Student);
+  const { assignments, isLoading } = useSelector((state) => state.Assignment);
   const dispatch = useDispatch();
   const { getallTeachers } = useSelector((state) => state.Teacher);
   const yourStudent = students?.filter(
@@ -27,8 +32,8 @@ function TeacherDashboardpage() {
   const [stats, setStats] = useState({
     classes: 1,
     students: yourStudent.length,
-    assignments: 3,
-    upcomingClasses: 3
+    assignments: assignments.length,
+    upcomingClasses: 3,
   });
   console.log(students)
   
@@ -109,13 +114,16 @@ function TeacherDashboardpage() {
   };
   
   // Format date for timetable events
-  const formatDateTime = (date) => {
-    return date.toLocaleString('en-US', { 
-      month: 'short', 
-      day: 'numeric', 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
+  const formatDateTime = (dateTimeString) => {
+    if (!dateTimeString) return "Not submitted";
+    const options = {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    };
+    return new Date(dateTimeString).toLocaleString(undefined, options);
   };
   
   // Get current time of day for greeting
@@ -358,9 +366,9 @@ function TeacherDashboardpage() {
 
             <div className="p-6">
               <div className="divide-y divide-gray-100">
-                {recentAssignments.map((assignment) => (
+                {assignments?.map((assignment) => (
                   <div
-                    key={assignment.id}
+                    key={assignment?._id}
                     className="py-4 first:pt-0 last:pb-0"
                   >
                     <div className="flex items-start">
@@ -370,41 +378,32 @@ function TeacherDashboardpage() {
                       <div className="flex-grow">
                         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
                           <h4 className="font-medium mb-1 sm:mb-0">
-                            {assignment.title}
+                            {assignment?.title}
                           </h4>
                           <span className="text-sm">
-                            Due:{" "}
-                            {assignment.dueDate.toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                            })}
+                            Due: {formatDateTime(assignment?.dueDate)}
                           </span>
                         </div>
-                        <p className="text-sm mt-1">{assignment.class}</p>
+                        <p className="text-sm mt-1">
+                          {assignment?.ClassId?.ClassName}
+                        </p>
                         <div className="mt-2">
                           <div className="flex justify-between mb-1">
                             <span className="text-xs">Submissions</span>
-                            <span className="text-xs">
-                              {assignment.submissionsCount}/
-                              {assignment.totalStudents}
-                            </span>
+                            <span className="text-xs">15 / 20</span>
                           </div>
                           <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
                             <div
                               className="h-full bg-green-500 rounded-full"
                               style={{
-                                width: `${
-                                  (assignment.submissionsCount /
-                                    assignment.totalStudents) *
-                                  100
-                                }%`,
+                                width: `${(15 / 20) * 100}%`,
                               }}
                             ></div>
                           </div>
                         </div>
                       </div>
                       <Link
-                        to={`/teacher/TeachersAssignmentpage/${assignment.id}`}
+                        to={`/teacher/TeachersAssignmentpage/${assignment?._id}`}
                         className="ml-4 text-blue-600 hover:text-blue-800 text-sm"
                       >
                         Review

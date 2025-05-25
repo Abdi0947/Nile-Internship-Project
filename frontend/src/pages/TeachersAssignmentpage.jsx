@@ -449,9 +449,7 @@ function TeachersAssignmentpage() {
                       <td className="py-3 px-4">
                         {assignment?.subject?.SubjectName}
                       </td>
-                      <td className="py-3 px-4">
-                        {new Date(assignment?.dueDate).toLocaleString()}
-                      </td>
+                      <td className="py-3 px-4">assignments</td>
                       <td className="py-3 px-4">
                         <div>
                           <span className="font-medium">
