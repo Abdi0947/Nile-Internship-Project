@@ -11,6 +11,7 @@ const Feerouter=require('./router/Feerouter')
 const Studentrouter=require('./router/StudentRouter')
 const Subjectrouter=require('./router/Subjectrouter')
 const ClassRouter = require('./router/ClassRouter')
+const AssignmentRouter = require('./router/Assigmentrouter')
 require("dotenv").config();
 const PORT = process.env.PORT || 5003;
 const cookieParser = require("cookie-parser");
@@ -35,6 +36,7 @@ app.use(cookieParser());
 app.use("/api/auth", authrouter);
 app.use("/api/teacher",Teacherrouter)
 app.use("/api/grade",Graderouter)
+app.use("/api/assignment", AssignmentRouter)
 app.use("/api/Notification", Notificationrouter)
 app.use("/api/attendance",Attendancerouter)
 app.use("/api/Timetable",Timetablerouter)

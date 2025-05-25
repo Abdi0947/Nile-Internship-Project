@@ -276,8 +276,7 @@ module.exports.getTeacherById = async (req, res) => {
   try {
     const teacher = await Teacher.findById(TeacherId)
       .populate("subjects")
-      .populate("attendance")
-      .populate("assignedClasses");
+      .populate("classId")
 
     if (!teacher) {
       return res.status(404).json({ error: "Teacher not found" });

@@ -14,6 +14,8 @@ const initialState = {
   issearchdata: false,
   editedTeacher: null,
   iseditedTeacher: false,
+  teacherDetails: null, // <-- add this
+  isTeacherDetailsLoading: false, // <-- loading state for single teacher fetch
   // 👇 ADD THIS
   Authuser: getSafeUserData() || null, // Or null initially
 };
@@ -40,6 +42,26 @@ export const AddTeacher = createAsyncThunk(
       return rejectWithValue(
         error.response?.data?.message || "Teacher adding failed"
       );
+    }
+  }
+);
+export const getTeacherById = createAsyncThunk(
+  "teacher/getTeacher",
+  async (teacherId, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(
+        `teacher/getTeacher/${teacherId}`,
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      const errorMessage =
+        error.response?.data?.error || "Failed to get teacher details.";
+      toast.error(errorMessage);
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -186,6 +208,18 @@ extraReducers:(builder)=>{
 
     .addCase(AddTeacher.rejected, (state, action) => {
       state.isTeacheradd = false;
+    })
+    .addCase(getTeacherById.pending, (state) => {
+      state.isTeacherDetailsLoading = true;
+      state.teacherDetails = null;
+    })
+    .addCase(getTeacherById.fulfilled, (state, action) => {
+      state.isTeacherDetailsLoading = false;
+      state.teacherDetails = action.payload;
+    })
+    .addCase(getTeacherById.rejected, (state, action) => {
+      state.isTeacherDetailsLoading = false;
+      state.teacherDetails = null;
     })
 
     .addCase(SearchTeacher.pending, (state) => {

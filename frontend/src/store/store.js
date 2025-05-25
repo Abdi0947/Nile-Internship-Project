@@ -6,6 +6,7 @@ import authReducer from "../features/Authentication"
 import FeeReducer from "../features/Fee"
 import StudentReducer from "../features/Student"
 import SubjectReducer from "../features/Subject"
+import AssignmentReducer from '../features/Assignment'
 import ClassReducer from '../features/Class'
 import NotificationReducer from "../features/Notification"
 import { ensureProfileImagePersistence } from "../lib/sessionPersistence";
@@ -47,6 +48,7 @@ const store = configureStore({
     Student: StudentReducer,
     notification: NotificationReducer,
     Subject: SubjectReducer,
+    Assignment: AssignmentReducer,
     Class: ClassReducer
   },
   middleware: (getDefaultMiddleware) => 

@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from "react-redux";
 import { motion } from 'framer-motion';
 import TopNavbar from '../components/Topnavbar';
 import { FiFileText, FiUsers, FiCalendar, FiCheckCircle, FiDownload, FiMessageCircle } from 'react-icons/fi';
+import {getAssignmentById} from '../features/Assignment'
 import toast from 'react-hot-toast';
 
 const AssignmentReviewPage = () => {
   const { assignmentId } = useParams();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { Authuser } = useSelector(state => state.auth);
   
   const [assignment, setAssignment] = useState(null);
+  const { currentAssignment } = useSelector((state) => state.Assignment);
   const [submissions, setSubmissions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -107,6 +110,12 @@ const AssignmentReviewPage = () => {
 
     fetchAssignmentData();
   }, [assignmentId]);
+  useEffect(() => {
+    if (assignmentId) {
+      dispatch(getAssignmentById(assignmentId));
+    }
+  }, [dispatch, assignmentId]);
+  console.log(currentAssignment);
 
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -206,8 +215,8 @@ const AssignmentReviewPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <TopNavbar />
-      
-      <motion.div 
+
+      <motion.div
         className="container mx-auto px-4 py-8 mt-8"
         initial="initial"
         animate="in"
@@ -215,24 +224,40 @@ const AssignmentReviewPage = () => {
         variants={pageVariants}
       >
         {/* Header */}
-        <motion.div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6" variants={itemVariants}>
+        <motion.div
+          className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6"
+          variants={itemVariants}
+        >
           <div className="flex items-center">
-            <button 
-              onClick={() => navigate(-1)} 
+            <button
+              onClick={() => navigate(-1)}
               className="mr-4 p-2 rounded-full hover:bg-gray-200"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-gray-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
             </button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">{assignment.title}</h1>
+              <h1 className="text-2xl font-bold text-gray-800">
+                {currentAssignment?.assignment?.title}
+              </h1>
               <div className="flex items-center mt-1 text-sm text-gray-600">
-                <span>{assignment.subject}</span>
+                <span>{currentAssignment?.assignment?.subject?.SubjectName}</span>
                 <span className="mx-2">•</span>
-                <span>{assignment.class}</span>
+                <span>{currentAssignment?.assignment?.ClassId?.ClassName}</span>
                 <span className="mx-2">•</span>
-                <span>Due: {formatDate(assignment.dueDate)}</span>
+                <span>Due: {formatDate(currentAssignment?.assignment?.dueDate)}</span>
               </div>
             </div>
           </div>
@@ -244,44 +269,75 @@ const AssignmentReviewPage = () => {
             <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
               <div className="p-1 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
               <div className="p-6">
-                <h2 className="text-lg font-bold text-gray-800 mb-4">Assignment Details</h2>
-                
+                <h2 className="text-lg font-bold text-gray-800 mb-4">
+                  Assignment Details
+                </h2>
+
                 <div className="space-y-4">
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500">Description</h3>
-                    <p className="mt-1 text-gray-800">{assignment.description}</p>
+                    <h3 className="text-sm font-medium text-gray-500">
+                      Description
+                    </h3>
+                    <p className="mt-1 text-gray-800">
+                      {currentAssignment?.assignment?.description}
+                    </p>
                   </div>
-                  
+
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500">Points</h3>
-                    <p className="mt-1 text-gray-800">{assignment.maxScore}</p>
+                    <h3 className="text-sm font-medium text-gray-500">
+                      Points assignment
+                    </h3>
+                    <p className="mt-1 text-gray-800">
+                      {currentAssignment?.assignment?.maxScore}
+                    </p>
                   </div>
-                  
+
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500">Due Date</h3>
-                    <p className="mt-1 text-gray-800">{formatDate(assignment.dueDate)}</p>
+                    <h3 className="text-sm font-medium text-gray-500">
+                      Due Date
+                    </h3>
+                    <p className="mt-1 text-gray-800">
+                      {formatDate(currentAssignment?.assignment?.dueDate)}
+                    </p>
                   </div>
-                  
+
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500">Created</h3>
-                    <p className="mt-1 text-gray-800">{formatDate(assignment.createdAt)}</p>
+                    <h3 className="text-sm font-medium text-gray-500">
+                      Created
+                    </h3>
+                    <p className="mt-1 text-gray-800">
+                      {formatDate(currentAssignment?.assignment?.createdAt)}
+                    </p>
                   </div>
 
                   <div className="pt-4 border-t border-gray-200">
-                    <h3 className="text-sm font-medium text-gray-500 mb-2">Submission Progress</h3>
+                    <h3 className="text-sm font-medium text-gray-500 mb-2">
+                      Submission Progress
+                    </h3>
                     <div className="flex justify-between text-sm mb-1">
                       <span>Submissions</span>
-                      <span>{assignment.submissionCount}/{assignment.totalStudents}</span>
+                      <span>
+                        {currentAssignment?.assignment?.submissionCount}/
+                        {currentAssignment?.assignment?.totalStudents}
+                      </span>
                     </div>
                     <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-green-500 rounded-full" 
-                        style={{ width: `${(assignment.submissionCount / assignment.totalStudents) * 100}%` }}
+                      <div
+                        className="h-full bg-green-500 rounded-full"
+                        style={{
+                          width: `${
+                            (assignment.submissionCount /
+                              assignment.totalStudents) *
+                            100
+                          }%`,
+                        }}
                       ></div>
                     </div>
                     <div className="mt-2 flex justify-between text-sm">
                       <span>Graded</span>
-                      <span>{assignment.gradedCount}/{assignment.submissionCount}</span>
+                      <span>
+                        {assignment.gradedCount}/{assignment.submissionCount}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -294,8 +350,10 @@ const AssignmentReviewPage = () => {
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
               <div className="p-6 border-b border-gray-200">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between">
-                  <h2 className="text-lg font-bold text-gray-800 mb-2 sm:mb-0">Student Submissions</h2>
-                  
+                  <h2 className="text-lg font-bold text-gray-800 mb-2 sm:mb-0">
+                    Student Submissions
+                  </h2>
+
                   <div className="flex items-center space-x-2">
                     <select
                       value={filter}
@@ -315,19 +373,34 @@ const AssignmentReviewPage = () => {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
                         Student
                       </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
                         Status
                       </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
                         Submitted
                       </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
                         Grade
                       </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
                         Actions
                       </th>
                     </tr>
@@ -336,11 +409,19 @@ const AssignmentReviewPage = () => {
                     {filteredSubmissions.map((submission) => (
                       <tr key={submission.id}>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">{submission.studentName}</div>
-                          <div className="text-sm text-gray-500">{submission.studentId}</div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {submission.studentName}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {submission.studentId}
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(submission.status)}`}>
+                          <span
+                            className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
+                              submission.status
+                            )}`}
+                          >
                             {submission.status}
                           </span>
                         </td>
@@ -349,34 +430,41 @@ const AssignmentReviewPage = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {submission.grade !== null ? (
-                            <span className="font-medium text-green-600">{submission.grade} / {assignment.maxScore}</span>
+                            <span className="font-medium text-green-600">
+                              {submission.grade} / {assignment.maxScore}
+                            </span>
                           ) : (
                             <span className="text-gray-400">Not graded</span>
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           <div className="flex space-x-2">
-                            {submission.status === 'submitted' && (
-                              <button 
-                                onClick={() => handleGradeSubmission(submission)}
+                            {submission.status === "submitted" && (
+                              <button
+                                onClick={() =>
+                                  handleGradeSubmission(submission)
+                                }
                                 className="text-blue-600 hover:text-blue-800"
                               >
                                 Grade
                               </button>
                             )}
-                            {submission.status === 'graded' && (
-                              <button 
-                                onClick={() => handleGradeSubmission(submission)}
+                            {submission.status === "graded" && (
+                              <button
+                                onClick={() =>
+                                  handleGradeSubmission(submission)
+                                }
                                 className="text-blue-600 hover:text-blue-800"
                               >
                                 Update
                               </button>
                             )}
-                            {submission.attachments && submission.attachments.length > 0 && (
-                              <button className="text-green-600 hover:text-green-800">
-                                View
-                              </button>
-                            )}
+                            {submission.attachments &&
+                              submission.attachments.length > 0 && (
+                                <button className="text-green-600 hover:text-green-800">
+                                  View
+                                </button>
+                              )}
                           </div>
                         </td>
                       </tr>
@@ -395,13 +483,25 @@ const AssignmentReviewPage = () => {
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4">
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Grade Submission</h3>
+                <h3 className="text-lg font-medium text-gray-900">
+                  Grade Submission
+                </h3>
                 <button
                   onClick={() => setShowGradingModal(false)}
                   className="text-gray-400 hover:text-gray-500"
                 >
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
@@ -409,31 +509,46 @@ const AssignmentReviewPage = () => {
               <div className="space-y-4">
                 <div>
                   <h4 className="text-sm font-medium text-gray-700">Student</h4>
-                  <p className="mt-1 text-sm text-gray-900">{selectedSubmission.studentName}</p>
+                  <p className="mt-1 text-sm text-gray-900">
+                    {selectedSubmission.studentName}
+                  </p>
                 </div>
 
-                {selectedSubmission.attachments && selectedSubmission.attachments.length > 0 && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Files</label>
-                    <ul className="mt-1 space-y-2">
-                      {selectedSubmission.attachments.map((file, index) => (
-                        <li key={index} className="flex items-center p-2 bg-gray-50 rounded border border-gray-200">
-                          <FiFileText className="text-blue-500 mr-2" />
-                          <div>
-                            <p className="text-sm font-medium text-gray-700">{file.name}</p>
-                            <p className="text-xs text-gray-500">{file.size}</p>
-                          </div>
-                          <button className="ml-auto text-blue-600 hover:text-blue-800">
-                            <FiDownload />
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                {selectedSubmission.attachments &&
+                  selectedSubmission.attachments.length > 0 && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Files
+                      </label>
+                      <ul className="mt-1 space-y-2">
+                        {selectedSubmission.attachments.map((file, index) => (
+                          <li
+                            key={index}
+                            className="flex items-center p-2 bg-gray-50 rounded border border-gray-200"
+                          >
+                            <FiFileText className="text-blue-500 mr-2" />
+                            <div>
+                              <p className="text-sm font-medium text-gray-700">
+                                {file.name}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {file.size}
+                              </p>
+                            </div>
+                            <button className="ml-auto text-blue-600 hover:text-blue-800">
+                              <FiDownload />
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
                 <div>
-                  <label htmlFor="grade" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="grade"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     Grade (out of {assignment.maxScore})
                   </label>
                   <input
@@ -448,7 +563,10 @@ const AssignmentReviewPage = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="feedback" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="feedback"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     Feedback
                   </label>
                   <textarea
@@ -463,13 +581,13 @@ const AssignmentReviewPage = () => {
               </div>
 
               <div className="mt-6 flex justify-end space-x-3">
-                <button 
+                <button
                   onClick={() => setShowGradingModal(false)}
                   className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
                 >
                   Cancel
                 </button>
-                <button 
+                <button
                   onClick={handleSubmitGrade}
                   className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
                 >
