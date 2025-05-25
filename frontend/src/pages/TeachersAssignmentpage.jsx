@@ -16,10 +16,9 @@ function TeachersAssignmentpage() {
   const { assignmentId } = useParams();
   const { Authuser } = useSelector((state) => state.auth);
   const { teacherDetails } = useSelector((state) => state.Teacher);
-  const { assignments } = useSelector((state) => state.Assignment);
+  const { assignments, isLoading } = useSelector((state) => state.Assignment);
   const teacheId = Authuser.id || Authuser._id;
   const [assignmentsData, setAssignments] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("all"); // 'all', 'pending', 'graded'
   const [showAddModal, setShowAddModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
@@ -164,18 +163,6 @@ function TeachersAssignmentpage() {
     }
   }, [assignmentId, assignmentsData, navigate]);
 
-  // Filter assignmentsData based on active tab
-  const filteredAssignments = assignmentsData.filter((assignment) => {
-    if (activeTab === "all") return true;
-    if (activeTab === "pending")
-      return assignment.submissionCount > assignment.gradedCount;
-    if (activeTab === "graded")
-      return (
-        assignment.submissionCount === assignment.gradedCount &&
-        assignment.submissionCount > 0
-      );
-    return true;
-  });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -427,7 +414,7 @@ function TeachersAssignmentpage() {
           </div>
 
           {/* Assignments List */}
-          {!assignments ? (
+          {isLoading ? (
             <div className="flex justify-center items-center h-64">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
             </div>
