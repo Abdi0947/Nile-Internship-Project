@@ -12,31 +12,43 @@ import {
   createAssignment,
   getAssignmentsByTeacherId,
 } from "../features/Assignment";
+import { fetchAllTimetables } from "../features/TimeTable";
 
 function TeacherDashboardpage() {
   const { Authuser } = useSelector((state) => state.auth);
+  const teacheId = Authuser.id || Authuser._id;
   const { students } = useSelector((state) => state.Student);
   const { assignments, isLoading } = useSelector((state) => state.Assignment);
   const dispatch = useDispatch();
   const { getallTeachers } = useSelector((state) => state.Teacher);
+  const { Timetables } = useSelector((state) => state.Timetables);
   const yourStudent = students?.filter(
     (item) => item.classId._id === Authuser.classId
   );
+  const teacherTimetable = Timetables?.filter(
+    (time) => time?.teacherId?._id === Authuser?.id
+  );
   console.log(Authuser.classId);
-  console.log(yourStudent);
+  console.log(teacherTimetable);
 
   useEffect(() => {
-      dispatch(gettingallTeachers());
-      dispatch(fetchAllStudents());
-    }, [dispatch]);
+      if (teacheId) {
+        dispatch(getAssignmentsByTeacherId(teacheId));
+      }
+    }, [dispatch, teacheId]);
+  useEffect(() => {
+    dispatch(gettingallTeachers());
+    dispatch(fetchAllStudents());
+    dispatch(fetchAllTimetables());
+  }, [dispatch]);
   const [stats, setStats] = useState({
     classes: 1,
     students: yourStudent.length,
     assignments: assignments.length,
-    upcomingClasses: 3,
+    upcomingClasses: teacherTimetable?.length,
   });
-  console.log(students)
-  
+  console.log(students);
+
   const [recentAssignments] = useState([
     {
       id: 1,
@@ -44,7 +56,7 @@ function TeacherDashboardpage() {
       dueDate: new Date(Date.now() + 86400000 * 2), // 2 days from now
       submissionsCount: 18,
       totalStudents: 30,
-      class: "Grade 10 - Math"
+      class: "Grade 10 - Math",
     },
     {
       id: 2,
@@ -52,7 +64,7 @@ function TeacherDashboardpage() {
       dueDate: new Date(Date.now() + 86400000 * 5), // 5 days from now
       submissionsCount: 12,
       totalStudents: 28,
-      class: "Grade 10 - Science"
+      class: "Grade 10 - Science",
     },
     {
       id: 3,
@@ -60,34 +72,64 @@ function TeacherDashboardpage() {
       dueDate: new Date(Date.now() + 86400000 * 7), // 7 days from now
       submissionsCount: 5,
       totalStudents: 25,
-      class: "Grade 10 - History"
-    }
+      class: "Grade 10 - History",
+    },
   ]);
-  
+
   const [upcomingClasses] = useState([
     {
       id: 1,
       title: "Math - Advanced Algebra",
       time: new Date(Date.now() + 3600000 * 2), // 2 hours from now
       room: "Room 101",
-      students: 30
+      students: 30,
     },
     {
       id: 2,
       title: "Science Lab - Chemical Reactions",
       time: new Date(Date.now() + 3600000 * 5), // 5 hours from now
       room: "Science Lab",
-      students: 28
+      students: 28,
     },
     {
       id: 3,
       title: "History - World War II",
       time: new Date(Date.now() + 3600000 * 24), // 24 hours from now
       room: "Room 203",
-      students: 25
-    }
+      students: 25,
+    },
   ]);
-  
+  // Get upcoming events from timetable (next 3 days)
+  const today = new Date();
+  const threeDaysLater = new Date(today);
+  threeDaysLater.setDate(today.getDate() + 3);
+
+  const upcomingEvents =
+    teacherTimetable?.filter((event) => {
+        const eventDate = new Date(event.startTime);
+        return eventDate >= today && eventDate <= threeDaysLater;
+      })
+      .sort((a, b) => new Date(a.startTime) - new Date(b.startTime)) || [];
+
+  const firstThreeEvents = upcomingEvents.slice(0, 3);
+  const moreEventsCount = upcomingEvents.length - firstThreeEvents.length;
+
+  // Format date for timetable events
+  console.log("Filtered upcoming events:", upcomingEvents);
+  function formatEventDate(dateString) {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return "Invalid Date";
+    }
+
+    return date.toLocaleString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -95,24 +137,24 @@ function TeacherDashboardpage() {
       opacity: 1,
       transition: {
         duration: 0.5,
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
-  
+
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
-    visible: { 
-      y: 0, 
+    visible: {
+      y: 0,
       opacity: 1,
-      transition: { 
+      transition: {
         type: "spring",
         stiffness: 100,
-        damping: 10
-      }
-    }
+        damping: 10,
+      },
+    },
   };
-  
+
   // Format date for timetable events
   const formatDateTime = (dateTimeString) => {
     if (!dateTimeString) return "Not submitted";
@@ -125,7 +167,7 @@ function TeacherDashboardpage() {
     };
     return new Date(dateTimeString).toLocaleString(undefined, options);
   };
-  
+
   // Get current time of day for greeting
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -133,7 +175,7 @@ function TeacherDashboardpage() {
     if (hour < 18) return "Good Afternoon";
     return "Good Evening";
   };
-  
+
   return (
     // {yourStudent ? }
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
@@ -303,10 +345,13 @@ function TeacherDashboardpage() {
               </div>
               <div className="bg-amber-50 p-2 rounded-lg mb-2">
                 <p className="text-amber-700 text-sm font-medium">
-                  Next: {formatDateTime(upcomingClasses[0].time)}
+                  Next:{" "}
+                  {upcomingEvents[0]
+                    ? formatEventDate(upcomingEvents[0].startTime)
+                    : "No event"}
                 </p>
                 <p className="text-gray-800 font-medium truncate">
-                  {upcomingClasses[0].title}
+                  {`${upcomingEvents[0]?.subjectId?.SubjectName || ''} with ${upcomingEvents[0]?.teacherId?.firstName || ''}` }
                 </p>
               </div>
               <div className="flex justify-center bg-gray-50 -mx-6 px-6 py-3 border-t mt-3">
@@ -433,41 +478,53 @@ function TeacherDashboardpage() {
             </div>
 
             <div className="p-6">
-              <div className="divide-y divide-gray-100">
-                {upcomingClasses.map((cls) => (
-                  <div key={cls.id} className="py-4 first:pt-0 last:pb-0">
-                    <div className="flex items-center mb-2">
-                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                        <FiClock className="text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium">{cls.title}</p>
-                        <p className="text-sm">{formatDateTime(cls.time)}</p>
-                      </div>
-                    </div>
-                    <div className="ml-13 pl-10">
-                      <div className="flex justify-between items-center">
-                        <div className="text-sm">
-                          <span className="inline-block px-2 py-1 bg-blue-50 text-blue-700 rounded-md mr-2">
-                            {cls.room}
-                          </span>
-                          <span className="inline-block px-2 py-1 bg-teal-50 text-teal-700 rounded-md">
-                            <FiUsers className="inline mr-1 text-xs" />{" "}
-                            {cls.students} students
-                          </span>
+                          {firstThreeEvents.length > 0 ? (
+                            <div className="divide-y divide-gray-100">
+                              {firstThreeEvents.map((event, index) => (
+                                <motion.div
+                                  key={event._id}
+                                  className="py-4 first:pt-0 last:pb-0"
+                                  initial={{ opacity: 0, y: 20 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: index * 0.1 }}
+                                  whileHover={{ x: 3 }}
+                                >
+                                  <div className="flex items-center mb-2">
+                                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                      <FiClock className="text-blue-600" />
+                                    </div>
+                                    <div>
+                                      <p className="font-medium text-black">
+                                        {`${event?.subjectId?.SubjectName} with Mrs. ${event?.teacherId?.firstName}`}
+                                      </p>
+                                      <p className="text-sm text-black">
+                                        {formatEventDate(event.startTime)}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  {event.description && (
+                                    <p className="text-sm ml-13 pl-10">
+                                      {event.description.length > 100
+                                        ? `${event.description.substring(0, 100)}...`
+                                        : event.description}
+                                    </p>
+                                  )}
+                                </motion.div>
+                              ))}
+            
+                              {moreEventsCount > 0 && (
+                                <p className="text-sm mt-3 text-gray-600">
+                                  +{moreEventsCount} more event
+                                  {moreEventsCount > 1 ? "s" : ""} scheduled soon
+                                </p>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="text-center py-8">
+                              <p className="text-black">No upcoming events</p>
+                            </div>
+                          )}
                         </div>
-                        <Link
-                          to={`/teacher/TeacherSubject/${cls.id}`}
-                          className="text-sm text-blue-600 hover:text-blue-800"
-                        >
-                          Details
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
           </motion.div>
         </div>
       </motion.div>
