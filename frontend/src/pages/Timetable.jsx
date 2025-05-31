@@ -63,14 +63,19 @@ const Timetable = () => {
   const handleEventClick = (info) => {
     setIsEditMode(true);
     setSelectedEvent(info.event);
+    
+    
 
     const startDate = info.event.start.toISOString().slice(0, 16);
     const endDate = info.event.end
       ? info.event.end.toISOString().slice(0, 16)
       : "";
-
-    setValue("subjectId", info.event.extendedProps.subjectId);
-    setValue("teacherId", info.event.extendedProps.teacherId);
+    const editInfo = Timetables.find(
+      (usertime) => usertime?._id === info?.event?.id
+    );
+      console.log(editInfo?.subjectId?.SubjectName);
+    setValue("subjectId", editInfo?.subjectId?._id);
+    setValue("teacherId", editInfo?.teacherId?._id);
     setValue("startTime", startDate);
     setValue("endTime", endDate);
 

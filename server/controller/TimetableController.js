@@ -57,10 +57,11 @@ module.exports.getTimetableById = async (req, res) => {
 
 module.exports.updateTimetable = async (req, res) => {
   try {
-    const{TimeID}=req.params;
-    const{updatedData}=req.body;
+    const { TimetableId } = req.params;
     
-    const updated = await Timetable.findByIdAndUpdate(TimeID, updatedData, { new: true });
+    const updated = await Timetable.findByIdAndUpdate(TimetableId, req.body, {
+      new: true,
+    });
     if (!updated) return res.status(404).json({ message: 'Timetable not found' });
     res.json(updated);
   } catch (err) {
