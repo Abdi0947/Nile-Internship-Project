@@ -25,10 +25,10 @@ function StudentDashboard() {
     progress: 75,
     grade: "A-",
   }));
-  const yourAssigment = assignments?.assignment?.filter(
-    (el) => el?.ClassId?._id === id
-  );
-  const myAssignments = yourAssigment.map((el) => ({
+  const yourAssignment = Array.isArray(assignments?.assignment)
+    ? assignments.assignment.filter((el) => el?.ClassId?._id === id)
+    : [];
+  const myAssignments = yourAssignment?.map((el) => ({
     id: el?._id,
     title: el?.title,
     course: el?.subject?.SubjectName,

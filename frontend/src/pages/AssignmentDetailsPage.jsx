@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { motion } from 'framer-motion';
 import TopNavbar from '../components/Topnavbar';
 import { FiFileText, FiUsers, FiCalendar, FiCheckCircle, FiEdit, FiDownload, FiUpload, FiMessageCircle } from 'react-icons/fi';
+import { getAssignmentById } from "../features/Assignment";
 
 const AssignmentDetailsPage = () => {
   const { assignmentId } = useParams();

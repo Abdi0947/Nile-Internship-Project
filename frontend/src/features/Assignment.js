@@ -71,6 +71,7 @@ export const getAssignmentById = createAsyncThunk(
   "/assignment/assignmentbyId",
   async (assignmentId, { rejectWithValue }) => {
     try {
+      console.log(assignmentId);
       const response = await axiosInstance.get(
         `/assignment/assignmentbyId/${assignmentId}`,
         { withCredentials: true }
@@ -141,7 +142,7 @@ const assignmentSlice = createSlice({
         state.isLoading = true;
       })
       .addCase(getAssignmentById.fulfilled, (state, action) => {
-        state.currentAssignment = action.payload;
+        state.assignments = action.payload;
         state.isLoading = false;
       })
       .addCase(getAssignmentById.rejected, (state, action) => {
