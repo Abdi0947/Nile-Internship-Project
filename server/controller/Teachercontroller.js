@@ -480,6 +480,7 @@ module.exports.editPassword = async (req, res) => {
     if (!currentPassword || !newPassword || !confirmPassword) {
       return res.status(404).json({ error: "Provide all infromation" });
     }
+    
 
     const oldPassword = await Teacher.findOne({ _id: id });
 
@@ -487,15 +488,17 @@ module.exports.editPassword = async (req, res) => {
       return res.status(404).json({ error: "Teacher not found" });
     }
 
-    if (oldPassword.password !== currentPassword) {
-      return res
-        .status(404)
-        .json({
-          error: "Wrong current password. Please enter correct password",
-        });
-    }
+    
+    const isMatch = await bcrypt.compare(currentPassword, oldPassword.password);
 
-    oldPassword.password = confirmPassword;
+    if (!isMatch) {
+      return res.status(404).json({
+        error: "Wrong current password. Please enter correct password",
+      });
+    }
+    const hashedpassword = await bcrypt.hash(confirmPassword, 10);
+
+    oldPassword.password = hashedpassword;
     await oldPassword.save();
 
     await sendEmail({
