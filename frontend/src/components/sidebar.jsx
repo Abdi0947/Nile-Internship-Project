@@ -155,7 +155,7 @@ function Sidebar({ isOpen, setIsOpen }) {
         {/* Navigation Menu */}
         <nav className="flex-1 space-y-1 overflow-y-auto scrollbar-hide">
           <NavLink 
-            to={Authuser.role.toLowerCase() === 'admin' ? '/admin/home' : `/${Authuser.role.toLowerCase()}/home`} 
+            to={Authuser?.role?.toLowerCase() === 'admin' ? '/admin/home' : `/${Authuser?.role?.toLowerCase()}/home`} 
             icon={<MdDashboard />}
             title="Dashboard"
             isOpen={isOpen}
@@ -165,7 +165,7 @@ function Sidebar({ isOpen, setIsOpen }) {
           />
 
           {/* ==== TEACHER SECTION ==== */}
-          {Authuser.role === "teacher" && (
+          {Authuser?.role === "teacher" && (
             <>
               <div className="relative">
                 <motion.button
@@ -301,7 +301,7 @@ function Sidebar({ isOpen, setIsOpen }) {
           )}
 
           {/* ==== STUDENT SECTION ==== */}
-          {Authuser.role === "student" && (
+          {Authuser?.role === "student" && (
             <>
               <NavLink 
                 to="/student/courses" 
@@ -343,7 +343,7 @@ function Sidebar({ isOpen, setIsOpen }) {
           )}
 
           {/* ==== ADMIN / MANAGER SECTION ==== */}
-          {(Authuser.role === "admin" || Authuser.role === "manager") && (
+          {(Authuser?.role === "admin" || Authuser?.role === "manager") && (
             <>
               <div className="relative">
                 <motion.button
@@ -488,7 +488,7 @@ function Sidebar({ isOpen, setIsOpen }) {
 
           {/* Common items */}
           <NavLink 
-            to={`/${Authuser.role}/account`} 
+            to={`/${Authuser?.role}/account`} 
             icon={<FaUserCircle />} 
             title="Account Setting" 
             isOpen={isOpen} 
@@ -498,7 +498,7 @@ function Sidebar({ isOpen, setIsOpen }) {
           />
 
           <NavLink 
-            to={`/${Authuser.role}/notifications`} 
+            to={`/${Authuser?.role}/notifications`} 
             icon={<MdNotificationsActive />} 
             title="Notifications" 
             isOpen={isOpen}

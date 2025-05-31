@@ -16,19 +16,19 @@ import { fetchAllTimetables } from "../features/TimeTable";
 
 function TeacherDashboardpage() {
   const { Authuser } = useSelector((state) => state.auth);
-  const teacheId = Authuser.id || Authuser._id;
+  const teacheId = Authuser?.id || Authuser?._id || "";
   const { students } = useSelector((state) => state.Student);
   const { assignments, isLoading } = useSelector((state) => state.Assignment);
   const dispatch = useDispatch();
   const { getallTeachers } = useSelector((state) => state.Teacher);
   const { Timetables } = useSelector((state) => state.Timetables);
   const yourStudent = students?.filter(
-    (item) => item.classId._id === Authuser.classId
+    (item) => item?.classId?._id === Authuser?.classId
   );
   const teacherTimetable = Timetables?.filter(
     (time) => time?.teacherId?._id === Authuser?.id
   );
-  console.log(Authuser.classId);
+  console.log(Authuser?.classId);
   console.log(teacherTimetable);
 
   useEffect(() => {
