@@ -179,27 +179,31 @@ module.exports.signup = async (req, res) => {
         .json({ error: "Please provide all neccessary information" });
     }
 
-    const validRoles = [
-      "Teacher",
-      "Manager",
-      "Admin",
-      "Student",
-      "teacher",
-      "manager",
-      "admin",
-      "student",
-      "administrative",
-    ];
-    if (!validRoles.includes(role)) {
-      return res.status(400).json({
-        error:
-          "The role should be one of: Teacher/teacher, Manager/manager, Admin/admin, or Student/student",
-      });
+    // Try to find the user in all collections
+    const user = await User.findOne({ email });
+    const teacher = await Teacher.findOne({ email });
+    const student = await Student.findOne({ email });
+
+    let foundUser;
+    if (student) {
+      foundUser = student;
+    } else if (teacher) {
+      foundUser = teacher;
+    } else if (user) {
+      foundUser = user;
     }
 
-    const duplicatedUser = await User.findOne({ email });
-    if (duplicatedUser) {
-      return res.status(400).json({ error: "User already exists" });
+    if (foundUser) {
+      return res
+        .status(400)
+        .json({ error: "User already exist with this email!" });
+    }
+
+    const validRoles = ["Admin", "admin"];
+    if (!validRoles.includes(role)) {
+      return res.status(400).json({
+        error: "The role should be one of: Admin",
+      });
     }
 
     const hashedpassword = await bcrypt.hash(password, 10);
@@ -255,42 +259,15 @@ module.exports.signup = async (req, res) => {
     const savedUser = await newUser.save();
     const token = await generateToken(savedUser, res);
 
-    // Send appropriate email based on role and approval status
-    try {
-      if (role.toLowerCase() === "teacher") {
-        await sendEmail({
-          email: savedUser.email,
-          subject: "Teacher Account Pending Approval",
-          message: `Your teacher account is pending approval. You will be notified once it's reviewed.`,
-          html: `
-            <div style="text-align: center; padding: 20px;">
-              <h2>Account Pending Approval</h2>
-              <p>Your teacher account is currently under review.</p>
-              <p>You will receive another email once your account is approved or rejected.</p>
-              <p>Thank you for your patience.</p>
-            </div>
-          `,
-        });
-      } else {
-        // Send regular welcome email for non-teacher roles
-        await sendEmail({
-          email: savedUser.email,
-          subject: "Welcome to Student Management System! 🎓",
-          message: `Welcome ${savedUser.firstName}! Your account has been successfully created.`,
-          html: getWelcomeEmailTemplate(savedUser),
-        });
-      }
-    } catch (emailError) {
-      console.error("Welcome email sending failed:", emailError);
-      // Don't fail the signup if email fails
-    }
-
+    await sendEmail({
+      email: savedUser.email,
+      subject: "Welcome to Student Management System! 🎓",
+      message: `Welcome ${savedUser.firstName}! Your account has been successfully created.`,
+      html: getWelcomeEmailTemplate(savedUser),
+    });
     res.status(201).json({
-      message:
-        role.toLowerCase() === "teacher"
-          ? "Signup successful. Your account is pending approval."
-          : "Signup successful",
-      savedUser: {
+      message: "Signup successful",
+      user: {
         id: savedUser._id,
         firstName: savedUser.firstName,
         lastName: savedUser.lastName,
@@ -310,7 +287,7 @@ module.exports.signup = async (req, res) => {
 module.exports.googleLogin = async (req, res) => {
   console.log(req.body);
   const { token } = req.body;
-  
+
   try {
     if (!token) {
       return res.status(400).json({ error: "Google token missing" });
@@ -340,12 +317,10 @@ module.exports.googleLogin = async (req, res) => {
     }
 
     if (!foundUser) {
-      return res
-        .status(404)
-        .json({
-          error:
-            "No account associated with this Google account. Please sign up first.",
-        });
+      return res.status(404).json({
+        error:
+          "No account associated with this Google account. Please sign up first.",
+      });
     }
 
     const tokenGenerated = await generateToken(foundUser, res);
@@ -398,8 +373,7 @@ module.exports.login = async (req, res) => {
 
     if (!foundUser) {
       return res.status(404).json({
-        error:
-          "No account associated with this account. Please sign up first.",
+        error: "No account associated with this account. Please sign up first.",
       });
     }
 
@@ -429,7 +403,6 @@ module.exports.login = async (req, res) => {
     });
   }
 };
-
 
 module.exports.logout = async (req, res) => {
   try {

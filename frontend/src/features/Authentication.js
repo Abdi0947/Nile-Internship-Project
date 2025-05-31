@@ -24,8 +24,8 @@ export const signup = createAsyncThunk(
       const response = await axiosInstance.post("auth/signup", credentials, { withCredentials: true });
       console.log('Signup API response:', response.data);
       
-      if (response.data && response.data.savedUser) {
-        storeUserData(response.data.savedUser, false); // Don't remember by default for new signups
+      if (response.data && response.data.user) {
+        storeUserData(response.data.user, false); // Don't remember by default for new signups
       }
       
       return response.data;
@@ -232,7 +232,7 @@ const authSlice = createSlice({
       })
       .addCase(signup.fulfilled, (state, action) => {
         state.isUserSignup = false;
-        state.Authuser = action.payload.savedUser;
+        state.Authuser = action.payload.user;
         state.token = action.payload.token;
         // toast.success("Signup successful!")
       })

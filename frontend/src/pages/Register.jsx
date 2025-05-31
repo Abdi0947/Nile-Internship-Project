@@ -180,10 +180,10 @@ const Register = () => {
         if (signup.fulfilled.match(resultAction)) {
           // toast.success('Account created successfully!');
           
-          const userRole = resultAction.payload.savedUser.role.toLowerCase();
+          const userRole = resultAction.payload.user.role.toLowerCase();
           switch (userRole) {
             case 'admin':
-              navigate('/admin/dashboard');
+              navigate("/admin/home");
               break;
             case 'teacher':
               navigate('/teacher');
