@@ -21,6 +21,7 @@ const Timetable = () => {
   const { Timetables, isTimetablesLoading } = useSelector(
     (state) => state.Timetables
   );
+  const { Authuser } = useSelector((state) => state.auth);
   const { getallTeachers } = useSelector((state) => state.Teacher);
   const { subjects } = useSelector((state) => state.Subject);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -41,7 +42,7 @@ const Timetable = () => {
     dispatch(gettingallTeachers());
     dispatch(getAllSubjects());
   }, [dispatch]);
-  console.log(subjects)
+  console.log(Authuser)
   // Handle date click to open modal for new event
   const handleDateClick = (info) => {
     setIsEditMode(false);
@@ -169,121 +170,131 @@ const Timetable = () => {
       </div>
 
       {/* Modal for adding/editing events */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">
-              {isEditMode ? "Edit Event" : "Add New Event"}
-            </h2>
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <div className="mb-4">
-                <div>
-                  <label className="block text-gray-700 mb-2">Subject</label>
-                  <select
-                    {...register("subjectId", {
-                      required: "Subject is required",
-                    })}
-                    className="w-full p-2 border rounded"
-                  >
-                    <option value="">Select Subject</option>
-                    {subjects?.map((subject) => (
-                      <option key={subject._id} value={subject?._id}>
-                        {subject.SubjectName}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.subjectId && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.subjectId.message}
-                    </p>
-                  )}
-                </div>
-              </div>
+      {isModalOpen &&
+        Authuser?.role ===
+          "Admin" ? (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+                <h2 className="text-xl font-bold mb-4">
+                  {isEditMode ? "Edit Event" : "Add New Event"}
+                </h2>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                  <div className="mb-4">
+                    <div>
+                      <label className="block text-gray-700 mb-2">
+                        Subject
+                      </label>
+                      <select
+                        {...register("subjectId", {
+                          required: "Subject is required",
+                        })}
+                        className="w-full p-2 border rounded"
+                      >
+                        <option value="">Select Subject</option>
+                        {subjects?.map((subject) => (
+                          <option key={subject._id} value={subject?._id}>
+                            {subject.SubjectName}
+                          </option>
+                        ))}
+                      </select>
+                      {errors.subjectId && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.subjectId.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
 
-              <div className="mb-4">
-                <div>
-                  <label className="block text-gray-700 mb-2">Teacher</label>
-                  <select
-                    {...register("teacherId", {
-                      required: "Teacher is required",
-                    })}
-                    className="w-full p-2 border rounded"
-                  >
-                    <option value="">Select Teacher</option>
-                    {getallTeachers?.map((teacher) => (
-                      <option key={teacher._id} value={teacher._id}>
-                        {teacher.firstName} {teacher.lastName}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.teacherId && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.teacherId.message}
-                    </p>
-                  )}
-                </div>
-              </div>
+                  <div className="mb-4">
+                    <div>
+                      <label className="block text-gray-700 mb-2">
+                        Teacher
+                      </label>
+                      <select
+                        {...register("teacherId", {
+                          required: "Teacher is required",
+                        })}
+                        className="w-full p-2 border rounded"
+                      >
+                        <option value="">Select Teacher</option>
+                        {getallTeachers?.map((teacher) => (
+                          <option key={teacher._id} value={teacher._id}>
+                            {teacher.firstName} {teacher.lastName}
+                          </option>
+                        ))}
+                      </select>
+                      {errors.teacherId && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.teacherId.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
 
-              <div className="mb-4">
-                <label className="block text-gray-700 mb-2">Start Time</label>
-                <input
-                  type="datetime-local"
-                  {...register("startTime", {
-                    required: "Start time is required",
-                  })}
-                  className="w-full p-2 border rounded"
-                />
-                {errors.startTime && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.startTime.message}
-                  </p>
-                )}
-              </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 mb-2">
+                      Start Time
+                    </label>
+                    <input
+                      type="datetime-local"
+                      {...register("startTime", {
+                        required: "Start time is required",
+                      })}
+                      className="w-full p-2 border rounded"
+                    />
+                    {errors.startTime && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.startTime.message}
+                      </p>
+                    )}
+                  </div>
 
-              <div className="mb-4">
-                <label className="block text-gray-700 mb-2">End Time</label>
-                <input
-                  type="datetime-local"
-                  {...register("endTime", { required: "End time is required" })}
-                  className="w-full p-2 border rounded"
-                />
-                {errors.endTime && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.endTime.message}
-                  </p>
-                )}
-              </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 mb-2">End Time</label>
+                    <input
+                      type="datetime-local"
+                      {...register("endTime", {
+                        required: "End time is required",
+                      })}
+                      className="w-full p-2 border rounded"
+                    />
+                    {errors.endTime && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.endTime.message}
+                      </p>
+                    )}
+                  </div>
 
-              <div className="flex justify-between">
-                <div>
-                  <button
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded mr-2"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-blue-500 text-white rounded"
-                  >
-                    {isEditMode ? "Update" : "Add"}
-                  </button>
-                </div>
-                {isEditMode && (
-                  <button
-                    type="button"
-                    onClick={handleDeleteEvent}
-                    className="px-4 py-2 bg-red-500 text-white rounded"
-                  >
-                    Delete
-                  </button>
-                )}
+                  <div className="flex justify-between">
+                    <div>
+                      <button
+                        type="button"
+                        onClick={() => setIsModalOpen(false)}
+                        className="px-4 py-2 bg-gray-300 text-gray-700 rounded mr-2"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-4 py-2 bg-blue-500 text-white rounded"
+                      >
+                        {isEditMode ? "Update" : "Add"}
+                      </button>
+                    </div>
+                    {isEditMode && (
+                      <button
+                        type="button"
+                        onClick={handleDeleteEvent}
+                        className="px-4 py-2 bg-red-500 text-white rounded"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
+                </form>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
+            </div>
+          ) : ""}
     </div>
   );
 };
