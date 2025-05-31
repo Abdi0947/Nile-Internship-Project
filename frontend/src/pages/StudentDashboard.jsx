@@ -1,27 +1,47 @@
 import React, { useEffect, useState } from "react";
 import TopNavbar from "../components/Topnavbar";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FiBookOpen, FiClipboard, FiCalendar, FiClock, FiBarChart2, FiAward, FiFileText, FiCheckSquare, FiUpload } from "react-icons/fi";
+import {getAllClasses} from '../features/Class.js'
+import {
+  getAssignmentsByTeacherId,
+} from "../features/Assignment";
 
 function StudentDashboard() {
+  const dispatch = useDispatch();
+  const [courseProgress, setCourseProgress] = useState([]);
   const { Authuser } = useSelector((state) => state.auth);
+  const { classes } = useSelector((state) => state.Class);
+
+  const yourClass = classes?.filter(
+    (item) => item?._id === Authuser?.classId
+  );
+  const mysubjects = yourClass[0]?.subject?.map((el) => ({
+    id: el?._id,
+    name: el?.SubjectName,
+    progress: 75,
+    grade: "A-",
+  }));
+  
   
   // Mock data - would be replaced with actual data from API
+
+  useEffect(()=> {
+    dispatch(getAllClasses())
+    setCourseProgress(mysubjects)
+  }, [dispatch])
+
+  console.log(yourClass);
   const [stats, setStats] = useState({
-    courses: 6,
+    courses: yourClass[0]?.subject?.length,
     assignments: 9,
     completedAssignments: 5,
-    averageGrade: 87.5
+    averageGrade: 87.5,
   });
   
-  const [courseProgress] = useState([
-    { id: 1, name: "Mathematics", progress: 75, grade: "A-" },
-    { id: 2, name: "Science", progress: 82, grade: "B+" },
-    { id: 3, name: "History", progress: 69, grade: "B" },
-    { id: 4, name: "English Literature", progress: 92, grade: "A" }
-  ]);
+  
   
   const [upcomingAssignments] = useState([
     {
@@ -327,7 +347,7 @@ function StudentDashboard() {
             
             <div className="p-6">
               <div className="divide-y divide-gray-100">
-                {courseProgress.map((course) => (
+                {courseProgress?.map((course) => (
                   <div key={course.id} className="py-4 first:pt-0 last:pb-0">
                     <div className="flex items-center justify-between mb-2">
                       <div>

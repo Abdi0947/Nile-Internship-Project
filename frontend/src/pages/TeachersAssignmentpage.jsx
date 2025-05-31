@@ -17,7 +17,7 @@ function TeachersAssignmentpage() {
   const { Authuser } = useSelector((state) => state.auth);
   const { teacherDetails } = useSelector((state) => state.Teacher);
   const { assignments, isLoading } = useSelector((state) => state.Assignment);
-  const teacheId = Authuser.id || Authuser._id;
+  const teacheId = Authuser?.id || Authuser?._id;
   const [assignmentsData, setAssignments] = useState([]);
   const [activeTab, setActiveTab] = useState("all"); // 'all', 'pending', 'graded'
   const [showAddModal, setShowAddModal] = useState(false);
