@@ -120,7 +120,6 @@ const Login = () => {
         } else if (login.rejected.match(resultAction)) {
           const errorMessage = resultAction.payload || "Invalid email or password. Please try again.";
           setLoginError(errorMessage);
-          toast.error('Login failed: ' + errorMessage);
         }
       } catch (error) {
         console.error("Login attempt error:", error);
