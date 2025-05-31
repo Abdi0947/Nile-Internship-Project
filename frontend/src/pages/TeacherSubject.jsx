@@ -12,7 +12,7 @@ function TeacherSubject() {
   const dispatch = useDispatch();
   
   const { Authuser } = useSelector((state) => state.auth);
-  const { subjects } = useSelector((state) => state.Subject);
+  const { subjects} = useSelector((state) => state.Subject);
   const {className, setClassName} = useState('')
   console.log(subjects.SubjectName);
   const subjectId = Authuser.subject;

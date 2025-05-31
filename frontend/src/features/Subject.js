@@ -55,25 +55,25 @@ const SubjectSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(getAllSubjects.pending, (state) => {
-        state.loading = true;
+        state.isLoading = true;
       })
       .addCase(getAllSubjects.fulfilled, (state, action) => {
         state.subjects = action.payload;
-        state.loading = false;
+        state.isLoading = false;
       })
       .addCase(getAllSubjects.rejected, (state, action) => {
-        state.loading = false;
+        state.isLoading = false;
         state.error = action.payload;
       })
       .addCase(getSubjectById.pending, (state) => {
-        state.loading = true;
+        state.isLoading = true;
       })
       .addCase(getSubjectById.fulfilled, (state, action) => {
         state.subjects = action.payload;
-        state.loading = false;
+        state.isLoading = false;
       })
       .addCase(getSubjectById.rejected, (state, action) => {
-        state.loading = false;
+        state.isLoading = false;
         state.error = action.payload;
       });
   },

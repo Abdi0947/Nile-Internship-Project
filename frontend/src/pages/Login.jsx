@@ -519,7 +519,7 @@ const Login = () => {
                 <motion.button
                   variants={itemVariants}
                   type="button"
-                  className={`w-full flex items-center justify-center gap-3 py-2.5 rounded-lg font-semibold shadow transition-all duration-200 border ${
+                  className={`w-full flex items-center justify-center gap-3 rounded-lg font-semibold shadow transition-all duration-200 border ${
                     darkMode
                       ? "bg-gray-900 border-gray-700 text-white hover:bg-gray-700"
                       : "bg-white border-gray-300 text-gray-800 hover:bg-gray-100"
