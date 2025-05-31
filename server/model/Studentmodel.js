@@ -70,6 +70,8 @@ const StudentSchema = new mongoose.Schema(
       enum: ["active", "graduated", "suspended"],
       default: "active",
     },
+    passwordResetToken: String,
+    passwordResetExpires: Date,
   },
   { timestamps: true }
 );

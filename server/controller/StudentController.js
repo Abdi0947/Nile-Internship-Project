@@ -1,13 +1,16 @@
 const Student = require("../model/Studentmodel");
+const Teacher = require("../model/Teachermodel");
+const User = require("../model/Usermodel");
 const Grade = require("../model/Grade");
 const Class = require("../model/Classmodel");
+const bcrypt = require("bcryptjs");
 const generator = require("generate-password");
 const cloudinary = require("../lib/Cloudinary");
 const crypto = require("crypto");
 const sendEmail = require("../lib/email");
 
 // Add this email template function at the top of the file
-const getWelcomeEmailTemplate = (user) => `
+const getWelcomeEmailTemplate = (newStudent, password) => `
 <!DOCTYPE html>
 <html>
 <head>
@@ -29,13 +32,13 @@ const getWelcomeEmailTemplate = (user) => `
             <h1>Welcome to Student Management System! 🎓</h1>
         </div>
         <div class="content">
-            <h2>Hello ${user.firstName} ${user.lastName},</h2>
+            <h2>Hello ${newStudent.firstName} ${newStudent.lastName},</h2>
             <p>Welcome to our platform! We're excited to have you join our community.</p>
             <p>Your account has been successfully created with the following details:</p>
             <ul>
-                <li>Email: ${user.email}</li>
-                <li>Password: ${user.password}</li>
-                <li>Role: ${user.role}</li>
+                <li>Email: ${newStudent.email}</li>
+                <li>Password: ${password}</li>
+                <li>Role: ${newStudent.role}</li>
                 <li>Account Created: ${new Date().toLocaleDateString()}</li>
             </ul>
             <p>To get started, please click the button below:</p>
@@ -75,6 +78,24 @@ module.exports.UpdateProfile = async (req, res) => {
         .status(400)
         .json({ error: "Please provide all neccessary information" });
     }
+    const user = await User.findOne({ email });
+    const student = await Student.findOne({ email });
+    const teacher = await Teacher.findOne({ email });
+
+    let foundUser;
+    if (student) {
+      foundUser = student;
+    } else if (teacher) {
+      foundUser = teacher;
+    } else if (user) {
+      foundUser = user;
+    }
+
+    if (foundUser) {
+      return res
+        .status(400)
+        .json({ error: "User already exist with this email!" });
+    }
 
     const password = generator.generate({
       length: 8,
@@ -84,6 +105,7 @@ module.exports.UpdateProfile = async (req, res) => {
       lowercase: true,
       strict: true, // ensures at least one character from each pool
     });
+    const hashedpassword = await bcrypt.hash(password, 10);
 
     console.log(password);
 
@@ -95,7 +117,7 @@ module.exports.UpdateProfile = async (req, res) => {
       address,
       Dateofbirth,
       gender,
-      password,
+      password: hashedpassword,
       classId: grade,
       parentPhone,
       parentName,
@@ -130,7 +152,7 @@ module.exports.UpdateProfile = async (req, res) => {
       email: newStudent.email,
       subject: "Welcome to Portal System! 🎓",
       message: `Welcome ${newStudent.firstName}! Your account has been successfully created.`,
-      html: getWelcomeEmailTemplate(newStudent),
+      html: getWelcomeEmailTemplate(newStudent, password),
     });
     res.status(201).json({
       message: "Student profile created successfully",

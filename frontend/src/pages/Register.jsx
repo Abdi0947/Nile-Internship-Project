@@ -183,7 +183,7 @@ const Register = () => {
           const userRole = resultAction.payload.user.role.toLowerCase();
           switch (userRole) {
             case 'admin':
-              navigate("/admin/home");
+              navigate('/admin/home');
               break;
             case 'teacher':
               navigate('/teacher');

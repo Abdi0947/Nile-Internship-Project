@@ -63,6 +63,8 @@ const TeacherSchema = new mongoose.Schema(
         ref: "TeacherAttendance",
       },
     ],
+    passwordResetToken: String,
+    passwordResetExpires: Date,
   },
   { timestamps: true }
 );

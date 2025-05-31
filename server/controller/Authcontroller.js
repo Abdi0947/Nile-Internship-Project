@@ -101,74 +101,6 @@ const getPasswordResetEmailTemplate = (user, resetURL) => `
 </html>
 `;
 
-// Add this email template for teacher approval notification
-const getTeacherApprovalEmailTemplate = (
-  user,
-  isApproved,
-  rejectionReason = ""
-) => `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Account ${isApproved ? "Approved" : "Rejected"}</title>
-    <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: linear-gradient(135deg, ${
-          isApproved ? "#4ade80" : "#ef4444"
-        } 0%, ${
-  isApproved ? "#22c55e" : "#dc2626"
-} 100%); padding: 30px; text-align: center; color: white; }
-        .content { padding: 20px; background: #f9fafb; }
-        .button { display: inline-block; padding: 12px 24px; background: ${
-          isApproved ? "#4ade80" : "#ef4444"
-        }; color: white; text-decoration: none; border-radius: 5px; }
-        .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>Teacher Account ${isApproved ? "Approved" : "Rejected"} ${
-  isApproved ? "🎉" : "❌"
-}</h1>
-        </div>
-        <div class="content">
-            <h2>Hello ${user.firstName} ${user.lastName},</h2>
-            <p>${
-              isApproved
-                ? "Your teacher account has been approved! You can now log in and access the system."
-                : "We regret to inform you that your teacher account application has been rejected."
-            }</p>
-            ${
-              !isApproved && rejectionReason
-                ? `<p><strong>Reason for rejection:</strong> ${rejectionReason}</p>`
-                : ""
-            }
-            ${
-              isApproved
-                ? `
-            <p>You can now log in to your account and start using the system.</p>
-            <p style="text-align: center;">
-                <a href="http://localhost:5173/login" class="button">Login to Your Account</a>
-            </p>
-            `
-                : `
-            <p>If you believe this is a mistake or would like to reapply, please contact the administration.</p>
-            `
-            }
-        </div>
-        <div class="footer">
-            <p>This is an automated message, please do not reply to this email.</p>
-            <p>© ${new Date().getFullYear()} Student Management System. All rights reserved.</p>
-        </div>
-    </div>
-</body>
-</html>
-`;
-
 module.exports.signup = async (req, res) => {
   try {
     const { firstName, lastName, email, password, role, ProfilePic } = req.body;
@@ -376,8 +308,16 @@ module.exports.login = async (req, res) => {
         error: "No account associated with this account. Please sign up first.",
       });
     }
+    const isMatch = await bcrypt.compare(password, foundUser.password);
+
+    if (!isMatch) {
+      return res.status(404).json({
+        error: "Incorrect password!",
+      });
+    }
 
     const tokenGenerated = await generateToken(foundUser, res);
+    
 
     return res.status(200).json({
       message: "Google login successful",
@@ -513,30 +453,42 @@ module.exports.updateProfile = async (req, res) => {
 };
 
 module.exports.ForgotPassword = async (req, res) => {
+  const { email } = req.body;
   try {
-    const user = await User.findOne({ email: req.body.email });
-    if (!user) {
+    const user = await User.findOne({ email });
+    const teacher = await Teacher.findOne({ email });
+    const student = await Student.findOne({ email });
+
+    let foundUser;
+    if (student) {
+      foundUser = student;
+    } else if (teacher) {
+      foundUser = teacher;
+    } else if (user) {
+      foundUser = user;
+    }
+
+    if (!foundUser) {
       return res.status(404).json({
-        status: "error",
-        message: "There is no user with that email address.",
+        error: "No account associated with this account. Please sign up first.",
       });
     }
 
     // Generate reset token
     const tokens = crypto.randomBytes(32).toString("hex");
-    user.passwordResetToken = tokens;
-    user.passwordResetExpires = Date.now() + 3600000; // 1 hour
-    await user.save({ validateBeforeSave: false });
+    foundUser.passwordResetToken = tokens;
+    foundUser.passwordResetExpires = Date.now() + 3600000; // 1 hour
+    await foundUser.save({ validateBeforeSave: false });
 
     // Create reset URL
     const resetURL = `http://localhost:5173/reset-password/${tokens}`;
 
     try {
       await sendEmail({
-        email: user.email,
+        email: foundUser.email,
         subject: "Password Reset Request - Student Management System",
         message: `To reset your password, please click this link: ${resetURL}`,
-        html: getPasswordResetEmailTemplate(user, resetURL),
+        html: getPasswordResetEmailTemplate(foundUser, resetURL),
       });
 
       res.status(200).json({
@@ -545,9 +497,9 @@ module.exports.ForgotPassword = async (req, res) => {
       });
     } catch (emailError) {
       // If email sending fails, reset the token
-      user.passwordResetToken = undefined;
-      user.passwordResetExpires = undefined;
-      await user.save({ validateBeforeSave: false });
+      foundUser.passwordResetToken = undefined;
+      foundUser.passwordResetExpires = undefined;
+      await foundUser.save({ validateBeforeSave: false });
 
       console.error("Password reset email sending failed:", emailError);
       return res.status(500).json({
@@ -569,12 +521,30 @@ module.exports.ResetPassword = async (req, res) => {
   try {
     const { tokens } = req.params;
 
+    
     const user = await User.findOne({
       passwordResetToken: tokens,
       passwordResetExpires: { $gt: Date.now() },
     });
+    const teacher = await Teacher.findOne({
+      passwordResetToken: tokens,
+      passwordResetExpires: { $gt: Date.now() },
+    });
+    const student = await Student.findOne({
+      passwordResetToken: tokens,
+      passwordResetExpires: { $gt: Date.now() },
+    });
 
-    if (!user) {
+    let foundUser;
+    if (student) {
+      foundUser = student;
+    } else if (teacher) {
+      foundUser = teacher;
+    } else if (user) {
+      foundUser = user;
+    }
+
+    if (!foundUser) {
       return res.status(400).json({
         status: "error",
         message: "Token is invalid or has expired",
@@ -582,10 +552,10 @@ module.exports.ResetPassword = async (req, res) => {
     }
     const hashed = await bcrypt.hash(req.body.password, 10);
 
-    user.password = hashed;
-    user.passwordResetToken = undefined;
-    user.passwordResetExpires = undefined;
-    await user.save();
+    foundUser.password = hashed;
+    foundUser.passwordResetToken = undefined;
+    foundUser.passwordResetExpires = undefined;
+    await foundUser.save();
 
     res.status(200).json({
       status: "Password successfully changed!",

@@ -1,15 +1,16 @@
 const Teacher = require("../model/Teachermodel");
+const Student = require("../model/Studentmodel");
 const Cloudinary = require("../lib/Cloudinary");
 const generator = require("generate-password");
+const bcrypt = require("bcryptjs");
 const User = require("../model/Usermodel");
-const Class = require("../model/Classmodel")
-const Subject = require("../model/Subjectmodel")
+const Class = require("../model/Classmodel");
+const Subject = require("../model/Subjectmodel");
 const crypto = require("crypto");
 const sendEmail = require("../lib/email");
 
-
 // Add this email template function at the top of the file
-const getWelcomeEmailTemplate = (user) => `
+const getWelcomeEmailTemplate = (newTeacher, password) => `
 <!DOCTYPE html>
 <html>
 <head>
@@ -31,13 +32,13 @@ const getWelcomeEmailTemplate = (user) => `
             <h1>Welcome to Student Management System! 🎓</h1>
         </div>
         <div class="content">
-            <h2>Hello ${user.firstName} ${user.lastName},</h2>
+            <h2>Hello ${newTeacher.firstName} ${newTeacher.lastName},</h2>
             <p>Welcome to our platform! We're excited to have you join our community.</p>
             <p>Your account has been successfully created with the following details:</p>
             <ul>
-                <li>Email: ${user.email}</li>
-                <li>Password: ${user.password}</li>
-                <li>Role: ${user.role}</li>
+                <li>Email: ${newTeacher.email}</li>
+                <li>Password: ${password}</li>
+                <li>Role: ${newTeacher.role}</li>
                 <li>Account Created: ${new Date().toLocaleDateString()}</li>
             </ul>
             <p>To get started, please click the button below:</p>
@@ -99,7 +100,6 @@ const passwordChanged = (user) => `
 `;
 
 module.exports.createTeacherprofile = async (req, res) => {
-  console.log(req.body)
   try {
     const {
       Firstname,
@@ -124,12 +124,29 @@ module.exports.createTeacherprofile = async (req, res) => {
         .status(404)
         .json({ error: "Please provide all necessary information" });
     }
-    const isTeacher = await Teacher.findOne({email: email})
-    if(isTeacher) {
+
+    const user = await User.findOne({ email });
+    const student = await Student.findOne({ email });
+
+    let foundUser;
+    if (student) {
+      foundUser = student;
+    } else if (user) {
+      foundUser = user;
+    }
+
+    if (foundUser) {
+      return res
+        .status(400)
+        .json({ error: "User already exist with this email!" });
+    }
+
+    const isTeacher = await Teacher.findOne({ email: email });
+    if (isTeacher) {
       return res.status(404).json({ error: "Teacher already registered!" });
     }
     const isSubject = await await Subject.findOne({
-      SubjectName: subjects
+      SubjectName: subjects,
     });
     if (isSubject) {
       return res.status(404).json({ error: "Subject already Taken!" });
@@ -172,11 +189,12 @@ module.exports.createTeacherprofile = async (req, res) => {
     });
 
     console.log(password);
+    const hashedpassword = await bcrypt.hash(password, 10);
     const newTeacher = await Teacher.create({
       firstName: Firstname,
       lastName: Lastname,
       email: email,
-      password: password,
+      password: hashedpassword,
       phone,
       Address: address,
       Dateofbirth: dateOfBirth,
@@ -185,7 +203,7 @@ module.exports.createTeacherprofile = async (req, res) => {
       attendance: attendance,
       assignedClasses: assignedClasses,
       qualification: qualification,
-      experience: experience
+      experience: experience,
     });
 
     // 2. Create the Class without the subject yet
@@ -193,22 +211,19 @@ module.exports.createTeacherprofile = async (req, res) => {
     if (!oldClass) {
       const newClass = await Class.create({
         ClassName: Classes,
-        teacherId: [newTeacher._id], 
+        teacherId: [newTeacher._id],
         subject: [],
         timetable: [],
       });
 
-      
       const subject = await Subject.create({
         SubjectName: subjects,
         ClassId: newClass._id,
       });
 
-      
       newClass.subject.push(subject._id);
       await newClass.save();
 
-      
       newTeacher.subjects = subject._id;
       await newTeacher.save();
 
@@ -223,19 +238,18 @@ module.exports.createTeacherprofile = async (req, res) => {
     console.log(oldClass.teacherId);
     oldClass.teacherId.push(newTeacher._id);
     await oldClass.save();
-    
+
     const subject = await Subject.create({
       SubjectName: subjects,
       ClassId: oldClass._id,
     });
 
-    
     oldClass.subject.push(subject._id);
     await oldClass.save();
-    
+
     newTeacher.subjects = subject._id;
     await newTeacher.save();
-    
+
     newTeacher.classId = oldClass._id;
     await newTeacher.save();
 
@@ -243,7 +257,7 @@ module.exports.createTeacherprofile = async (req, res) => {
       email: newTeacher.email,
       subject: "Welcome to Student Management System! 🎓",
       message: `Welcome ${newTeacher.firstName}! Your account has been successfully created.`,
-      html: getWelcomeEmailTemplate(newTeacher),
+      html: getWelcomeEmailTemplate(newTeacher, password),
     });
 
     res.status(201).json({
@@ -263,7 +277,6 @@ module.exports.getTeacher = async (req, res) => {
     const teachers = await Teacher.find()
       .populate("subjects")
       .populate("classId");
-     
 
     res.status(200).json(teachers);
   } catch (error) {
@@ -276,7 +289,7 @@ module.exports.getTeacherById = async (req, res) => {
   try {
     const teacher = await Teacher.findById(TeacherId)
       .populate("subjects")
-      .populate("classId")
+      .populate("classId");
 
     if (!teacher) {
       return res.status(404).json({ error: "Teacher not found" });
@@ -348,7 +361,7 @@ module.exports.updateTeacher = async (req, res) => {
       joinDate,
       classId: classDoc._id,
       subjects: subjectDoc._id,
-      experience
+      experience,
     };
 
     // 🛠️ Update teacher
@@ -392,17 +405,16 @@ module.exports.deleteTeacher = async (req, res) => {
       (sId) => !sId.equals(TeacherId)
     );
     await classDoc.save();
-    
 
     classDoc.subject = classDoc.subject.filter(
       (sId) => !sId.equals(subjectDoc._id)
     );
     await classDoc.save();
-    if(!classDoc) {
+    if (!classDoc) {
       return res.status(404).json({ error: "Class not found" });
     }
 
-    if(!subjectDoc) {
+    if (!subjectDoc) {
       return res.status(404).json({ error: "Subject not found" });
     }
 
@@ -433,55 +445,57 @@ module.exports.searchTeacher = async (req, res) => {
 };
 
 module.exports.editProfile = async (req, res) => {
-  console.log(req.body)
+  console.log(req.body);
   console.log(req.params.TeacherId);
   try {
-    const {firstName, lastName, email, phone, address} = req.body;
-    const oldTeacher = await Teacher.findOne({_id: req.params.TeacherId});
+    const { firstName, lastName, email, phone, address } = req.body;
+    const oldTeacher = await Teacher.findOne({ _id: req.params.TeacherId });
     oldTeacher.firstName = firstName;
-    await oldTeacher.save()
+    await oldTeacher.save();
 
     oldTeacher.lastName = lastName;
-    await oldTeacher.save()
+    await oldTeacher.save();
 
     oldTeacher.email = email;
-    await oldTeacher.save()
+    await oldTeacher.save();
 
     oldTeacher.phone = phone;
-    await oldTeacher.save()
+    await oldTeacher.save();
 
     oldTeacher.Address = address;
-    await oldTeacher.save()
+    await oldTeacher.save();
 
     return res.status(200).json(oldTeacher);
   } catch (error) {
     console.error("Update error:", error);
     res.status(500).json({ message: "Server error while updating teacher" });
   }
-}
+};
 
 module.exports.editPassword = async (req, res) => {
-  
   try {
     const id = req.params.TeacherId;
-    const {currentPassword, newPassword, confirmPassword} = req.body
+    const { currentPassword, newPassword, confirmPassword } = req.body;
 
     if (!currentPassword || !newPassword || !confirmPassword) {
       return res.status(404).json({ error: "Provide all infromation" });
     }
 
-    const oldPassword = await Teacher.findOne({_id: id})
+    const oldPassword = await Teacher.findOne({ _id: id });
 
-    
     if (!oldPassword) {
       return res.status(404).json({ error: "Teacher not found" });
     }
 
-    if(oldPassword.password !== currentPassword) {
-      return res.status(404).json({ error: "Wrong current password. Please enter correct password" });
+    if (oldPassword.password !== currentPassword) {
+      return res
+        .status(404)
+        .json({
+          error: "Wrong current password. Please enter correct password",
+        });
     }
 
-    oldPassword.password = confirmPassword
+    oldPassword.password = confirmPassword;
     await oldPassword.save();
 
     await sendEmail({
@@ -490,11 +504,10 @@ module.exports.editPassword = async (req, res) => {
       message: `Hello ${oldPassword.firstName}, your password was successfully updated. If you did not request this change, please contact support immediately.`,
       html: passwordChanged(oldPassword),
     });
-    
 
     return res.status(200).json(oldPassword);
   } catch (error) {
     console.error("Update error:", error);
     res.status(500).json({ message: "Server error while updating teacher" });
   }
-}
+};
