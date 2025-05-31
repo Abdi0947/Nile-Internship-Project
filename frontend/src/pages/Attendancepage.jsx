@@ -9,7 +9,11 @@ import toast from 'react-hot-toast';
 function Attendancepage() {
   const dispatch = useDispatch();
   const { allAttendance, isAttendanceLoading } = useSelector(state => state.attendance);
+  const { Authuser } = useSelector((state) => state.auth);
   const { students } = useSelector(state => state.Student);
+  const yourStudent = students?.filter(
+    (item) => item?.classId?._id === Authuser?.classId
+  );
   const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [selectedClass, setSelectedClass] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('');
@@ -36,18 +40,20 @@ function Attendancepage() {
   }, [dispatch]);
 
   useEffect(() => {
-    if (students && students.length > 0 && selectedClass) {
+    if (yourStudent && yourStudent?.length > 0 && selectedClass) {
       // In a real app, filter students by class
-      const filteredStudents = students.filter(student => 
-        student.status === 'active' // Only include active students
+      const filteredStudents = yourStudent?.filter(
+        (student) => student?.status === "active" // Only include active students
       );
-      
-      setAttendanceData(filteredStudents.map(student => ({
-        studentId: student._id,
-        studentName: `${student.firstName} ${student.lastName}`,
-        status: 'present',
-        note: ''
-      })));
+
+      setAttendanceData(
+        filteredStudents.map((student) => ({
+          studentId: student._id,
+          studentName: `${student.firstName} ${student.lastName}`,
+          status: "present",
+          note: "",
+        }))
+      );
     }
   }, [students, selectedClass]);
 
