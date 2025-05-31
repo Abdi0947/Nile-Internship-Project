@@ -1,4 +1,5 @@
 const User = require("../model/Usermodel");
+const { OAuth2Client } = require("google-auth-library");
 const Teacher = require("../model/Teachermodel");
 const Student = require("../model/Studentmodel");
 const bcrypt = require("bcryptjs");
@@ -6,6 +7,9 @@ const generateToken = require("../lib/Tokengenerator");
 const Cloudinary = require("../lib/Cloudinary");
 const crypto = require("crypto");
 const sendEmail = require("../lib/email");
+require("dotenv").config();
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Add this email template function at the top of the file
 const getWelcomeEmailTemplate = (user) => `
@@ -303,6 +307,73 @@ module.exports.signup = async (req, res) => {
   }
 };
 
+module.exports.googleLogin = async (req, res) => {
+  console.log(req.body);
+  const { token } = req.body;
+  
+  try {
+    if (!token) {
+      return res.status(400).json({ error: "Google token missing" });
+    }
+
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const email = payload.email;
+    console.log("[Google Login] Verifying token for:", email);
+
+    // Try to find the user in all collections
+    const user = await User.findOne({ email });
+    const teacher = await Teacher.findOne({ email });
+    const student = await Student.findOne({ email });
+
+    let foundUser;
+    if (student) {
+      foundUser = student;
+    } else if (teacher) {
+      foundUser = teacher;
+    } else if (user) {
+      foundUser = user;
+    }
+
+    if (!foundUser) {
+      return res
+        .status(404)
+        .json({
+          error:
+            "No account associated with this Google account. Please sign up first.",
+        });
+    }
+
+    const tokenGenerated = await generateToken(foundUser, res);
+
+    return res.status(200).json({
+      message: "Google login successful",
+      user: {
+        id: foundUser._id,
+        firstName: foundUser.firstName,
+        lastName: foundUser.lastName,
+        email: foundUser.email,
+        role: foundUser.role,
+        ProfilePic: foundUser.ProfilePic,
+        approvalStatus: foundUser.approvalStatus,
+        token: tokenGenerated,
+        ...(foundUser.phone && { phone: foundUser.phone }),
+        ...(foundUser.Address && { address: foundUser.Address }),
+        ...(foundUser.subjects && { subject: foundUser.subjects }),
+        ...(foundUser.classId && { classId: foundUser.classId }),
+      },
+    });
+  } catch (error) {
+    console.error("[Google Login Error]:", error.message);
+    return res
+      .status(500)
+      .json({ error: "Google login failed: " + error.message });
+  }
+};
 module.exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -316,89 +387,41 @@ module.exports.login = async (req, res) => {
     const teacher = await Teacher.findOne({ email });
     const student = await Student.findOne({ email });
 
-    if (!user && !teacher && !student) {
-      console.log("[Auth Debug] No user found with email:", email);
-      return res.status(400).json({ error: "No user found with this email" });
-    }
-
+    let foundUser;
     if (student) {
-      if (student.password !== password) {
-        return res.status(400).json({ error: "Invalid password" });
-      }
-      const token = await generateToken(student, res);
-      console.log("[Auth Debug] Login successful, token generated");
+      foundUser = student;
+    } else if (teacher) {
+      foundUser = teacher;
+    } else if (user) {
+      foundUser = user;
+    }
 
-      console.log(student);
-      return res.status(200).json({
-        message: "login successful",
-        user: {
-          id: student._id,
-          firstName: student.firstName,
-          lastName: student.lastName,
-          email: student.email,
-          password: student.password,
-          role: student.role,
-          address: student.Address,
-          phone: student.phone,
-          ProfilePic: student.ProfilePic,
-          approvalStatus: student.approvalStatus,
-          token,
-        },
+    if (!foundUser) {
+      return res.status(404).json({
+        error:
+          "No account associated with this account. Please sign up first.",
       });
     }
 
-    if (teacher) {
-      if (teacher.password !== password) {
-        return res.status(400).json({ error: "Invalid password" });
-      }
-      const token = await generateToken(teacher, res);
-      console.log("[Auth Debug] Login successful, token generated");
+    const tokenGenerated = await generateToken(foundUser, res);
 
-      console.log(teacher);
-      return res.status(200).json({
-        message: "login successful",
-        user: {
-          id: teacher._id,
-          firstName: teacher.firstName,
-          lastName: teacher.lastName,
-          email: teacher.email,
-          classId: teacher.classId,
-          subject: teacher.subjects,
-          password: teacher.password,
-          role: teacher.role,
-          address: teacher.Address,
-          phone: teacher.phone,
-          ProfilePic: teacher.ProfilePic,
-          approvalStatus: teacher.approvalStatus,
-          token,
-        },
-      });
-    }
-
-    if (user) {
-      const hasedpassword = await bcrypt.compare(password, user.password);
-
-      if (!hasedpassword) {
-        return res.status(400).json({ error: "Invalid credentials" });
-      }
-
-      const token = await generateToken(user, res);
-      console.log("[Auth Debug] Login successful, token generated");
-
-      return res.status(200).json({
-        message: "login successful",
-        user: {
-          id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          role: user.role,
-          ProfilePic: user.ProfilePic,
-          approvalStatus: user.approvalStatus,
-          token,
-        },
-      });
-    }
+    return res.status(200).json({
+      message: "Google login successful",
+      user: {
+        id: foundUser._id,
+        firstName: foundUser.firstName,
+        lastName: foundUser.lastName,
+        email: foundUser.email,
+        role: foundUser.role,
+        ProfilePic: foundUser.ProfilePic,
+        approvalStatus: foundUser.approvalStatus,
+        token: tokenGenerated,
+        ...(foundUser.phone && { phone: foundUser.phone }),
+        ...(foundUser.Address && { address: foundUser.Address }),
+        ...(foundUser.subjects && { subject: foundUser.subjects }),
+        ...(foundUser.classId && { classId: foundUser.classId }),
+      },
+    });
   } catch (error) {
     console.error("[Auth Debug] Login error:", error);
     res.status(400).json({
@@ -406,6 +429,7 @@ module.exports.login = async (req, res) => {
     });
   }
 };
+
 
 module.exports.logout = async (req, res) => {
   try {

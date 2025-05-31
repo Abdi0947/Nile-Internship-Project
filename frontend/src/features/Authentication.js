@@ -82,6 +82,48 @@ export const login = createAsyncThunk(
   }
 );
 
+export const googleLogin = createAsyncThunk(
+  "auth/googleLogin",
+
+  async (tokenId, { rejectWithValue }) => {
+    console.log(tokenId);
+    try {
+      const response = await axiosInstance.post(
+        "auth/googleLogin",
+        { token: tokenId },
+        { withCredentials: true }
+      );
+
+      if (response.data && response.data.user) {
+        const user = response.data.user;
+
+        // Ensure token is set
+        if (response.data.token && !user.token) {
+          user.token = response.data.token;
+        }
+
+        // Store in localStorage/sessionStorage
+        const rememberMe = true; // or get from cookie/setting
+        storeUserData(user, rememberMe);
+        const storage = rememberMe ? localStorage : sessionStorage;
+        if (response.data.token) {
+          storage.setItem("token", response.data.token);
+        }
+
+        return { ...response.data, rememberMe };
+      }
+
+      throw new Error("Invalid Google response.");
+    } catch (error) {
+      console.error("Google Login Error:", error);
+      return rejectWithValue(
+        error.response?.data?.message || "Google login failed"
+      );
+    }
+  }
+);
+
+
 // Logout
 export const logout = createAsyncThunk(
   "auth/logout",
@@ -184,65 +226,76 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-     
+
       .addCase(signup.pending, (state) => {
         state.isUserSignup = true;
       })
       .addCase(signup.fulfilled, (state, action) => {
         state.isUserSignup = false;
-        state.Authuser = action.payload.savedUser; 
-        state.token = action.payload.token; 
+        state.Authuser = action.payload.savedUser;
+        state.token = action.payload.token;
         // toast.success("Signup successful!")
       })
       .addCase(signup.rejected, (state, action) => {
         state.isUserSignup = false;
-        toast.error(action.payload || "Error in signup")
+        toast.error(action.payload || "Error in signup");
       })
 
-      
       .addCase(login.pending, (state) => {
         state.isUserLogin = true;
       })
       .addCase(login.fulfilled, (state, action) => {
         state.isUserLogin = false;
-        state.Authuser = action.payload.user; 
+        state.Authuser = action.payload.user;
         state.token = action.payload.token;
         state.rememberMe = action.payload.rememberMe;
         // toast.success("Login successfully")
       })
       .addCase(login.rejected, (state, action) => {
         state.isUserLogin = false;
-        toast.error(action.payload || "Error in login")
+        toast.error(action.payload || "Error in login");
       })
 
-    
       .addCase(logout.fulfilled, (state) => {
         state.Authuser = null;
         state.token = null;
         // Don't reset rememberMe preference
         // toast.success("Successfully logged out!");
       })
-      .addCase(logout.rejected, (state, action) => {
-     
-      })
+      .addCase(logout.rejected, (state, action) => {})
 
       .addCase(updateUserInfo.pending, (state) => {
         state.isUpdatingUserInfo = true;
       })
-      
+
       .addCase(updateUserInfo.fulfilled, (state, action) => {
         state.isUpdatingUserInfo = false;
         state.Authuser = {
           ...state.Authuser,
-          ...action.payload
+          ...action.payload,
         };
         // toast.success("Profile information updated successfully");
       })
-      
+
       .addCase(updateUserInfo.rejected, (state, action) => {
         state.isUpdatingUserInfo = false;
         toast.error(action.payload || "Failed to update profile information");
       })
+      .addCase(googleLogin.pending, (state) => {
+        state.isUserLogin = true;
+      })
+      .addCase(googleLogin.fulfilled, (state, action) => {
+        state.isUserLogin = false;
+        state.Authuser = action.payload.user;
+        state.token = action.payload.token;
+        state.rememberMe = action.payload.rememberMe;
+        toast.success("Google login successful");
+      })
+      .addCase(googleLogin.rejected, (state, action) => {
+        state.isUserLogin = false;
+        toast.error(action.payload || "Google login failed");
+      });
+      
 
       
 

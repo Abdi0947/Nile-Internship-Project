@@ -5,6 +5,7 @@ import App from './App.jsx'; // Make sure App is still a .jsx file if you use JS
 import store from './store/store.js'; // Assuming you have a Redux store
 import { Provider } from 'react-redux';
 import { initSessionPersistence } from './lib/sessionPersistence';
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from 'react-hot-toast';
 
 // Initialize session persistence
@@ -24,7 +25,9 @@ const AppWrapper = () => {
 
   return (
     <>
-      <App />
+      <GoogleOAuthProvider clientId="438049168106-s8iocmapck9alne527skbbofc5tligcl.apps.googleusercontent.com">
+        <App />
+      </GoogleOAuthProvider>
       <Toaster position="top-right" />
     </>
   );

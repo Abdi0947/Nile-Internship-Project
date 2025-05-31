@@ -9,13 +9,15 @@ const {
   ResetPassword,
   updateUserInfo,
   approveTeacher,
-  getPendingTeachers
+  getPendingTeachers,
+  googleLogin
 } = require("../controller/Authcontroller");
 const { protect, restrictTo, authmiddleware } = require("../middleware/Authmiddleware");
 
 // Public routes
 router.post("/signup", signup);
 router.post("/login", login);
+router.post("/googleLogin", googleLogin);
 router.post("/logout", logout);
 router.post("/forgot-password", ForgotPassword);
 router.post("/reset-password/:tokens", ResetPassword);
