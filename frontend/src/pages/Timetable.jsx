@@ -115,6 +115,7 @@ const Timetable = () => {
 
   // Handle event deletion
   const handleDeleteEvent = async () => {
+    console.log(selectedEvent.id);
     if (selectedEvent) {
       try {
         await dispatch(removeTimetable(selectedEvent.id)).unwrap();

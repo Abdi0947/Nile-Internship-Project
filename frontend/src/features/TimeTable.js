@@ -49,15 +49,21 @@ export const addTimetable = createAsyncThunk(
 
 // Remove a Timetable
 export const removeTimetable = createAsyncThunk(
-    'Timetable/deleteTimetable',
-    async (TimetableId, { rejectWithValue }) => {
-        try {
-            const response = await axiosInstance.delete(`Timetable/deleteTimetable/${TimetableId}`, { withCredentials: true });
-            return { id: TimetableId, data: response.data };
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.message || "Failed to remove Timetable");
-        }
+  "Timetable/deleteTimetable",
+  async (TimetableId, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.delete(
+        `Timetable/deleteTimetable/${TimetableId}`,
+        { withCredentials: true }
+      );
+      return { id: TimetableId, data: response.data };
+    } catch (error) {
+        console.log(error)
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to remove Timetable"
+      );
     }
+  }
 );
 
 // Update a Timetable

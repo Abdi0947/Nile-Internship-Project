@@ -71,8 +71,8 @@ module.exports.updateTimetable = async (req, res) => {
 
 module.exports.deleteTimetable = async (req, res) => {
   try {
-    const{TimeID}=req.params;
-    const deleted = await Timetable.findByIdAndDelete(TimeID);
+    const { TimetableId } = req.params;
+    const deleted = await Timetable.findByIdAndDelete(TimetableId);
     if (!deleted) return res.status(404).json({ message: 'Timetable not found' });
     res.json({ message: 'Timetable deleted successfully' });
   } catch (err) {
