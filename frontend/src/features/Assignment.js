@@ -51,10 +51,10 @@ export const createAssignment = createAsyncThunk(
 
 // ✅ Get all assignments
 export const getAllAssignments = createAsyncThunk(
-  "/Assignment/getAll",
+  "/assignment/getAll",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get("/Assignment/getAll", {
+      const response = await axiosInstance.get("/assignment/getAll", {
         withCredentials: true,
       });
       return response.data;
@@ -66,7 +66,7 @@ export const getAllAssignments = createAsyncThunk(
   }
 );
 
-// ✅ Get assignment by ID
+// Get assignment by ID
 export const getAssignmentById = createAsyncThunk(
   "/assignment/assignmentbyId",
   async (assignmentId, { rejectWithValue }) => {

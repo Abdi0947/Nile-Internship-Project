@@ -98,3 +98,19 @@ exports.getAssignmentById = async (req, res) => {
       .json({ error: "Error retrieving assignment: " + error.message });
   }
 };
+exports.getAllAssignments = async (req, res) => {
+  try {
+    const assignment = await Assignment.find()
+      .populate("ClassId")
+      .populate("subject");
+
+    res.status(200).json({
+      assignment
+    });
+  } catch (error) {
+    console.error("Error retrieving assignment by ID:", error.message);
+    res
+      .status(500)
+      .json({ error: "Error retrieving assignment: " + error.message });
+  }
+};

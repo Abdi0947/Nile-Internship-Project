@@ -5,24 +5,31 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FiBookOpen, FiClipboard, FiCalendar, FiClock, FiBarChart2, FiAward, FiFileText, FiCheckSquare, FiUpload } from "react-icons/fi";
 import {getAllClasses} from '../features/Class.js'
-import {
-  getAssignmentsByTeacherId,
-} from "../features/Assignment";
+import { getAllAssignments } from "../features/Assignment";
 
 function StudentDashboard() {
   const dispatch = useDispatch();
   const [courseProgress, setCourseProgress] = useState([]);
+  const [upcomingAssignments, setUpcomingAssignments] = useState([]);
   const { Authuser } = useSelector((state) => state.auth);
   const { classes } = useSelector((state) => state.Class);
+  const { assignments, isLoading } = useSelector((state) => state.Assignment);
 
-  const yourClass = classes?.filter(
+  const yourClass = classes?.find(
     (item) => item?._id === Authuser?.classId
   );
-  const mysubjects = yourClass[0]?.subject?.map((el) => ({
+  const mysubjects = yourClass?.subject?.map((el) => ({
     id: el?._id,
     name: el?.SubjectName,
     progress: 75,
     grade: "A-",
+  }));
+  const myAssignments = assignments?.assignment?.map((el) => ({
+    id: el?._id,
+    title: el?.title,
+    course: el?.subject?.SubjectName,
+    dueDate: new Date(el?.dueDate).toLocaleString(),
+    status: "started",
   }));
   
   
@@ -30,42 +37,22 @@ function StudentDashboard() {
 
   useEffect(()=> {
     dispatch(getAllClasses())
+    dispatch(getAllAssignments())
     setCourseProgress(mysubjects)
+    setUpcomingAssignments(myAssignments)
   }, [dispatch])
 
-  console.log(yourClass);
+  console.log(assignments);
   const [stats, setStats] = useState({
-    courses: yourClass[0]?.subject?.length,
-    assignments: 9,
+    courses: yourClass?.subject?.length,
+    assignments: assignments?.assignment?.length,
     completedAssignments: 5,
     averageGrade: 87.5,
   });
   
   
   
-  const [upcomingAssignments] = useState([
-    {
-      id: 1,
-      title: "Algebra Homework Set 4",
-      course: "Mathematics",
-      dueDate: new Date(Date.now() + 86400000 * 2), // 2 days from now
-      status: "not-started"
-    },
-    {
-      id: 2,
-      title: "Chemical Reactions Lab Report",
-      course: "Science",
-      dueDate: new Date(Date.now() + 86400000 * 4), // 4 days from now
-      status: "in-progress"
-    },
-    {
-      id: 3,
-      title: "Essay on American Revolution",
-      course: "History",
-      dueDate: new Date(Date.now() + 86400000 * 6), // 6 days from now
-      status: "not-started"
-    }
-  ]);
+  
   
   const [upcomingClasses] = useState([
     {
