@@ -136,6 +136,13 @@ function StudentDashboard() {
     if (hour < 18) return "Good Afternoon";
     return "Good Evening";
   };
+
+  if (isLoading)
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
