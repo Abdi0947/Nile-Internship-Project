@@ -16,19 +16,19 @@ function StudentDashboard() {
   const { classes } = useSelector((state) => state.Class);
   const { assignments, isLoading } = useSelector((state) => state.Assignment);
 
-  const yourClass = classes?.find(
+  let yourClass = classes?.find(
     (item) => item?._id === Authuser?.classId
   );
-  const mysubjects = yourClass?.subject?.map((el) => ({
+  let mysubjects = yourClass?.subject?.map((el) => ({
     id: el?._id,
     name: el?.SubjectName,
     progress: 75,
     grade: "A-",
   }));
-  const yourAssignment = Array.isArray(assignments?.assignment)
+  let yourAssignment = Array.isArray(assignments?.assignment)
     ? assignments.assignment.filter((el) => el?.ClassId?._id === id)
     : [];
-  const myAssignments = yourAssignment?.map((el) => ({
+  let myAssignments = yourAssignment?.map((el) => ({
     id: el?._id,
     title: el?.title,
     course: el?.subject?.SubjectName,

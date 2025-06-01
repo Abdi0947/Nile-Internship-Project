@@ -10,67 +10,32 @@ import { useEffect } from 'react';
 function AssignmentDetails() {
   const { id } = useParams();
   const assignmentId = id
-  const [assignment, setAssignment] = useState({
-    id: "",
-    title: "",
-    course: "",
-    description: "",
-    dueDate: "", // 2 days from now
-    status: "not-started",
-    attachments: [
-      { name: `.pdf`, size: "2.4 MB" },
-    ],
-    requirements: [
-      "Show all work and calculations",
-      "Include units where applicable",
-      "Submit as PDF or DOC format",
-      "Maximum file size: 10MB",
-    ],
-    gradingCriteria: [
-      { criterion: "Completeness", weight: "30%" },
-      { criterion: "Accuracy", weight: "40%" },
-      { criterion: "Presentation", weight: "20%" },
-      { criterion: "Timeliness", weight: "10%" },
-    ],
-  });
+  
   const { assignments, isLoading } = useSelector((state) => state.Assignment);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const myAssignments = {
-    id: assignmentId,
-    title: assignments?.assignment?.title,
-    course: assignments?.assignment?.subject?.SubjectName,
-    description: assignments?.assignment?.description,
-    dueDate: new Date(assignments?.assignment?.dueDate).toLocaleString(), // 2 days from now
-    status: "not-started",
-    attachments: [
-      { name: `${assignments?.assignment?.title}.pdf`, size: "2.4 MB" },
-    ],
-    requirements: [
-      "Show all work and calculations",
-      "Include units where applicable",
-      "Submit as PDF or DOC format",
-      "Maximum file size: 10MB",
-    ],
-    gradingCriteria: [
-      { criterion: "Completeness", weight: "30%" },
-      { criterion: "Accuracy", weight: "40%" },
-      { criterion: "Presentation", weight: "20%" },
-      { criterion: "Timeliness", weight: "10%" },
-    ],
-  };
+  const requirements = [
+    "Show all work",
+    "Include units where applicable",
+    "Submit as PDF or DOC format",
+    "Maximum file size: 10MB",
+  ]
+  const gradingCriteria = [
+    { criterion: "Completeness", weight: "30%" },
+    { criterion: "Accuracy", weight: "40%" },
+    { criterion: "Presentation", weight: "20%" },
+    { criterion: "Timeliness", weight: "10%" },
+  ]
+  
   
   
 
   useEffect(()=> {
     dispatch(getAssignmentById(assignmentId))
   }, [dispatch])
-  useEffect(()=> {
-    
-    setAssignment(myAssignments)
-  }, [])
 
   console.log(assignments);
+
   
 
   const formatDate = (date) => {
@@ -120,16 +85,18 @@ function AssignmentDetails() {
             <div className="flex justify-between items-start">
               <div>
                 <h1 className="text-2xl font-bold text-gray-800">
-                  {assignment.title}
+                  {assignments?.assignment?.title}
                 </h1>
-                <p className="text-gray-600 mt-1">{assignment.course}</p>
+                <p className="text-gray-600 mt-1">
+                  {assignments?.assignment?.subject?.SubjectName}
+                </p>
               </div>
               <span
                 className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
-                  assignment.status
+                  "not-started"
                 )}`}
               >
-                {assignment.status.replace("-", " ")}
+                {"not-started".replace("-", " ")}
               </span>
             </div>
           </div>
@@ -141,7 +108,9 @@ function AssignmentDetails() {
               <h2 className="text-lg font-semibold text-gray-800 mb-2">
                 Description
               </h2>
-              <p className="text-gray-600">{assignment.description}</p>
+              <p className="text-gray-600">
+                {assignments?.assignment?.description}
+              </p>
             </div>
 
             {/* Due Date and Status */}
@@ -149,13 +118,20 @@ function AssignmentDetails() {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="flex items-center text-gray-600">
                   <FiClock className="mr-2" />
-                  <span>Due Date: {formatDate(assignment.dueDate)}</span>
+                  <span>
+                    Due Date:{" "}
+                    {formatDate(
+                      new Date(
+                        assignments?.assignment?.dueDate
+                      ).toLocaleString()
+                    )}
+                  </span>
                 </div>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="flex items-center text-gray-600">
                   <FiCalendar className="mr-2" />
-                  <span>Status: {assignment.status.replace("-", " ")}</span>
+                  <span>Status: {"not-started".replace("-", " ")}</span>
                 </div>
               </div>
             </div>
@@ -166,25 +142,20 @@ function AssignmentDetails() {
                 Attachments
               </h2>
               <div className="space-y-2">
-                {assignment.attachments.map((file, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between bg-gray-50 p-3 rounded-lg"
-                  >
-                    <div className="flex items-center">
-                      <FiFileText className="text-gray-400 mr-2" />
-                      <span className="text-gray-600">{file.name}</span>
-                    </div>
-                    <button className="text-blue-600 hover:text-blue-800">
-                      <a
-                        href={assignments?.assignment?.attachments}
-                        target="_blank"
-                      >
-                        <FiDownload className="w-5 h-5" />
-                      </a>
-                    </button>
+                <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                  <div className="flex items-center">
+                    <FiFileText className="text-gray-400 mr-2" />
+                    <span className="text-gray-600">{`${assignments?.assignment?.title}.pdf`}</span>
                   </div>
-                ))}
+                  <button className="text-blue-600 hover:text-blue-800">
+                    <a
+                      href={assignments?.assignment?.attachments}
+                      target="_blank"
+                    >
+                      <FiDownload className="w-5 h-5" />
+                    </a>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -194,7 +165,7 @@ function AssignmentDetails() {
                 Requirements
               </h2>
               <ul className="space-y-2">
-                {assignment.requirements.map((req, index) => (
+                {requirements.map((req, index) => (
                   <li key={index} className="flex items-start">
                     <FiCheckCircle className="text-green-500 mt-1 mr-2 flex-shrink-0" />
                     <span className="text-gray-600">{req}</span>
@@ -221,7 +192,7 @@ function AssignmentDetails() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {assignment.gradingCriteria.map((criteria, index) => (
+                    {gradingCriteria.map((criteria, index) => (
                       <tr key={index}>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                           {criteria.criterion}

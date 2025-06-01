@@ -14,19 +14,10 @@ function StudentAssignmentDetails() {
   const { assignmentId } = useParams();
   const [Allassignments, setAssignment] = useState([]);
 
-  const sampleAssignment = {
-    title: "Algebra Homework Set 4",
-    course: "Mathematics",
-    dueDate: "2024-06-30",
-    description:
-      "Solve all the problems in Chapter 5 and show your work for each step. Make sure to review quadratic equations and submit your answers as a PDF.",
-    fileUrl:
-      "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-  };
-  const yourAssigment = assignments?.assignment?.filter(
+  let yourAssigment = assignments?.assignment?.filter(
     (el) => el?.ClassId?._id === id
   );
-  const myAssignments = yourAssigment?.map((el) => ({
+  let myAssignments = yourAssigment?.map((el) => ({
     id: el?._id,
     title: el?.title,
     course: el?.subject?.SubjectName,
