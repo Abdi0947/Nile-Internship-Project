@@ -142,7 +142,7 @@ const assignmentSlice = createSlice({
         state.isLoading = true;
       })
       .addCase(getAssignmentById.fulfilled, (state, action) => {
-        state.assignments = action.payload;
+        state.currentAssignment = action.payload;
         state.isLoading = false;
       })
       .addCase(getAssignmentById.rejected, (state, action) => {
