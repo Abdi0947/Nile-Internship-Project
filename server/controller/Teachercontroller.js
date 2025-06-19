@@ -1,6 +1,6 @@
 const Teacher = require("../model/Teachermodel");
 const Student = require("../model/Studentmodel");
-const Cloudinary = require("../lib/Cloudinary");
+const cloudinary = require("../lib/Cloudinary");
 const generator = require("generate-password");
 const bcrypt = require("bcryptjs");
 const User = require("../model/Usermodel");
@@ -512,5 +512,96 @@ module.exports.editPassword = async (req, res) => {
   } catch (error) {
     console.error("Update error:", error);
     res.status(500).json({ message: "Server error while updating teacher" });
+  }
+};
+
+module.exports.updateProfilePic = async (req, res) => {
+  try {
+    const { ProfilePic } = req.body;
+    const id = req.params.TeacherId;
+
+    if (ProfilePic) {
+      try {
+        console.log("Processing profile image upload...");
+
+        // Check if Cloudinary is properly configured
+        const isCloudinaryConfigured =
+          process.env.CLOUD_NAME &&
+          process.env.CLOUD_NAME !== "your_cloud_name" &&
+          process.env.API_KEY &&
+          process.env.API_KEY !== "your_cloudinary_api_key" &&
+          process.env.API_SECRET &&
+          process.env.API_SECRET !== "your_cloudinary_api_secret";
+
+        let imageUrl = "";
+
+        if (isCloudinaryConfigured) {
+          // Use Cloudinary if properly configured
+          const uploadResponse = await cloudinary.uploader.upload(ProfilePic, {
+            folder: "profile_school_managment_system",
+            transformation: [{ quality: "auto" }],
+            fetch_format: "auto",
+          });
+
+          imageUrl = uploadResponse.secure_url;
+          console.log("Image uploaded to Cloudinary:", imageUrl);
+        } else {
+          // Fallback for local development - store image in user session
+          console.log(
+            "Cloudinary not configured correctly - using direct image data"
+          );
+          // Store the image data directly temporarily (not ideal for production)
+          imageUrl = ProfilePic;
+        }
+
+        // // Add a unique identifier to prevent caching issues
+        // const timestampedUrl = imageUrl.includes("?")
+        //   ? `${imageUrl}&t=${Date.now()}`
+        //   : `${imageUrl}?t=${Date.now()}`;
+
+        const updatedUser = await Teacher.findOneAndUpdate(
+          { _id: id },
+          { ProfilePic: imageUrl }, // Store the URL in DB
+          { new: true }
+        ) // Exclude password from response
+        if (!updatedUser) {
+          return res.status(404).json({ message: "User not found" });
+        }
+
+        console.log("User profile updated successfully");
+
+        return res.status(200).json({
+          message: "Profile updated successfully",
+          updatedUser: {
+            ...updatedUser.toObject(),
+            ProfilePic: imageUrl, // Send back timestamped URL to client
+          },
+        });
+      } catch (cloudinaryError) {
+        console.error("Cloudinary upload failed:", cloudinaryError);
+
+        // Provide more specific error message
+        let errorMessage = "Image upload failed";
+        if (
+          cloudinaryError.message &&
+          cloudinaryError.message.includes("Unknown API key")
+        ) {
+          errorMessage =
+            "Cloudinary credentials not configured. Please update your .env file with valid Cloudinary credentials.";
+        }
+
+        return res.status(500).json({
+          message: errorMessage,
+          error: cloudinaryError.message,
+        });
+      }
+    } else {
+      return res.status(400).json({ message: "No profile picture provided" });
+    }
+  } catch (error) {
+    console.error("Error in update profile Controller", error.message);
+    res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
   }
 };

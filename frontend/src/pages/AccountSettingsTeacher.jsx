@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import TopNavbar from "../components/Topnavbar";
 import { useDispatch, useSelector } from "react-redux";
 import { editPassword } from "../features/Teacher";
-import {updateUserInfo} from '../features/Authentication'
+import { updateUserInfo } from "../features/Authentication";
 import toast from "react-hot-toast";
 import ProfilePicture from "../components/ProfilePicture";
 
@@ -60,13 +60,12 @@ const AccountSettingsTeacher = () => {
 
   const handleProfileImageUpdate = async (imageData) => {
     try {
-        const id = Authuser?._id
-      const updatedUserData = {
+      const userData = {
         ...profileForm.values,
         ProfilePic: imageData,
       };
 
-      // await dispatch(editTeacherProfile({id,updatedUserData})).unwrap();
+      await dispatch(updateUserInfo(userData)).unwrap();
       setProfileImageKey(Date.now());
       toast.success("Profile picture updated successfully");
     } catch (error) {
@@ -181,8 +180,8 @@ const AccountSettingsTeacher = () => {
   const handlePasswordChange = async (values) => {
     try {
       // Implement password change API call here
-      const id = Authuser.id || Authuser._id
-      dispatch(editPassword({id, values }));
+      const id = Authuser.id || Authuser._id;
+      dispatch(editPassword({ id, values }));
       toast.success("Password changed successfully");
       passwordForm.resetForm();
     } catch (error) {

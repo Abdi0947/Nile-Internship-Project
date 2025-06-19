@@ -34,7 +34,7 @@ const TeacherSchema = new mongoose.Schema(
       enum: ["male", "female"],
     },
 
-    profileImage: {
+    ProfilePic: {
       type: String,
     },
     qualification: {

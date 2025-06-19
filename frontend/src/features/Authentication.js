@@ -159,9 +159,11 @@ export const updateUserInfo = createAsyncThunk(
       const userRole = storedUser.role;
       let endpoint;
       if (userRole === "teacher") {
-        endpoint = `teacher/editTeacherProfile/${storedUser.id || storedUser._id}`;
+        endpoint = `teacher/editTeacherProfile/${
+          storedUser.id || storedUser._id
+        }`;
       } else if (userRole === "Student") {
-        endpoint = `student/updateProfile/${storedUser.id || storedUser._id}`
+        endpoint = `student/updateProfile/${storedUser.id || storedUser._id}`;
       } else {
         endpoint = `auth/updateUserInfo`;
       }
@@ -209,7 +211,30 @@ export const updateUserInfo = createAsyncThunk(
           console.error("Profile picture info error:", error);
           toast.error("Profile picture error");
         }
-        
+      }
+      // If profile image update is needed for teacher
+      if (userData.ProfilePic && userRole === "teacher") {
+        try {
+          const response = await axiosInstance.put(
+            `teacher/updateTeacherpic/${storedUser.id || storedUser._id}`,
+            { ProfilePic: userData.ProfilePic },
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          console.log(response.data.updatedUser.ProfilePic);
+          localStorage.setItem(
+            "profileImage",
+            response?.data?.updatedUser?.ProfilePic
+          );
+          toast.success("Profile picture updated successfully");
+        } catch (error) {
+          console.error("Profile picture info error:", error);
+          toast.error("Profile picture error");
+        }
       }
 
       const updatedUser = response.data?.updatedUser || response.data;
