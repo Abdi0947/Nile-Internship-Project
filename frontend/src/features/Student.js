@@ -127,6 +127,29 @@ export const searchStudents = createAsyncThunk(
   }
 );
 
+export const editPassword = createAsyncThunk(
+  "teacher/editPassword",
+  async ({ id, values}, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.put(
+        `Student/editPassword/${id}`,
+        values,
+        { withCredentials: true }
+      );
+      console.log(response.data);
+      // storeUserData(response.data);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      const errorMessage =
+        error.response?.data?.error ||
+        "Failed to update Teacher. Please try again.";
+      toast.error(errorMessage);
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 // Get student academic records
 export const getStudentAcademicRecords = createAsyncThunk(
   "student/academic-records",

@@ -258,7 +258,7 @@ function AdminDashboard() {
     {
       id: "c13",
       name: "Class 11 - Physics",
-      ClassName: "Grade 1a",
+      ClassName: "Grade 11",
       schedule: "TTh 1:00 PM",
       subject: "PHYSICS11",
     },

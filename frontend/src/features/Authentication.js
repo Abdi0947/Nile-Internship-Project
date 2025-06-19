@@ -150,16 +150,18 @@ export const updateUserInfo = createAsyncThunk(
       //   return rejectWithValue("User not authenticated. Please log in again.");
       // }
 
-      // Store profile image in localStorage if it’s a base64 image
-      if (userData.ProfilePic && userData.ProfilePic.startsWith("data:image")) {
-        localStorage.setItem("profileImage", userData.ProfilePic);
-      }
+      // // Store profile image in localStorage if it’s a base64 image
+      // if (userData.ProfilePic && userData.ProfilePic.startsWith("data:image")) {
+      //   localStorage.setItem("profileImage", userData.ProfilePic);
+      // }
 
       // Determine endpoint based on role
       const userRole = storedUser.role;
       let endpoint;
       if (userRole === "teacher") {
         endpoint = `teacher/editTeacherProfile/${storedUser.id || storedUser._id}`;
+      } else if (userRole === "Student") {
+        endpoint = `student/updateProfile/${storedUser.id || storedUser._id}`
       } else {
         endpoint = `auth/updateUserInfo`;
       }
@@ -172,7 +174,7 @@ export const updateUserInfo = createAsyncThunk(
       });
 
       // If profile image update is needed
-      if (userData.ProfilePic && userRole !== "teacher") {
+      if (userData.ProfilePic && userRole === "admin") {
         await axiosInstance.put(
           "auth/updateProfile",
           { ProfilePic: userData.ProfilePic },
@@ -183,6 +185,31 @@ export const updateUserInfo = createAsyncThunk(
             },
           }
         );
+      }
+      // If profile image update is needed
+      if (userData.ProfilePic && userRole === "Student") {
+        try {
+          const response = await axiosInstance.put(
+            `student/updateProfilePic/${storedUser.id || storedUser._id}`,
+            { ProfilePic: userData.ProfilePic },
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          console.log(response.data.updatedUser.ProfilePic);
+          localStorage.setItem(
+            "profileImage",
+            response?.data?.updatedUser?.ProfilePic
+          );
+          toast.success("Profile picture updated successfully");
+        } catch (error) {
+          console.error("Profile picture info error:", error);
+          toast.error("Profile picture error");
+        }
+        
       }
 
       const updatedUser = response.data?.updatedUser || response.data;

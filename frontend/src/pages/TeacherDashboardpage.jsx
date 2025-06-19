@@ -176,6 +176,13 @@ function TeacherDashboardpage() {
     return "Good Evening";
   };
 
+  if (isLoading)
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+
   return (
     // {yourStudent ? }
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
@@ -351,7 +358,9 @@ function TeacherDashboardpage() {
                     : "No event"}
                 </p>
                 <p className="text-gray-800 font-medium truncate">
-                  {`${upcomingEvents[0]?.subjectId?.SubjectName || ''} with ${upcomingEvents[0]?.teacherId?.firstName || ''}` }
+                  {`${upcomingEvents[0]?.subjectId?.SubjectName || ""} with ${
+                    upcomingEvents[0]?.teacherId?.firstName || ""
+                  }`}
                 </p>
               </div>
               <div className="flex justify-center bg-gray-50 -mx-6 px-6 py-3 border-t mt-3">
@@ -408,10 +417,9 @@ function TeacherDashboardpage() {
                 </Link>
               </div>
             </div>
-
             <div className="p-6">
               <div className="divide-y divide-gray-100">
-                {assignments?.map((assignment) => (
+                {Array.isArray(assignments) && assignments?.map((assignment) => (
                   <div
                     key={assignment?._id}
                     className="py-4 first:pt-0 last:pb-0"
@@ -478,53 +486,53 @@ function TeacherDashboardpage() {
             </div>
 
             <div className="p-6">
-                          {firstThreeEvents.length > 0 ? (
-                            <div className="divide-y divide-gray-100">
-                              {firstThreeEvents.map((event, index) => (
-                                <motion.div
-                                  key={event._id}
-                                  className="py-4 first:pt-0 last:pb-0"
-                                  initial={{ opacity: 0, y: 20 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  transition={{ delay: index * 0.1 }}
-                                  whileHover={{ x: 3 }}
-                                >
-                                  <div className="flex items-center mb-2">
-                                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                                      <FiClock className="text-blue-600" />
-                                    </div>
-                                    <div>
-                                      <p className="font-medium text-black">
-                                        {`${event?.subjectId?.SubjectName} with Mrs. ${event?.teacherId?.firstName}`}
-                                      </p>
-                                      <p className="text-sm text-black">
-                                        {formatEventDate(event.startTime)}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  {event.description && (
-                                    <p className="text-sm ml-13 pl-10">
-                                      {event.description.length > 100
-                                        ? `${event.description.substring(0, 100)}...`
-                                        : event.description}
-                                    </p>
-                                  )}
-                                </motion.div>
-                              ))}
-            
-                              {moreEventsCount > 0 && (
-                                <p className="text-sm mt-3 text-gray-600">
-                                  +{moreEventsCount} more event
-                                  {moreEventsCount > 1 ? "s" : ""} scheduled soon
-                                </p>
-                              )}
-                            </div>
-                          ) : (
-                            <div className="text-center py-8">
-                              <p className="text-black">No upcoming events</p>
-                            </div>
-                          )}
+              {firstThreeEvents.length > 0 ? (
+                <div className="divide-y divide-gray-100">
+                  {firstThreeEvents.map((event, index) => (
+                    <motion.div
+                      key={event._id}
+                      className="py-4 first:pt-0 last:pb-0"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      whileHover={{ x: 3 }}
+                    >
+                      <div className="flex items-center mb-2">
+                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                          <FiClock className="text-blue-600" />
                         </div>
+                        <div>
+                          <p className="font-medium text-black">
+                            {`${event?.subjectId?.SubjectName} with Mrs. ${event?.teacherId?.firstName}`}
+                          </p>
+                          <p className="text-sm text-black">
+                            {formatEventDate(event.startTime)}
+                          </p>
+                        </div>
+                      </div>
+                      {event.description && (
+                        <p className="text-sm ml-13 pl-10">
+                          {event.description.length > 100
+                            ? `${event.description.substring(0, 100)}...`
+                            : event.description}
+                        </p>
+                      )}
+                    </motion.div>
+                  ))}
+
+                  {moreEventsCount > 0 && (
+                    <p className="text-sm mt-3 text-gray-600">
+                      +{moreEventsCount} more event
+                      {moreEventsCount > 1 ? "s" : ""} scheduled soon
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-black">No upcoming events</p>
+                </div>
+              )}
+            </div>
           </motion.div>
         </div>
       </motion.div>

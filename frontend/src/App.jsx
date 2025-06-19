@@ -47,6 +47,7 @@ import TeacherRequestPage from './pages/TeacherRequestPage';
 import ResetPassword from './pages/ResetPassword';
 import TermsAndConditions from './pages/TermsAndConditions';
 import AccountSettingsTeacher from './pages/AccountSettingsTeacher';
+import AccountSettingsStudent from './pages/AccountSettingsStudent';
 
 function App() {
   const dispatch = useDispatch();
@@ -164,8 +165,8 @@ function App() {
             <Route path="assignments" element={<StudentAssignmentDetails />} />
             <Route path="grades" element={<StudentGradeReport />} />
             <Route path="timetable" element={<Timetable />} />
-            <Route path="account" element={<AccountSettings />} />
-            <Route path="settings" element={<AccountSettings />} />
+            <Route path="account" element={<AccountSettingsStudent />} />
+            <Route path="settings" element={<AccountSettingsStudent />} />
             <Route path="notifications" element={<Notificationpage />} />
             <Route path="assignments/:id" element={<AssignmentDetails />} />
             <Route

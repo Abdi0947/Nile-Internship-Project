@@ -9,7 +9,9 @@ const {
   DeleteProfile,
   GetAcadamicRecords,
   getallStudents,
-  EditProfile
+  EditProfile,
+  editPassword,
+  updateProfilePic
 
 } = require("../controller/StudentController");
 
@@ -24,7 +26,8 @@ router.get("/getallStudentprofile",getallStudents)
 
 router.delete("/profile/:userId", DeleteProfile);
 router.put("/updateProfile/:StudentId", EditProfile);
-
+router.put("/updateProfilePic/:StudentId", updateProfilePic);
+router.put("/editPassword/:StudentId", editPassword);
 router.get("/academic-records", GetAcadamicRecords);
 
 module.exports = router;

@@ -69,7 +69,13 @@ export const storeUserData = (userData, rememberMe = false) => {
     console.log('Using storage:', rememberMe ? 'localStorage' : 'sessionStorage');
     
     // Store user data in storage
-    storage.setItem('user', JSON.stringify(userDataToStore));
+    storage.setItem(
+      "user",
+      JSON.stringify({
+        role: userData?.role,
+        id: userData?.id || userData?._id,
+      })
+    );
     
     // Store token separately if provided
     if (userDataToStore.token) {

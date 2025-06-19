@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { FiDownload, FiBookOpen, FiCalendar, FiFileText } from 'react-icons/fi';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { FiDownload, FiBookOpen, FiCalendar, FiFileText } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllAssignments } from "../features/Assignment";
-
-
 
 function StudentAssignmentDetails() {
   const dispatch = useDispatch();
@@ -26,13 +25,11 @@ function StudentAssignmentDetails() {
     fileUrl: el?.attachments,
   }));
 
-  
-  useEffect(()=> {
-      dispatch(getAllAssignments())
-      setAssignment(myAssignments)
-      
-    }, [dispatch])
-    console.log(assignments)
+  useEffect(() => {
+    dispatch(getAllAssignments());
+    setAssignment(myAssignments);
+  }, [dispatch]);
+  console.log(assignments);
 
   if (isLoading)
     return (
@@ -57,6 +54,13 @@ function StudentAssignmentDetails() {
           <div className="flex items-center text-gray-600 mb-4">
             <FiFileText className="mr-2" />
             <span className="font-medium mr-6">{assignment?.course}</span>
+            <Link
+              to={`/student/assignments/${assignment.id}`}
+              className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
+            >
+              <FiFileText className="mr-1" />
+              View Details
+            </Link>
             <FiCalendar className="mr-2" />
             <span>
               Due:{" "}
@@ -84,4 +88,4 @@ function StudentAssignmentDetails() {
   );
 }
 
-export default StudentAssignmentDetails; 
+export default StudentAssignmentDetails;

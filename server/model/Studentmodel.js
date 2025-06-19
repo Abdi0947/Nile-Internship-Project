@@ -44,7 +44,7 @@ const StudentSchema = new mongoose.Schema(
       type: String,
     },
 
-    profileImage: {
+    ProfilePic: {
       type: String,
     },
 

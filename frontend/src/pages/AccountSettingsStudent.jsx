@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import TopNavbar from '../components/Topnavbar';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateUserInfo } from '../features/Authentication';
+import { editPassword } from "../features/Student";
 import toast from 'react-hot-toast';
 import ProfilePicture from '../components/ProfilePicture';
 
@@ -27,7 +28,7 @@ const AccountSettingsStudent = () => {
   const handleFileSelect = () => {
     fileInputRef.current.click();
   };
-
+  console.log(Authuser);
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -59,12 +60,12 @@ const AccountSettingsStudent = () => {
 
   const handleProfileImageUpdate = async (imageData) => {
     try {
-      const updatedUserData = {
+      const userData = {
         ...profileForm.values,
         ProfilePic: imageData
       };
       
-      await dispatch(updateUserInfo(updatedUserData)).unwrap();
+      await dispatch(updateUserInfo(userData)).unwrap();
       setProfileImageKey(Date.now());
       toast.success('Profile picture updated successfully');
     } catch (error) {
@@ -162,10 +163,10 @@ const AccountSettingsStudent = () => {
     }));
   };
 
-  const handleProfileUpdate = async (values) => {
+  const handleProfileUpdate = async (userData) => {
     try {
       // Update profile information
-      await dispatch(updateUserInfo(values)).unwrap();
+      await dispatch(updateUserInfo(userData)).unwrap();
       
       setShowSavedMessage(true);
       setTimeout(() => setShowSavedMessage(false), 3000);
@@ -178,11 +179,13 @@ const AccountSettingsStudent = () => {
   const handlePasswordChange = async (values) => {
     try {
       // Implement password change API call here
-      toast.success('Password changed successfully');
+      const id = Authuser.id || Authuser._id
+      dispatch(editPassword({id, values }));
+      toast.success("Password changed successfully");
       passwordForm.resetForm();
     } catch (error) {
-      toast.error('Failed to change password');
-      console.error('Password change error:', error);
+      toast.error("Failed to change password");
+      console.error("Password change error:", error);
     }
   };
 

@@ -31,7 +31,6 @@ const ProfilePicture = ({
     if (imageUrl) {
       setLocalImage(imageUrl);
       setShowFallbackImage(false);
-      console.log('Profile image loaded:', imageUrl.substring(0, 30) + '...');
     } else {
       setShowFallbackImage(true);
       console.log('Using fallback image');
