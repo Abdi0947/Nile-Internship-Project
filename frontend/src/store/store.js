@@ -6,6 +6,7 @@ import authReducer from "../features/Authentication"
 import FeeReducer from "../features/Fee"
 import StudentReducer from "../features/Student"
 import SubjectReducer from "../features/Subject"
+import GradeReducer from "../features/Grade"
 import AssignmentReducer from '../features/Assignment'
 import ClassReducer from '../features/Class'
 import NotificationReducer from "../features/Notification"
@@ -48,6 +49,7 @@ const store = configureStore({
     Student: StudentReducer,
     notification: NotificationReducer,
     Subject: SubjectReducer,
+    Grade: GradeReducer,
     Assignment: AssignmentReducer,
     Class: ClassReducer
   },

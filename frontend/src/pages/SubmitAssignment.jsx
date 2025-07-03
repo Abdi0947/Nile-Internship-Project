@@ -1,49 +1,65 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import TopNavbar from '../components/Topnavbar';
-import { FiUpload, FiFile, FiX } from 'react-icons/fi';
-import { motion } from 'framer-motion';
+import React, { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import TopNavbar from "../components/Topnavbar";
+import { submitAssignment } from "../features/Assignment";
+import { FiUpload, FiFile, FiX } from "react-icons/fi";
+import { motion } from "framer-motion";
+import toast from "react-hot-toast";
 
 function SubmitAssignment() {
   const { assignmentId } = useParams();
+  const dispatch = useDispatch();
+  const { Authuser } = useSelector((state) => state.auth);
+
   const navigate = useNavigate();
   const [files, setFiles] = useState([]);
-  const [comment, setComment] = useState('');
+  const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const studentId = Authuser?.id || Authuser?._id;
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
-    setFiles(prev => [...prev, ...selectedFiles]);
+    setFiles((prev) => [...prev, ...selectedFiles]);
   };
 
   const removeFile = (index) => {
-    setFiles(prev => prev.filter((_, i) => i !== index));
+    setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate form
+    if (!files || !comment || !studentId) {
+      toast.error("Please fill all required fields");
+      return;
+    }
+    const formData = {
+      student_id: studentId,
+      AssignmentId: assignmentId,
+      comment,
+      attachments: files,
+    };
+    console.log(formData)
     setIsSubmitting(true);
-    
+
     try {
       // Here you would typically upload files and submit the assignment
-      // For now, we'll just simulate a successful submission
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Show success message and redirect
-      navigate('/student/assignments', { 
-        state: { message: 'Assignment submitted successfully!' }
-      });
+      dispatch(submitAssignment(formData))
+      toast.success("Assignment submitted successfully!");
     } catch (error) {
-      console.error('Error submitting assignment:', error);
+      console.error("Error submitting assignment:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
+  console.log(assignmentId);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <TopNavbar />
-      
+
       <div className="max-w-3xl mx-auto px-4 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -52,7 +68,9 @@ function SubmitAssignment() {
           className="bg-white rounded-xl shadow-md p-6"
         >
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-bold text-gray-800">Submit Assignment</h1>
+            <h1 className="text-2xl font-bold text-gray-800">
+              Submit Assignment
+            </h1>
             <button
               onClick={() => navigate(-1)}
               className="text-gray-500 hover:text-gray-700"
@@ -97,13 +115,20 @@ function SubmitAssignment() {
             {/* File List */}
             {files.length > 0 && (
               <div className="space-y-2">
-                <h3 className="text-sm font-medium text-gray-700">Selected Files:</h3>
+                <h3 className="text-sm font-medium text-gray-700">
+                  Selected Files:
+                </h3>
                 <ul className="divide-y divide-gray-200">
                   {files.map((file, index) => (
-                    <li key={index} className="py-2 flex items-center justify-between">
+                    <li
+                      key={index}
+                      className="py-2 flex items-center justify-between"
+                    >
                       <div className="flex items-center">
                         <FiFile className="h-5 w-5 text-gray-400 mr-2" />
-                        <span className="text-sm text-gray-600">{file.name}</span>
+                        <span className="text-sm text-gray-600">
+                          {file.name}
+                        </span>
                       </div>
                       <button
                         type="button"
@@ -120,7 +145,10 @@ function SubmitAssignment() {
 
             {/* Comments Section */}
             <div>
-              <label htmlFor="comment" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="comment"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Comments (Optional)
               </label>
               <textarea
@@ -140,12 +168,13 @@ function SubmitAssignment() {
                 type="submit"
                 disabled={isSubmitting || files.length === 0}
                 className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white 
-                  ${isSubmitting || files.length === 0 
-                    ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+                  ${
+                    isSubmitting || files.length === 0
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   }`}
               >
-                {isSubmitting ? 'Submitting...' : 'Submit Assignment'}
+                {isSubmitting ? "Submitting..." : "Submit Assignment"}
               </button>
             </div>
           </form>
@@ -155,4 +184,4 @@ function SubmitAssignment() {
   );
 }
 
-export default SubmitAssignment; 
+export default SubmitAssignment;

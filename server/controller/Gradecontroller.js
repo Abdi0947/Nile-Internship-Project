@@ -6,10 +6,10 @@ module.exports.createGrade=async(req,res)=>{
 
 try{
 
-    const { studentId, subjectId, teacherId, grade, examType,date}=req.body;
+    const { studentId, subjectId, teacherId, grade, examType}=req.body;
 
 
-    if ( !studentId|| !subjectId||! teacherId||! grade||!examType,date) {
+    if ( !studentId|| !subjectId||! teacherId||! grade||!examType) {
         return res
           .status(400)
           .json({ error: "Please provide all neccessary information" });
@@ -19,7 +19,7 @@ try{
         subjectId, 
         teacherId, 
         grade, 
-        examType,date
+        examType,
        
       });
 
@@ -40,12 +40,45 @@ catch(error){
 }
 
 module.exports.getallGrade=async(req,res)=>{
+  const {teacherId} = req.params
+  console.log(teacherId);
     try{
-      const grades=await Grade.find()
-      .populate('studentId')
-      .populate('subjectId')
-      .populate('teacherId');
-      res.status(200).json(grades);
+      const grades = await Grade.find({
+        teacherId: teacherId,
+      })
+        .populate("studentId")
+        .populate("subjectId");
+      
+
+      const transformed = [];
+
+      grades.forEach((entry) => {
+        const firstName = entry.studentId.firstName;
+        const lastName = entry.studentId.lastName;
+        const fullName = `${firstName} ${lastName}`;
+        const examType = entry.examType.toLowerCase();
+        const grade = Number(entry.grade);
+
+        
+        let student = transformed.find((s) => s.studentName === fullName);
+
+        if (!student) {
+          student = {
+            studentName: fullName,
+            assignment: null,
+            midTerm: null,
+            final: null,
+          };
+          transformed.push(student);
+        }
+
+        
+        if (examType === "assignment") student.assignment = grade;
+        else if (examType === "midterm") student.midTerm = grade;
+        else if (examType === "final") student.final = grade;
+      });
+      console.log(transformed);
+      res.status(200).json(transformed);
 
     }
     catch(error){

@@ -47,7 +47,7 @@ function TeachersAssignmentpage() {
   // Mock data for assignmentsData (replace with actual API calls)
   useEffect(() => {
     const fetchAssignments = async () => {
-      setIsLoading(true);
+      // setIsLoading(true);
       try {
         // Mock API call - replace with actual API call
         setTimeout(() => {

@@ -26,6 +26,7 @@ export const createAssignment = createAsyncThunk(
       formData.attachments.forEach((file) => {
         payload.append("attachments", file); // backend should accept multiple
       });
+      console.log(payload);
 
       const response = await axiosInstance.post(
         "/assignment/createAssgiment",
@@ -42,6 +43,42 @@ export const createAssignment = createAsyncThunk(
       return response.data;
     } catch (error) {
       toast.error("Failed to create assignment");
+      return rejectWithValue(
+        error.response?.data?.message || "Error creating assignment"
+      );
+    }
+  }
+);
+// ✅ Create assignment
+export const submitAssignment = createAsyncThunk(
+  "/assignment/submitAssgiment",
+  async (formData , { rejectWithValue }) => {
+    try {
+      const payload = new FormData();
+      
+      payload.append("student_id", formData.student_id);
+      payload.append("AssignmentId", formData.AssignmentId);
+      payload.append("comment", formData.comment);
+      formData.attachments?.forEach((file) => {
+        payload.append("attachments", file); // backend should accept multiple
+      });
+
+      const response = await axiosInstance.post(
+        "/assignment/submitAssgiment",
+        payload,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      toast.success("Assignment submitted successfully!");
+      return response.data;
+    } catch (error) {
+      toast.error(error?.response?.data?.error || "Failed to submit assignment");
+      console.log("Error submitting assignment:", error);
       return rejectWithValue(
         error.response?.data?.message || "Error creating assignment"
       );
@@ -122,6 +159,13 @@ const assignmentSlice = createSlice({
         state.isLoading = false;
       })
       .addCase(createAssignment.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      .addCase(submitAssignment.fulfilled, (state, action) => {
+        state.isLoading = false;
+      })
+      .addCase(submitAssignment.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })

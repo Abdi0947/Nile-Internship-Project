@@ -1,6 +1,8 @@
 const Assignment = require("../model/Assignmentmodel");
+const AssignmentSub = require("../model/AssignmentSubModel");
 
 exports.createAssgiment = async (req, res) => {
+  console.log(req.body);
   try {
     const {
       title,
@@ -31,7 +33,7 @@ exports.createAssgiment = async (req, res) => {
     });
 
     await assignment.save();
-    console.log(assignment)
+    console.log(assignment);
 
     res.status(201).json({
       message: "Assignment created successfully",
@@ -105,12 +107,42 @@ exports.getAllAssignments = async (req, res) => {
       .populate("subject");
 
     res.status(200).json({
-      assignment
+      assignment,
     });
   } catch (error) {
     console.error("Error retrieving assignment by ID:", error.message);
     res
       .status(500)
       .json({ error: "Error retrieving assignment: " + error.message });
+  }
+};
+exports.submitAssignment = async (req, res) => {
+  try {
+    const { student_id, AssignmentId, comment } = req.body;
+    let attachmentUrl = req.file?.path;
+
+    if (!attachmentUrl) {
+      return res.status(400).json({ error: "Attachment is required." });
+    }
+    attachmentUrl = attachmentUrl.replace("/image/upload/", "/raw/upload/");
+
+    const assignmentSubmitted = new AssignmentSub({
+      student_id,
+      AssignmentId,
+      comment,
+      answerUrl: attachmentUrl,
+    });
+
+    await assignmentSubmitted.save();
+
+    res.status(201).json({
+      message: "Assignment submitted successfully",
+      assignmentSubmitted,
+    });
+  } catch (error) {
+    console.error("Error during creating Assignment:", error.message);
+    res
+      .status(400)
+      .json({ error: "Error during Assignment: " + error.message });
   }
 };

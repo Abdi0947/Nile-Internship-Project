@@ -1216,7 +1216,7 @@ function AdminDashboard() {
         {/* Teachers and Students Sections */}
         <div className="mt-8 mr-8">
           {/* Teachers List Section */}
-          <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8 p-6">
+          <div className="bg-white  rounded-xl shadow-md overflow-hidden mb-8 p-6">
             <div className="border-b border-gray-200 flex justify-between items-center pb-6">
               <div>
                 <h2 className="text-lg font-semibold text-gray-800">
@@ -1234,24 +1234,24 @@ function AdminDashboard() {
                 Add Teacher
               </button>
             </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
+            <div className="w-full overflow-x-auto block">
+              <table className="w-full min-w-full divide-y divide-gray-200">
                 {/* Teachers List Table Header */}
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50 sticky top-0 z-10">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Name
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Subject
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Gender
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Assigned Classes
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">
                       Actions
                     </th>
                   </tr>
@@ -1260,7 +1260,7 @@ function AdminDashboard() {
                   {Array.isArray(getallTeachers) &&
                     getallTeachers?.map((teacher) => (
                       <tr key={teacher?._id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 py-4 align-top">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 h-10 w-10">
                               <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
@@ -1280,30 +1280,28 @@ function AdminDashboard() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 py-4 align-top">
                           <div className="text-sm text-gray-900">
                             {teacher?.subjects?.SubjectName}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 py-4 align-top">
                           <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 capitalize">
                             {teacher?.gender}
                           </span>
                         </td>
-                        <td className="px-6 py-4">
-                          <div className="space-y-1">
-                            <div className="text-sm">
-                              <span className="text-gray-900">
-                                {teacher?.classId?.ClassName}
-                              </span>
-                              <span className="text-gray-500 text-xs block">
-                                {teacher?.subjects?.SubjectName}
-                              </span>
-                            </div>
+                        <td className="px-4 py-4 align-top">
+                          <div className="space-y-1 text-sm">
+                            <span className="text-gray-900 block">
+                              {teacher?.classId?.ClassName}
+                            </span>
+                            <span className="text-gray-500 text-xs block">
+                              {teacher?.subjects?.SubjectName}
+                            </span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex flex-col space-y-2">
+                        <td className="px-4 py-4 align-top text-sm font-medium">
+                          <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
                             <button
                               onClick={() => handleViewTeacher(teacher)}
                               className="text-blue-600 hover:text-blue-900 flex items-center px-2 py-1 rounded hover:bg-blue-50"
@@ -1364,113 +1362,108 @@ function AdminDashboard() {
                 Add Student
               </button>
             </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                {/* Students List Table Header */}
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Grade
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Contact
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Gender
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Parent Info
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {Array.isArray(students) &&
-                    students.map((student) => (
-                      <tr key={student?._id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="flex-shrink-0 h-10 w-10">
-                              <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                <span className="text-blue-600 font-medium">
-                                  {student?.firstName[0] || ""}
-                                  {student?.lastName[0] || ""}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">
-                                {student?.firstName} {student?.lastName}
-                              </div>
-                              <div className="text-sm text-gray-500">
-                                {student?.email}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {student?.classId?.ClassName || ""}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {student?.phone}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 capitalize">
-                            {student?.gender}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm">
-                            <div className="text-gray-900">
-                              {student?.parentName}
-                            </div>
-                            <div className="text-gray-500">
-                              {student?.parentPhone}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex items-center space-x-2">
-                            <button
-                              onClick={() => handleViewStudent(student)}
-                              className="text-blue-600 hover:text-blue-900 flex items-center px-2 py-1 rounded hover:bg-blue-50"
-                              title="View Details"
-                            >
-                              <FiUser className="w-4 h-4 mr-1" />
-                              View
-                            </button>
-                            <button
-                              onClick={() => handleEditStudent(student)}
-                              className="text-indigo-600 hover:text-indigo-900 flex items-center px-2 py-1 rounded hover:bg-indigo-50"
-                              title="Edit Student"
-                            >
-                              <FiActivity className="w-4 h-4 mr-1" />
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => handleDeleteStudent(student)}
-                              className="text-red-600 hover:text-red-900 flex items-center px-2 py-1 rounded hover:bg-red-50"
-                              title="Delete Student"
-                            >
-                              <FiXCircle className="w-4 h-4 mr-1" />
-                              Delete
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
+            <div className="w-full overflow-x-auto block">
+  <table className="w-full min-w-full divide-y divide-gray-200">
+    {/* Students List Table Header */}
+    <thead className="bg-gray-50 sticky top-0 z-10">
+      <tr>
+        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          Name
+        </th>
+        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          Grade
+        </th>
+        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          Contact
+        </th>
+        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          Gender
+        </th>
+        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          Parent Info
+        </th>
+        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">
+          Actions
+        </th>
+      </tr>
+    </thead>
+    <tbody className="bg-white divide-y divide-gray-200">
+      {Array.isArray(students) &&
+        students.map((student) => (
+          <tr key={student?._id} className="hover:bg-gray-50">
+            <td className="px-4 py-4">
+              <div className="flex items-center">
+                <div className="flex-shrink-0 h-10 w-10">
+                  <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                    <span className="text-blue-600 font-medium">
+                      {student?.firstName?.[0] || ""}
+                      {student?.lastName?.[0] || ""}
+                    </span>
+                  </div>
+                </div>
+                <div className="ml-4">
+                  <div className="text-sm font-medium text-gray-900">
+                    {student?.firstName} {student?.lastName}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {student?.email}
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td className="px-4 py-4">
+              <div className="text-sm text-gray-900">
+                {student?.classId?.ClassName || ""}
+              </div>
+            </td>
+            <td className="px-4 py-4">
+              <div className="text-sm text-gray-900">{student?.phone}</div>
+            </td>
+            <td className="px-4 py-4">
+              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 capitalize">
+                {student?.gender}
+              </span>
+            </td>
+            <td className="px-4 py-4">
+              <div className="text-sm">
+                <div className="text-gray-900">{student?.parentName}</div>
+                <div className="text-gray-500">{student?.parentPhone}</div>
+              </div>
+            </td>
+            <td className="px-4 py-4 text-sm font-medium">
+              <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
+                <button
+                  onClick={() => handleViewStudent(student)}
+                  className="text-blue-600 hover:text-blue-900 flex items-center px-2 py-1 rounded hover:bg-blue-50"
+                  title="View Details"
+                >
+                  <FiUser className="w-4 h-4 mr-1" />
+                  View
+                </button>
+                <button
+                  onClick={() => handleEditStudent(student)}
+                  className="text-indigo-600 hover:text-indigo-900 flex items-center px-2 py-1 rounded hover:bg-indigo-50"
+                  title="Edit Student"
+                >
+                  <FiActivity className="w-4 h-4 mr-1" />
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDeleteStudent(student)}
+                  className="text-red-600 hover:text-red-900 flex items-center px-2 py-1 rounded hover:bg-red-50"
+                  title="Delete Student"
+                >
+                  <FiXCircle className="w-4 h-4 mr-1" />
+                  Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+        ))}
+    </tbody>
+  </table>
+</div>
+
           </div>
         </div>
       </motion.div>

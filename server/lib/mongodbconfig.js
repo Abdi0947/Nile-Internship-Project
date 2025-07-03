@@ -5,7 +5,7 @@ require("dotenv").config()
 
 module.exports.MongoDBconfig=()=>{
     mongoose
-      .connect('mongodb://localhost:27017/test')
+      .connect(process.env.MONGODB_URL)
       .then(() => {
         console.log("connected to database successfully");
       })
