@@ -335,6 +335,8 @@ function TeacherGradeReport() {
                         </label>
                         <input
                           type="number"
+                          min="0"
+                          max="50"
                           value={newGrade.grade}
                           onChange={(e) =>
                             setNewTeacher({
@@ -415,7 +417,7 @@ function TeacherGradeReport() {
                     </tr>
                   </thead>
                   <tbody>
-                    {isAttendanceLoading ? (
+                    {isLoading ? (
                       <tr>
                         <td colSpan="6" className="py-4 text-center">
                           <div className="flex justify-center">
@@ -425,7 +427,6 @@ function TeacherGradeReport() {
                       </tr>
                     ) : grades && grades.length > 0 ? (
                       grades.map((attendance) => {
-
                         return (
                           <tr key={attendance?.assignment}>
                             <td className="py-2 px-4 border">
@@ -440,7 +441,16 @@ function TeacherGradeReport() {
                             <td className="py-2 px-4 border">
                               {attendance?.final}
                             </td>
-                            <td className="py-2 px-4 border">under</td>
+                            <td className="py-2 px-4 border">
+                              {attendance?.midTerm &&
+                                attendance?.assignment &&
+                                attendance?.final ? (`${
+                                  attendance?.midTerm +
+                                  attendance?.assignment +
+                                  attendance?.final
+                                }`) : "in progress"}
+                                
+                            </td>
                             <td className="py-2 px-4 border">
                               <div className="flex space-x-2">
                                 <button
