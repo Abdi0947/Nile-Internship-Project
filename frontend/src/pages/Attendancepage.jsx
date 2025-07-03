@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllAttendance, addAttendance, removeAttendance, updateAttendance } from '../features/Attendance';
 import { fetchAllStudents } from '../features/Student';
+import { getTeacherById } from "../features/Teacher";
 import TopNavbar from "../components/Topnavbar";
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
@@ -11,6 +12,8 @@ function Attendancepage() {
   const { allAttendance, isAttendanceLoading } = useSelector(state => state.attendance);
   const { Authuser } = useSelector((state) => state.auth);
   const { students } = useSelector(state => state.Student);
+  const { teacherDetails } = useSelector((state) => state.Teacher);
+  const teacheId = Authuser?.id || Authuser?._id;
   const yourStudent = students?.filter(
     (item) => item?.classId?._id === Authuser?.classId
   );
@@ -39,6 +42,7 @@ function Attendancepage() {
     dispatch(fetchAllStudents());
   }, [dispatch]);
 
+
   useEffect(() => {
     if (yourStudent && yourStudent?.length > 0 && selectedClass) {
       // In a real app, filter students by class
@@ -51,7 +55,11 @@ function Attendancepage() {
           studentId: student._id,
           studentName: `${student.firstName} ${student.lastName}`,
           status: "present",
-          note: "",
+          remarks: "",
+          teacherId: teacheId,
+          subjectId: teacherDetails?.subjects?._id,
+          classId: selectedClass,
+          date: selectedDate,
         }))
       );
     }
@@ -62,6 +70,15 @@ function Attendancepage() {
       filterAttendanceRecords();
     }
   }, [allAttendance, filterParams, viewMode]);
+
+  useEffect(() => {
+      if (teacheId) {
+        dispatch(getTeacherById(teacheId));
+      }
+    }, [dispatch, teacheId]);
+    
+    // const classOptions = teacherDetails?.classId;
+    // const subjectOptions = teacherDetails?.subjects;
 
   const filterAttendanceRecords = () => {
     if (!allAttendance) return;
@@ -94,15 +111,16 @@ function Attendancepage() {
     );
   };
 
-  const handleNoteChange = (studentId, note) => {
+  const handleNoteChange = (studentId, remarks) => {
     setAttendanceData(prev => 
       prev.map(item => 
-        item.studentId === studentId ? { ...item, note } : item
+        item.studentId === studentId ? { ...item, remarks } : item
       )
     );
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     if (!selectedDate || !selectedClass || !selectedSubject) {
       toast.error('Please select date, class and subject');
       return;
@@ -114,30 +132,28 @@ function Attendancepage() {
     }
 
     const attendancePayload = {
-      date: selectedDate,
-      class: selectedClass,
-      subject: selectedSubject,
       attendanceRecords: attendanceData
     };
 
     if (isEditing && editingAttendanceId) {
-      await dispatch(updateAttendance({ 
+      dispatch(updateAttendance({ 
         id: editingAttendanceId, 
         updatedData: attendancePayload 
       }));
       setIsEditing(false);
       setEditingAttendanceId(null);
     } else {
-      await dispatch(addAttendance(attendancePayload));
+      dispatch(addAttendance(attendancePayload));
     }
 
     // Reset form
-    setSelectedDate(format(new Date(), 'yyyy-MM-dd'));
-    setSelectedClass('');
-    setSelectedSubject('');
-    setAttendanceData([]);
+    // setSelectedDate(format(new Date(), 'yyyy-MM-dd'));
+    // setSelectedClass('');
+    // setSelectedSubject('');
+    // setAttendanceData([]);
+    toast.success("Assignment created successfully!");
   };
-
+  console.log(attendanceData);
   const handleEdit = (attendance) => {
     setIsEditing(true);
     setEditingAttendanceId(attendance._id);
@@ -162,32 +178,44 @@ function Attendancepage() {
   return (
     <div className="min-h-screen bg-gray-100">
       <TopNavbar />
-      
+
       <div className="container mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-800">Attendance Management</h1>
+            <h1 className="text-2xl font-bold text-gray-800">
+              Attendance Management
+            </h1>
             <div className="flex space-x-2">
-              <button 
-                onClick={() => setViewMode('record')} 
-                className={`px-4 py-2 rounded ${viewMode === 'record' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
+              <button
+                onClick={() => setViewMode("record")}
+                className={`px-4 py-2 rounded ${
+                  viewMode === "record"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 text-gray-800"
+                }`}
               >
                 Record Attendance
               </button>
-              <button 
-                onClick={() => setViewMode('view')} 
-                className={`px-4 py-2 rounded ${viewMode === 'view' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
+              <button
+                onClick={() => setViewMode("view")}
+                className={`px-4 py-2 rounded ${
+                  viewMode === "view"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 text-gray-800"
+                }`}
               >
                 View Records
               </button>
             </div>
           </div>
 
-          {viewMode === 'record' ? (
+          {viewMode === "record" ? (
             <>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Date
+                  </label>
                   <input
                     type="date"
                     value={selectedDate}
@@ -196,29 +224,39 @@ function Attendancepage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Class</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Class
+                  </label>
                   <select
                     value={selectedClass}
                     onChange={(e) => setSelectedClass(e.target.value)}
                     className="w-full p-2 border rounded"
                   >
                     <option value="">Select Class</option>
-                    {classOptions.map(cls => (
-                      <option key={cls} value={cls}>{cls}</option>
-                    ))}
+                    <option
+                      key={teacherDetails?.classId._id}
+                      value={teacherDetails?.classId?._id}
+                    >
+                      {teacherDetails?.classId.ClassName}
+                    </option>
                   </select>
                 </div>
-    <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Subject
+                  </label>
                   <select
                     value={selectedSubject}
                     onChange={(e) => setSelectedSubject(e.target.value)}
                     className="w-full p-2 border rounded"
                   >
                     <option value="">Select Subject</option>
-                    {subjectOptions.map(subject => (
-                      <option key={subject} value={subject}>{subject}</option>
-                    ))}
+                    <option
+                      key={teacherDetails?.subjects?._id}
+                      value={teacherDetails?.subjects?._id}
+                    >
+                      {teacherDetails?.subjects?.SubjectName}
+                    </option>
                   </select>
                 </div>
               </div>
@@ -229,7 +267,9 @@ function Attendancepage() {
                     <table className="min-w-full bg-white border">
                       <thead className="bg-gray-100">
                         <tr>
-                          <th className="py-2 px-4 border text-left">Student</th>
+                          <th className="py-2 px-4 border text-left">
+                            Student
+                          </th>
                           <th className="py-2 px-4 border text-left">Status</th>
                           <th className="py-2 px-4 border text-left">Note</th>
                         </tr>
@@ -237,12 +277,24 @@ function Attendancepage() {
                       <tbody>
                         {attendanceData.length > 0 ? (
                           attendanceData.map((item, index) => (
-                            <tr key={item.studentId} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                              <td className="py-2 px-4 border">{item.studentName}</td>
+                            <tr
+                              key={item.studentId}
+                              className={
+                                index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                              }
+                            >
+                              <td className="py-2 px-4 border">
+                                {item.studentName}
+                              </td>
                               <td className="py-2 px-4 border">
                                 <select
                                   value={item.status}
-                                  onChange={(e) => handleStatusChange(item.studentId, e.target.value)}
+                                  onChange={(e) =>
+                                    handleStatusChange(
+                                      item.studentId,
+                                      e.target.value
+                                    )
+                                  }
                                   className="w-full p-1 border rounded"
                                 >
                                   <option value="present">Present</option>
@@ -254,9 +306,14 @@ function Attendancepage() {
                               <td className="py-2 px-4 border">
                                 <input
                                   type="text"
-                                  value={item.note}
-                                  onChange={(e) => handleNoteChange(item.studentId, e.target.value)}
-                                  placeholder="Add note"
+                                  value={item.remarks}
+                                  onChange={(e) =>
+                                    handleNoteChange(
+                                      item.studentId,
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="Add remarks"
                                   className="w-full p-1 border rounded"
                                 />
                               </td>
@@ -264,7 +321,10 @@ function Attendancepage() {
                           ))
                         ) : (
                           <tr>
-                            <td colSpan="3" className="py-4 text-center text-gray-500">
+                            <td
+                              colSpan="3"
+                              className="py-4 text-center text-gray-500"
+                            >
                               No students available for this class
                             </td>
                           </tr>
@@ -279,7 +339,11 @@ function Attendancepage() {
                       className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                       disabled={isAttendanceLoading}
                     >
-                      {isAttendanceLoading ? 'Saving...' : isEditing ? 'Update Attendance' : 'Save Attendance'}
+                      {isAttendanceLoading
+                        ? "Saving..."
+                        : isEditing
+                        ? "Update Attendance"
+                        : "Save Attendance"}
                     </button>
                   </div>
                 </>
@@ -293,7 +357,9 @@ function Attendancepage() {
             <>
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Start Date
+                  </label>
                   <input
                     type="date"
                     name="startDate"
@@ -303,7 +369,9 @@ function Attendancepage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    End Date
+                  </label>
                   <input
                     type="date"
                     name="endDate"
@@ -313,7 +381,9 @@ function Attendancepage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Class</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Class
+                  </label>
                   <select
                     name="class"
                     value={filterParams.class}
@@ -321,13 +391,17 @@ function Attendancepage() {
                     className="w-full p-2 border rounded"
                   >
                     <option value="">All Classes</option>
-                    {classOptions.map(cls => (
-                      <option key={cls} value={cls}>{cls}</option>
+                    {classOptions.map((cls) => (
+                      <option key={cls} value={cls}>
+                        {cls}
+                      </option>
                     ))}
                   </select>
                 </div>
-        <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Subject
+                  </label>
                   <select
                     name="subject"
                     value={filterParams.subject}
@@ -335,8 +409,10 @@ function Attendancepage() {
                     className="w-full p-2 border rounded"
                   >
                     <option value="">All Subjects</option>
-                    {subjectOptions.map(subject => (
-                      <option key={subject} value={subject}>{subject}</option>
+                    {subjectOptions.map((subject) => (
+                      <option key={subject} value={subject}>
+                        {subject}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -374,17 +450,28 @@ function Attendancepage() {
                     ) : filteredAttendance && filteredAttendance.length > 0 ? (
                       filteredAttendance.map((attendance) => {
                         // Calculate attendance statistics
-                        const totalStudents = attendance.attendanceRecords?.length || 0;
-                        const presentCount = attendance.attendanceRecords?.filter(r => r.status === 'present').length || 0;
-                        const absentCount = attendance.attendanceRecords?.filter(r => r.status === 'absent').length || 0;
-                        
+                        const totalStudents =
+                          attendance.attendanceRecords?.length || 0;
+                        const presentCount =
+                          attendance.attendanceRecords?.filter(
+                            (r) => r.status === "present"
+                          ).length || 0;
+                        const absentCount =
+                          attendance.attendanceRecords?.filter(
+                            (r) => r.status === "absent"
+                          ).length || 0;
+
                         return (
                           <tr key={attendance._id}>
                             <td className="py-2 px-4 border">
-                              {format(new Date(attendance.date), 'dd/MM/yyyy')}
+                              {format(new Date(attendance.date), "dd/MM/yyyy")}
                             </td>
-                            <td className="py-2 px-4 border">{attendance.class}</td>
-                            <td className="py-2 px-4 border">{attendance.subject}</td>
+                            <td className="py-2 px-4 border">
+                              {attendance.class}
+                            </td>
+                            <td className="py-2 px-4 border">
+                              {attendance.subject}
+                            </td>
                             <td className="py-2 px-4 border">{presentCount}</td>
                             <td className="py-2 px-4 border">{absentCount}</td>
                             <td className="py-2 px-4 border">
@@ -408,7 +495,10 @@ function Attendancepage() {
                       })
                     ) : (
                       <tr>
-                        <td colSpan="6" className="py-4 text-center text-gray-500">
+                        <td
+                          colSpan="6"
+                          className="py-4 text-center text-gray-500"
+                        >
                           No attendance records found
                         </td>
                       </tr>
@@ -419,7 +509,7 @@ function Attendancepage() {
             </>
           )}
         </div>
-        </div>
+      </div>
     </div>
   );
 }

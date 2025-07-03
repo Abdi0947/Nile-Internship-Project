@@ -13,6 +13,11 @@ const AttendanceSchema = new mongoose.Schema({
     ref: 'Teacher',
     required: true
   },
+  subjectId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Teacher',
+    required: true
+  },
   classId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Class',
@@ -25,7 +30,7 @@ const AttendanceSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['present', 'absent', 'leave'],
+    enum: ['present', 'absent', 'late', 'excused'],
     required: true
   },
   remarks: {

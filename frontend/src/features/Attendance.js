@@ -15,15 +15,20 @@ const initialState = {
 
 export const addAttendance = createAsyncThunk(
   "attendance/createAttendance",
-  async (attendanceData, { rejectWithValue }) => {
+  async (attendancePayload, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post(
         "attendance/createAttendance",
-        attendanceData,
+        attendancePayload,
         { withCredentials: true }
       );
+      toast.success("Attendance recorded successfully!");
       return response.data;
     } catch (error) {
+      console.log(error);
+      toast.error(
+        error.response?.data?.message || "Failed to add attendance"
+      );
       return rejectWithValue(
         error.response?.data?.message || "Failed to add attendance"
       );

@@ -13,6 +13,7 @@ import toast from "react-hot-toast";
 function TeachersAssignmentpage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [isLoadings, setIsLoading] = useState(true);
   const { assignmentId } = useParams();
   const { Authuser } = useSelector((state) => state.auth);
   const { teacherDetails } = useSelector((state) => state.Teacher);

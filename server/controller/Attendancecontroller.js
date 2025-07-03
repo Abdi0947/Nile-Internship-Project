@@ -3,10 +3,10 @@ const Attendance = require('../model/Attendance');
 
 module.exports.createAttendance = async (req, res) => {
   try {
-    const { studentId,teacherId, classId,  date,status,remarks}=req.body;
+    const { attendanceRecords}=req.body;
 
 
-    if ( !studentId||!teacherId||!classId||!date||!status||!remarks) {
+    if ( !attendanceRecords) {
         return res
           .status(400)
           .json({ error: "Please provide all neccessary information" });
@@ -14,17 +14,8 @@ module.exports.createAttendance = async (req, res) => {
 
 
 
-    const attendance = new Attendance({
-        studentId,
-        teacherId,
-         classId,  
-         date,
-         status,
-         remarks
-        
-    });
-    const saved = await attendance.save();
-    res.status(201).json(saved);
+      await Attendance.insertMany(attendanceRecords);
+    res.status(201).json("Attendance recorded successfully");
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
