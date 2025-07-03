@@ -40,8 +40,7 @@ catch(error){
 }
 
 module.exports.getallGrade=async(req,res)=>{
-  const {teacherId} = req.params
-  console.log(teacherId);
+  const {teacherId} = req.params;
     try{
       const grades = await Grade.find({
         teacherId: teacherId,
@@ -55,6 +54,7 @@ module.exports.getallGrade=async(req,res)=>{
       grades.forEach((entry) => {
         const firstName = entry.studentId.firstName;
         const lastName = entry.studentId.lastName;
+        const studentId = entry.studentId._id;
         const fullName = `${firstName} ${lastName}`;
         const examType = entry.examType.toLowerCase();
         const grade = Number(entry.grade);
@@ -64,6 +64,7 @@ module.exports.getallGrade=async(req,res)=>{
 
         if (!student) {
           student = {
+            id: studentId,
             studentName: fullName,
             assignment: null,
             midTerm: null,
@@ -77,7 +78,6 @@ module.exports.getallGrade=async(req,res)=>{
         else if (examType === "midterm") student.midTerm = grade;
         else if (examType === "final") student.final = grade;
       });
-      console.log(transformed);
       res.status(200).json(transformed);
 
     }
@@ -106,14 +106,37 @@ module.exports.getGradeById = async (req, res) => {
 
 
   module.exports.updateGrade = async (req, res) => {
+    const { studentId, subjectId, teacherId, grade, examType } = req.body;
     try {
-        const {GraderId}=req.params;
-        const {updatedData}=req.body
-      const updatedGrade = await Grade.findByIdAndUpdate(GraderId, updatedData, { new: true });
-  
-      if (!updatedGrade) return res.status(404).json({ message: 'Grade not found' });
-  
-      res.status(200).json(updatedGrade);
+        if (!studentId || !examType || !grade) {
+          return res.status(400).json({ message: 'Please provide all required fields' });
+        }
+      const findGradeOfStudent = await Grade.find({ studentId: studentId });
+      if (findGradeOfStudent.length === 0) {
+        return res
+          .status(404)
+          .json({ message: "Grade not found for this student" });
+      }
+      const findGrade = await Grade.find({ studentId: studentId, examType: examType });
+      if (findGrade.length === 0) {
+        const newGrade = new Grade({
+          studentId,
+          subjectId,
+          teacherId,
+          grade,
+          examType,
+        });
+        newGrade.save();
+        return res.status(201).json({ message: 'Grade updated successfully' });
+      }
+
+      const updatedGrade = await Grade.findOneAndUpdate(
+        { studentId: studentId, examType: examType },
+        { grade },
+        { new: true }
+      );
+      updatedGrade.save();
+      res.status(200).json({ message: 'Grade updated successfully' }); 
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
@@ -121,12 +144,13 @@ module.exports.getGradeById = async (req, res) => {
   
  
   module.exports.deleteGrade = async (req, res) => {
-
+    const { studentId } = req.params;
+    console.log(studentId)
 
     try {
 
-        const {GraderId}=req.params;
-      const deletedGrade = await Grade.findByIdAndDelete(GraderId);
+        
+      const deletedGrade = await Grade.deleteMany({ studentId: studentId });
   
       if (!deletedGrade) return res.status(404).json({ message: 'Grade not found' });
   

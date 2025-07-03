@@ -52,6 +52,45 @@ export const getAllGrade = createAsyncThunk(
     }
   }
 );
+export const deleteGrade = createAsyncThunk(
+  `/grade/deleteGrader`,
+  async (studentId, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.delete(
+        `/grade/deleteGrader/${studentId}`,
+        { withCredentials: true }
+      );
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch subject"
+      );
+    }
+  }
+);
+export const updateGrade = createAsyncThunk(
+  "/grade/updateGrader",
+  async (editGradeData, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.put(
+        "/grade/updateGrader",
+        editGradeData,
+        {
+          withCredentials: true,
+        }
+      );
+      console.log(response.data);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to add student. Please try again.");
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch subjects"
+      );
+    }
+  }
+);
 
 const GradeSlice = createSlice({
   name: "Grade",
@@ -64,6 +103,12 @@ const GradeSlice = createSlice({
       })
       .addCase(createGrade.fulfilled, (state, action) => {
         state.grades = action.payload;
+        state.isLoading = false;
+      })
+      .addCase(updateGrade.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(updateGrade.fulfilled, (state) => {
         state.isLoading = false;
       })
       .addCase(createGrade.rejected, (state, action) => {
