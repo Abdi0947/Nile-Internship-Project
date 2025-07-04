@@ -4,7 +4,7 @@ const {createAttendance , getAllAttendance ,getAttendanceById,updateAttendance ,
 
 
 router.post("/createAttendance",createAttendance)
-router.get('/getallAttendance', getAllAttendance);
+router.get('/getallAttendance/:teacherId', getAllAttendance);
 router.get('/getAttendance/:AttendanceId',getAttendanceById);
 router.put('/updateAttendance/:AttendanceId', updateAttendance);
 router.delete('/deleteAttendance/:AttendanceId',deleteAttendance);

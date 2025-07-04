@@ -77,11 +77,14 @@ export const updateAttendance = createAsyncThunk(
 // Get All Attendance
 export const getAllAttendance = createAsyncThunk(
   "attendance/getallAttendance",
-  async (_, { rejectWithValue }) => {
+  async (teacheId, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get("attendance/getallAttendance", {
-        withCredentials: true,
-      });
+      const response = await axiosInstance.get(
+        `attendance/getallAttendance/${teacheId}`,
+        {
+          withCredentials: true,
+        }
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -105,7 +108,7 @@ const attendanceSlice = createSlice({
       })
       .addCase(getAllAttendance.fulfilled, (state, action) => {
         state.isAttendanceLoading = false;
-        state.allAttendance = action.payload.attendances || [];
+        state.allAttendance = action.payload;
       })
       .addCase(getAllAttendance.rejected, (state, action) => {
         state.isAttendanceLoading = false;

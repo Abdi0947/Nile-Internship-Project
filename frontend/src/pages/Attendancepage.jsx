@@ -33,21 +33,17 @@ function Attendancepage() {
     status: ''
   });
 
-  // Class and subject options (replace with actual data from your API)
-  const classOptions = ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6'];
-  const subjectOptions = ['Mathematics', 'Science', 'English', 'History', 'Geography', 'Computer Science'];
 
   useEffect(() => {
-    dispatch(getAllAttendance());
+    dispatch(getAllAttendance(teacheId));
     dispatch(fetchAllStudents());
   }, [dispatch]);
 
 
   useEffect(() => {
     if (yourStudent && yourStudent?.length > 0 && selectedClass) {
-      // In a real app, filter students by class
       const filteredStudents = yourStudent?.filter(
-        (student) => student?.status === "active" // Only include active students
+        (student) => student?.status === "active" 
       );
 
       setAttendanceData(
@@ -76,9 +72,6 @@ function Attendancepage() {
         dispatch(getTeacherById(teacheId));
       }
     }, [dispatch, teacheId]);
-    
-    // const classOptions = teacherDetails?.classId;
-    // const subjectOptions = teacherDetails?.subjects;
 
   const filterAttendanceRecords = () => {
     if (!allAttendance) return;
@@ -94,15 +87,17 @@ function Attendancepage() {
       endDate.setHours(0, 0, 0, 0);
       
       const dateMatches = recordDate >= startDate && recordDate <= endDate;
-      const classMatches = filterParams.class ? record.class === filterParams.class : true;
-      const subjectMatches = filterParams.subject ? record.subject === filterParams.subject : true;
+      const classMatches = filterParams.class ? record.classId === filterParams.class : true;
+      const subjectMatches = filterParams.subject
+        ? record.subjectId === filterParams.subject
+        : true;
       
       return dateMatches && classMatches && subjectMatches;
     });
     
     setFilteredAttendance(filtered);
   };
-
+  
   const handleStatusChange = (studentId, status) => {
     setAttendanceData(prev => 
       prev.map(item => 
@@ -147,13 +142,12 @@ function Attendancepage() {
     }
 
     // Reset form
-    // setSelectedDate(format(new Date(), 'yyyy-MM-dd'));
-    // setSelectedClass('');
-    // setSelectedSubject('');
-    // setAttendanceData([]);
-    toast.success("Assignment created successfully!");
+    setSelectedDate(format(new Date(), 'yyyy-MM-dd'));
+    setSelectedClass('');
+    setSelectedSubject('');
+    setAttendanceData([]);
   };
-  console.log(attendanceData);
+
   const handleEdit = (attendance) => {
     setIsEditing(true);
     setEditingAttendanceId(attendance._id);
@@ -174,6 +168,7 @@ function Attendancepage() {
     const { name, value } = e.target;
     setFilterParams(prev => ({ ...prev, [name]: value }));
   };
+  console.log(allAttendance);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -390,12 +385,12 @@ function Attendancepage() {
                     onChange={handleFilterChange}
                     className="w-full p-2 border rounded"
                   >
-                    <option value="">All Classes</option>
-                    {classOptions.map((cls) => (
-                      <option key={cls} value={cls}>
-                        {cls}
-                      </option>
-                    ))}
+                    <option
+                      key={teacherDetails?.classId._id}
+                      value={teacherDetails?.classId?._id}
+                    >
+                      {teacherDetails?.classId.ClassName}
+                    </option>
                   </select>
                 </div>
                 <div>
@@ -409,11 +404,12 @@ function Attendancepage() {
                     className="w-full p-2 border rounded"
                   >
                     <option value="">All Subjects</option>
-                    {subjectOptions.map((subject) => (
-                      <option key={subject} value={subject}>
-                        {subject}
-                      </option>
-                    ))}
+                    <option
+                      key={teacherDetails?.subjects?._id}
+                      value={teacherDetails?.subjects?._id}
+                    >
+                      {teacherDetails?.subjects?.SubjectName}
+                    </option>
                   </select>
                 </div>
                 <div className="flex items-end">
@@ -432,9 +428,10 @@ function Attendancepage() {
                     <tr>
                       <th className="py-2 px-4 border text-left">Date</th>
                       <th className="py-2 px-4 border text-left">Class</th>
-                      <th className="py-2 px-4 border text-left">Subject</th>
+                      <th className="py-2 px-4 border text-left">Late</th>
                       <th className="py-2 px-4 border text-left">Present</th>
                       <th className="py-2 px-4 border text-left">Absent</th>
+                      <th className="py-2 px-4 border text-left">Excuse</th>
                       <th className="py-2 px-4 border text-left">Actions</th>
                     </tr>
                   </thead>
@@ -460,20 +457,27 @@ function Attendancepage() {
                           attendance.attendanceRecords?.filter(
                             (r) => r.status === "absent"
                           ).length || 0;
+                        const lateCount =
+                          attendance.attendanceRecords?.filter(
+                            (r) => r.status === "late"
+                          ).length || 0;
+                        const excusedCount =
+                          attendance.attendanceRecords?.filter(
+                            (r) => r.status === "excused"
+                          ).length || 0;
 
                         return (
-                          <tr key={attendance._id}>
+                          <tr key={attendance.date}>
                             <td className="py-2 px-4 border">
                               {format(new Date(attendance.date), "dd/MM/yyyy")}
                             </td>
                             <td className="py-2 px-4 border">
-                              {attendance.class}
+                              {attendance?.className}
                             </td>
-                            <td className="py-2 px-4 border">
-                              {attendance.subject}
-                            </td>
+                            <td className="py-2 px-4 border">{lateCount}</td>
                             <td className="py-2 px-4 border">{presentCount}</td>
                             <td className="py-2 px-4 border">{absentCount}</td>
+                            <td className="py-2 px-4 border">{excusedCount}</td>
                             <td className="py-2 px-4 border">
                               <div className="flex space-x-2">
                                 <button
