@@ -26,7 +26,9 @@ export const createGrade = createAsyncThunk(
       return response.data;
     } catch (error) {
       console.log(error);
-      toast.error("Failed to add student. Please try again.");
+      toast.error(
+        error.response?.data?.error || "Failed to add grade. Please try again."
+      );
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch subjects"
       );
@@ -52,13 +54,31 @@ export const getAllGrade = createAsyncThunk(
     }
   }
 );
+export const getGradeById = createAsyncThunk(
+  `/grade/getGrader`,
+  async (studentId, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(
+        `/grade/getGrader/${studentId}`,
+        { withCredentials: true }
+      );
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch subject"
+      );
+    }
+  }
+);
 export const deleteGrade = createAsyncThunk(
   `/grade/deleteGrader`,
-  async (studentId, { rejectWithValue }) => {
+  async ({ studentId, teacherId }, { rejectWithValue }) => {
+    console.log(studentId, teacherId);
     try {
       const response = await axiosInstance.delete(
         `/grade/deleteGrader/${studentId}`,
-        { withCredentials: true }
+        { data: { teacherId }, withCredentials: true }
       );
       return response.data;
     } catch (error) {
@@ -125,9 +145,19 @@ const GradeSlice = createSlice({
       .addCase(getAllGrade.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+      })
+      .addCase(getGradeById.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getGradeById.fulfilled, (state, action) => {
+        state.grades = action.payload;
+        state.isLoading = false;
+      })
+      .addCase(getGradeById.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
       });
   },
 });
-
 
 export default GradeSlice.reducer;

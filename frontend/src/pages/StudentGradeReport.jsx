@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import TopNavbar from '../components/Topnavbar';
+import { useDispatch, useSelector } from "react-redux";
+import {
+   getGradeById
+} from "../features/Grade";
 import { motion } from 'framer-motion';
 import { FiDownload, FiPrinter, FiShare2, FiFilter, FiCalendar, FiChevronDown, FiBook, FiBarChart2 } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 
 const StudentGradeReport = () => {
+  const dispatch = useDispatch();
+  const { Authuser } = useSelector((state) => state.auth);
+  const { isLoading, grades } = useSelector((state) => state.Grade);
+  const studentId = Authuser?.id;
+  
   // Sample data - would be fetched from API in real implementation
   const [gradeData, setGradeData] = useState({
     studentInfo: {
@@ -59,6 +68,28 @@ const StudentGradeReport = () => {
       'F': 0
     }
   });
+
+  useEffect(() => {
+      dispatch(getGradeById(studentId));
+    }, [dispatch]);
+  
+  console.log(grades)
+  let totalSum = 0;
+  let subjectCount = 0;
+
+  grades.forEach((sub) => {
+    if(sub?.assignment && sub?.midterm && sub?.final) {
+      const sum = sub?.assignment + sub?.midterm + sub?.final;
+      totalSum += sum;
+      subjectCount++;
+    } else {
+      return totalSum = 0; // If any score is missing, we consider it as 0 for average calculation
+    }
+    
+  });
+  
+
+  const overallAverage = totalSum / subjectCount;
 
   const [selectedTerm, setSelectedTerm] = useState(gradeData.terms.find(term => term.isActive)?.id || gradeData.terms[0].id);
   const [expandedCourse, setExpandedCourse] = useState(null);
@@ -117,8 +148,8 @@ const StudentGradeReport = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <TopNavbar />
-      
-      <motion.div 
+
+      <motion.div
         className="container mx-auto px-4 py-8 mt-14"
         variants={pageVariants}
         initial="initial"
@@ -127,11 +158,18 @@ const StudentGradeReport = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
           <motion.div variants={cardVariants}>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Academic Records</h1>
-            <p className="text-gray-600">Complete overview of your academic performance</p>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">
+              Academic Records
+            </h1>
+            <p className="text-gray-600">
+              Complete overview of your academic performance
+            </p>
           </motion.div>
-          
-          <motion.div variants={cardVariants} className="flex flex-wrap gap-2 mt-4 md:mt-0">
+
+          <motion.div
+            variants={cardVariants}
+            className="flex flex-wrap gap-2 mt-4 md:mt-0"
+          >
             <button className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors">
               <FiDownload /> Export PDF
             </button>
@@ -143,123 +181,98 @@ const StudentGradeReport = () => {
             </button>
           </motion.div>
         </div>
-        
+
         {/* Student Overview */}
-        <motion.div 
+        <motion.div
           variants={cardVariants}
           className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl p-6 mb-8 shadow-md"
         >
           <div className="flex flex-col md:flex-row justify-between">
             <div>
-              <h2 className="text-2xl font-bold mb-1">{gradeData.studentInfo.name}</h2>
-              <p className="text-blue-100">ID: {gradeData.studentInfo.id} | {gradeData.studentInfo.grade}</p>
-              <p className="text-blue-100 mt-1">Program: {gradeData.studentInfo.program}</p>
+              <h2 className="text-2xl font-bold mb-1">
+                {Authuser?.firstName} {Authuser?.lastName}
+              </h2>
+              <p className="text-blue-100">Email: {Authuser?.email}</p>
+              <p className="text-blue-100 mt-1">{Authuser?.role}</p>
             </div>
-            
-            <div className="mt-4 md:mt-0 flex flex-col items-start md:items-end">
-              <div className="flex items-center mb-2">
-                <span className="text-4xl font-bold">{gradeData.overallStats.gpa}</span>
-                <div className="ml-2">
-                  <div className="text-sm text-blue-100">Cumulative GPA</div>
-                  <div className="text-lg font-semibold">{gradeData.overallStats.averageGrade} Average</div>
+            {grades.length > 0 && (
+              <div className="mt-4 md:mt-0 flex flex-col items-start md:items-end">
+                <div className="flex items-center mb-2">
+                  <span className="text-4xl font-bold">
+                    {overallAverage !== 0
+                      ? Number(overallAverage).toFixed(1)
+                      : "In progress"}
+                    %
+                  </span>
+                  <div className="ml-2">
+                    <div className="text-sm text-blue-100">Average</div>
+                  </div>
+                </div>
+                <div className="flex gap-4 text-sm text-blue-100">
+                  <div>{subjectCount} Courses Completed</div>
                 </div>
               </div>
-              <div className="flex gap-4 text-sm text-blue-100">
-                <div>{gradeData.overallStats.totalCredits} Credits Total</div>
-                <div>{gradeData.overallStats.completedCourses} Courses Completed</div>
-              </div>
-            </div>
+            )}
+            { grades.length === 0 && (
+              <div className="mt-4 md:mt-0 text-red-200">
+                {/* create emoji */}
+                <div className="text-4xl mb-2">😞</div>
+                <p className="text-sm">No grades submitted for you.</p>
+              </div>)}
           </div>
         </motion.div>
-        
-        {/* Grade Distribution */}
-        <motion.div 
-          variants={cardVariants}
-          className="bg-white rounded-xl shadow-md p-6 mb-8"
-        >
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Grade Distribution</h2>
-          
-          <div className="flex items-end h-32 mb-4">
-            {Object.entries(gradeData.gradeDistribution).map(([grade, count], index) => (
-              <div key={grade} className="flex flex-col items-center flex-1" style={{ minWidth: 30 }}>
-                <div 
-                  className={`w-full mx-1 rounded-t-md ${
-                    grade.startsWith('A') ? 'bg-green-500' :
-                    grade.startsWith('B') ? 'bg-blue-500' :
-                    grade.startsWith('C') ? 'bg-yellow-500' :
-                    grade.startsWith('D') ? 'bg-orange-500' : 'bg-red-500'
-                  }`}
-                  style={{ height: `${count * 20}px` }}
-                ></div>
-                <div className="text-xs font-medium mt-1 text-gray-600">{grade}</div>
-              </div>
-            ))}
-          </div>
-          
-          <div className="flex justify-between text-sm text-gray-500 mt-2">
-            <div>Lower Grades</div>
-            <div>Higher Grades</div>
-          </div>
-        </motion.div>
-        
-        {/* Term Selection */}
-        <motion.div variants={cardVariants} className="mb-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-800">Term Grades</h2>
-            
-            <div className="relative inline-block">
-              <select 
-                value={selectedTerm}
-                onChange={(e) => setSelectedTerm(Number(e.target.value))}
-                className="appearance-none pl-3 pr-10 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer bg-white"
-              >
-                {gradeData.terms.map(term => (
-                  <option key={term.id} value={term.id}>
-                    {term.name} {term.isActive ? '(Current)' : ''}
-                  </option>
-                ))}
-              </select>
-              <FiChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-            </div>
-          </div>
-          
-          <div className="flex items-center mt-2 mb-4">
-            <FiCalendar className="text-gray-400 mr-2" />
-            <span className="text-gray-600">
-              {currentTerm?.name} — {currentTerm?.isActive ? 'In Progress' : 'Completed'}
-            </span>
-            <div className="ml-auto flex items-center">
-              <span className="text-gray-600 mr-2">Term GPA:</span>
-              <span className="font-bold text-blue-600">{calculateTermGPA(currentTerm?.courses || [])}</span>
-            </div>
-          </div>
-        </motion.div>
-        
         {/* Course List */}
-        <motion.div variants={cardVariants} className="bg-white rounded-xl shadow-md overflow-hidden">
+        <motion.div
+          variants={cardVariants}
+          className="bg-white rounded-xl shadow-md overflow-hidden"
+        >
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
                   Course
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Grade
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Assignment(20%)
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Credits
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Mid(30%)
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Performance
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Final(50%)
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Total(100%)
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {currentTerm?.courses.map(course => (
-                <React.Fragment key={course.id}>
-                  <tr 
-                    className={`hover:bg-gray-50 cursor-pointer ${expandedCourse === course.id ? 'bg-gray-50' : ''}`}
-                    onClick={() => setExpandedCourse(expandedCourse === course.id ? null : course.id)}
+              {grades?.map((course, key) => (
+                <React.Fragment key={key}>
+                  <tr
+                    className={`hover:bg-gray-50 cursor-pointer ${
+                      expandedCourse === course?.id ? "bg-gray-50" : ""
+                    }`}
+                    onClick={() =>
+                      setExpandedCourse(
+                        expandedCourse === course?.id ? null : course?.id
+                      )
+                    }
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -267,56 +280,72 @@ const StudentGradeReport = () => {
                           <FiBook />
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{course.name}</div>
-                          <div className="text-sm text-gray-500">Course ID: {course.id}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full ${
-                        course.grade.startsWith('A') ? 'bg-green-100 text-green-800' :
-                        course.grade.startsWith('B') ? 'bg-blue-100 text-blue-800' :
-                        course.grade.startsWith('C') ? 'bg-yellow-100 text-yellow-800' :
-                        course.grade.startsWith('D') ? 'bg-orange-100 text-orange-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                        {course.grade}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {course.credits} Credits
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <div className="flex items-center">
-                        <div className="w-32 bg-gray-200 rounded-full h-2.5 mr-2">
-                          <div className={`h-2.5 rounded-full ${
-                            course.percentage >= 90 ? 'bg-green-500' :
-                            course.percentage >= 80 ? 'bg-blue-500' :
-                            course.percentage >= 70 ? 'bg-yellow-500' :
-                            course.percentage >= 60 ? 'bg-orange-500' : 'bg-red-500'
-                          }`} style={{ width: `${course.percentage}%` }}></div>
-                        </div>
-                        <span>{course.percentage}%</span>
-                      </div>
-                    </td>
-                  </tr>
-                  
-                  {/* Expanded details */}
-                  {expandedCourse === course.id && (
-                    <tr className="bg-gray-50">
-                      <td colSpan="4" className="px-6 py-4">
-                        <div className="text-sm text-gray-700">
-                          <h4 className="font-medium mb-2">Instructor Notes</h4>
-                          <p className="text-gray-600 mb-3">{course.notes}</p>
-                          
-                          <div className="mt-3 flex space-x-3">
-                            <Link to={`/student/course/${course.id}`} className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center">
-                              <FiBarChart2 className="mr-1" /> View Detailed Performance
-                            </Link>
+                          <div className="text-sm font-medium text-gray-900">
+                            {course?.subjectName}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            Mrs. {course?.teacherName}
                           </div>
                         </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {course?.assignment}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {course?.midterm}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {course?.final}
+                    </td>
+                    {course?.final && course?.midterm && course?.assignment ? (
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <div className="flex items-center">
+                          <div className="w-32 bg-gray-200 rounded-full h-2.5 mr-2">
+                            <div
+                              className={`h-2.5 rounded-full ${
+                                course.midterm +
+                                  course.assignment +
+                                  course.final >=
+                                90
+                                  ? "bg-green-500"
+                                  : course.midterm +
+                                      course.assignment +
+                                      course.final >=
+                                    80
+                                  ? "bg-blue-500"
+                                  : course.midterm +
+                                      course.assignment +
+                                      course.final >=
+                                    70
+                                  ? "bg-yellow-500"
+                                  : course.midterm +
+                                      course.assignment +
+                                      course.final >=
+                                    60
+                                  ? "bg-orange-500"
+                                  : "bg-red-500"
+                              }`}
+                              style={{
+                                width: `${
+                                  course.midterm +
+                                  course.assignment +
+                                  course.final
+                                }%`,
+                              }}
+                            ></div>
+                          </div>
+                          <span>
+                            {course.midterm + course.assignment + course.final}%
+                          </span>
+                        </div>
                       </td>
-                    </tr>
-                  )}
+                    ) : (
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        In progress
+                      </td>
+                    )}
+                  </tr>
                 </React.Fragment>
               ))}
             </tbody>

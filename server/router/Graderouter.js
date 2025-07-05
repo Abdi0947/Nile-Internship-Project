@@ -5,7 +5,7 @@ const {createGrade,getallGrade,getGradeById,updateGrade ,deleteGrade}=require('.
 
 router.post("/createGrade",createGrade)
 router.get("/getallGrader/:teacherId", getallGrade);
-router.get('/getGrader/:GraderId',getGradeById);
+router.get('/getGrader/:studentId',getGradeById);
 router.put('/updateGrader/', updateGrade);
 router.delete("/deleteGrader/:studentId", deleteGrade);
 

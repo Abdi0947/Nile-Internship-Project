@@ -290,7 +290,7 @@ function TeacherGradeReport() {
     if (
       window.confirm("Are you sure you want to delete this grade?")
     ) {
-      dispatch(deleteGrade(studentId))
+      dispatch(deleteGrade({studentId, teacherId}))
       .unwrap()
       .then(() => {
         dispatch(getAllGrade(teacherId));
