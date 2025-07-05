@@ -11,7 +11,7 @@ function AssignmentDetails() {
   const { id } = useParams();
   const assignmentId = id
   
-  const { assignments, isLoading } = useSelector((state) => state.Assignment);
+  const {  currentAssignment, isLoading } = useSelector((state) => state.Assignment);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const requirements = [
@@ -34,7 +34,7 @@ function AssignmentDetails() {
     dispatch(getAssignmentById(assignmentId))
   }, [dispatch])
 
-  console.log(assignments);
+
 
   
 
@@ -85,10 +85,10 @@ function AssignmentDetails() {
             <div className="flex justify-between items-start">
               <div>
                 <h1 className="text-2xl font-bold text-gray-800">
-                  {assignments?.assignment?.title}
+                  {currentAssignment?.assignment?.title}
                 </h1>
                 <p className="text-gray-600 mt-1">
-                  {assignments?.assignment?.subject?.SubjectName}
+                  {currentAssignment?.assignment?.subject?.SubjectName}
                 </p>
               </div>
               <span
@@ -109,7 +109,7 @@ function AssignmentDetails() {
                 Description
               </h2>
               <p className="text-gray-600">
-                {assignments?.assignment?.description}
+                {currentAssignment?.assignment?.description}
               </p>
             </div>
 
@@ -122,7 +122,7 @@ function AssignmentDetails() {
                     Due Date:{" "}
                     {formatDate(
                       new Date(
-                        assignments?.assignment?.dueDate
+                        currentAssignment?.assignment?.dueDate
                       ).toLocaleString()
                     )}
                   </span>
@@ -145,11 +145,11 @@ function AssignmentDetails() {
                 <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
                   <div className="flex items-center">
                     <FiFileText className="text-gray-400 mr-2" />
-                    <span className="text-gray-600">{`${assignments?.assignment?.title}.pdf`}</span>
+                    <span className="text-gray-600">{`${currentAssignment?.assignment?.title}.pdf`}</span>
                   </div>
                   <button className="text-blue-600 hover:text-blue-800">
                     <a
-                      href={assignments?.assignment?.attachments}
+                      href={currentAssignment?.assignment?.attachments}
                       target="_blank"
                     >
                       <FiDownload className="w-5 h-5" />

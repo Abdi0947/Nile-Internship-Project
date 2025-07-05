@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom';
 const StudentGradeReport = () => {
   const dispatch = useDispatch();
   const { Authuser } = useSelector((state) => state.auth);
-  const { isLoading, grades } = useSelector((state) => state.Grade);
+  const {  grades } = useSelector((state) => state.Grade);
   const studentId = Authuser?.id;
   
   // Sample data - would be fetched from API in real implementation

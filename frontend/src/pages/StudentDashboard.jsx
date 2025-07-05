@@ -4,15 +4,17 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FiBookOpen, FiClipboard, FiCalendar, FiClock, FiBarChart2, FiAward, FiFileText, FiCheckSquare, FiUpload } from "react-icons/fi";
+import { getGradeById } from "../features/Grade";
 import {getAllClasses} from '../features/Class.js'
 import { getAllAssignments } from "../features/Assignment";
 
 function StudentDashboard() {
   const dispatch = useDispatch();
-  const [courseProgress, setCourseProgress] = useState([]);
-  const [upcomingAssignments, setUpcomingAssignments] = useState([]);
   const { Authuser } = useSelector((state) => state.auth);
+  const {  grades } = useSelector((state) => state.Grade);
+  
   const id = Authuser?.classId || "";
+  const studentId = Authuser?.id;
   const { classes } = useSelector((state) => state.Class);
   const { assignments, isLoading } = useSelector((state) => state.Assignment);
 
@@ -25,36 +27,52 @@ function StudentDashboard() {
     progress: 75,
     grade: "A-",
   }));
-  let yourAssignment = Array.isArray(assignments?.assignment)
-    ? assignments.assignment.filter((el) => el?.ClassId?._id === id)
-    : [];
-  let myAssignments = yourAssignment?.map((el) => ({
-    id: el?._id,
-    title: el?.title,
-    course: el?.subject?.SubjectName,
-    dueDate: new Date(el?.dueDate).toLocaleString(),
-    status: "started",
-  }));
-  
+  classes
+    ?.find((item) => item?._id === Authuser?.classId)
+    .subject?.map((el) => ({
+      id: el?._id,
+      name: el?.SubjectName,
+      progress: 75,
+      grade: "A-",
+    }));
   
   // Mock data - would be replaced with actual data from API
 
   useEffect(()=> {
     dispatch(getAllClasses())
     dispatch(getAllAssignments())
-    setCourseProgress(mysubjects)
-    setUpcomingAssignments(myAssignments)
   }, [dispatch])
 
   console.log(assignments);
   console.log(Authuser)
   const [stats, setStats] = useState({
-    courses: yourClass?.subject?.length,
+    courses: classes?.find((item) => item?._id === Authuser?.classId)?.subject
+      ?.length,
     assignments: assignments?.assignment?.length,
     completedAssignments: 5,
     averageGrade: 87.5,
   });
   
+  useEffect(() => {
+        dispatch(getGradeById(studentId));
+      }, [dispatch]);
+    
+    let totalSum = 0;
+    let subjectCount = 0;
+  
+    grades.forEach((sub) => {
+      if(sub?.assignment && sub?.midterm && sub?.final) {
+        const sum = sub?.assignment + sub?.midterm + sub?.final;
+        totalSum += sum;
+        subjectCount++;
+      } else {
+        return totalSum = 0; // If any score is missing, we consider it as 0 for average calculation
+      }
+      
+    });
+    
+  
+    const overallAverage = totalSum / subjectCount;
   
   
   
@@ -304,29 +322,19 @@ function StudentDashboard() {
                     Average Grade
                   </p>
                   <p className="text-3xl font-bold text-black">
-                    {stats.averageGrade}%
+                    {overallAverage}%
                   </p>
                 </div>
               </div>
 
-              <div className="flex justify-between items-center py-2">
+              <div className="flex justify-center items-center py-2">
                 <div className="flex flex-col items-center">
                   <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mb-1">
                     <span className="text-blue-700 font-medium">A</span>
                   </div>
-                  <span className="text-xs text-black">2 Courses</span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mb-1">
-                    <span className="text-green-700 font-medium">B</span>
-                  </div>
-                  <span className="text-xs text-black">3 Courses</span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center mb-1">
-                    <span className="text-yellow-700 font-medium">C</span>
-                  </div>
-                  <span className="text-xs text-black">1 Course</span>
+                  <span className="text-xs text-black">
+                    {subjectCount} Courses completed
+                  </span>
                 </div>
               </div>
 
@@ -409,41 +417,49 @@ function StudentDashboard() {
 
             <div className="p-6">
               <div className="divide-y divide-gray-100">
-                {courseProgress?.map((course) => (
-                  <div key={course.id} className="py-4 first:pt-0 last:pb-0">
-                    <div className="flex items-center justify-between mb-2">
-                      <div>
-                        <h4 className="font-medium text-black">
-                          {course.name}
-                        </h4>
-                        <p className="text-sm text-black">
-                          Current Grade:{" "}
-                          <span className="font-medium text-blue-600">
-                            {course.grade}
+                {classes
+                  ?.find((item) => item?._id === Authuser?.classId)
+                  .subject?.map((el) => ({
+                    id: el?._id,
+                    name: el?.SubjectName,
+                    progress: 75,
+                    grade: "A-",
+                  }))
+                  ?.map((course) => (
+                    <div key={course.id} className="py-4 first:pt-0 last:pb-0">
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <h4 className="font-medium text-black">
+                            {course.name}
+                          </h4>
+                          <p className="text-sm text-black">
+                            Current Grade:{" "}
+                            <span className="font-medium text-blue-600">
+                              {course.grade}
+                            </span>
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <span className="font-medium text-black">
+                            {course.progress}%
                           </span>
-                        </p>
+                          <p className="text-sm text-black">Completed</p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <span className="font-medium text-black">
-                          {course.progress}%
-                        </span>
-                        <p className="text-sm text-black">Completed</p>
+                      <div className="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${
+                            course.progress >= 80
+                              ? "bg-gradient-to-r from-green-500 to-emerald-500"
+                              : course.progress >= 60
+                              ? "bg-gradient-to-r from-blue-500 to-indigo-500"
+                              : "bg-gradient-to-r from-yellow-500 to-amber-500"
+                          }`}
+                          style={{ width: `${course.progress}%` }}
+                        ></div>
                       </div>
                     </div>
-                    <div className="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full ${
-                          course.progress >= 80
-                            ? "bg-gradient-to-r from-green-500 to-emerald-500"
-                            : course.progress >= 60
-                            ? "bg-gradient-to-r from-blue-500 to-indigo-500"
-                            : "bg-gradient-to-r from-yellow-500 to-amber-500"
-                        }`}
-                        style={{ width: `${course.progress}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             </div>
           </motion.div>
@@ -469,79 +485,121 @@ function StudentDashboard() {
 
             <div className="p-6">
               <div className="divide-y divide-gray-100">
-                {upcomingAssignments?.slice(0, 3)?.map((assignment) => (
-                  <div
-                    key={assignment.id}
-                    className="py-4 first:pt-0 last:pb-0"
-                  >
-                    <div className="flex items-start">
-                      <div
-                        className={`p-2 rounded-lg mr-4 ${
-                          assignment.status === "complete"
-                            ? "bg-green-100 text-green-700"
-                            : assignment.status === "in-progress"
-                            ? "bg-blue-100 text-blue-700"
-                            : "bg-amber-100 text-amber-700"
-                        }`}
-                      >
-                        {assignment.status === "complete" ? (
-                          <FiCheckSquare className="text-xl" />
-                        ) : (
-                          <FiClipboard className="text-xl" />
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h4 className="font-medium text-gray-800">
-                              {assignment.title}
-                            </h4>
-                            <p className="text-sm text-gray-500">
-                              {assignment.course}
-                            </p>
-                          </div>
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              assignment.status === "complete"
-                                ? "bg-green-100 text-green-800"
-                                : assignment.status === "in-progress"
-                                ? "bg-blue-100 text-blue-800"
-                                : "bg-amber-100 text-amber-800"
-                            }`}
-                          >
-                            {assignment.status.replace("-", " ")}
-                          </span>
-                        </div>
-                        <div className="mt-2 flex items-center text-sm text-gray-500">
-                          <FiClock className="mr-1" />
-                          <span>Due {formatDateTime(assignment.dueDate)}</span>
-                        </div>
-                        <div className="mt-3 flex space-x-3">
-                          <Link
-                            to={`/student/assignments/${assignment.id}`}
-                            className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
-                          >
-                            <FiFileText className="mr-1" />
-                            View Details
-                          </Link>
-                          {assignment.status !== "complete" && (
-                            <Link
-                              to={`/student/assignments/${assignment.id}/submit`}
-                              className="text-green-600 hover:text-green-800 text-sm font-medium flex items-center"
-                            >
-                              <FiUpload className="mr-1" />
-                              Submit
-                            </Link>
+                {assignments?.assignment
+                  ?.filter((el) => el?.ClassId?._id === id)
+                  ?.map((el) => ({
+                    id: el?._id,
+                    title: el?.title,
+                    course: el?.subject?.SubjectName,
+                    dueDate: new Date(el?.dueDate).toLocaleString(),
+                    status: "started",
+                  }))
+                  ?.slice(0, 3)
+                  ?.map((assignment) => (
+                    <div
+                      key={assignment.id}
+                      className="py-4 first:pt-0 last:pb-0"
+                    >
+                      <div className="flex items-start">
+                        <div
+                          className={`p-2 rounded-lg mr-4 ${
+                            assignment.status === "complete"
+                              ? "bg-green-100 text-green-700"
+                              : assignment.status === "in-progress"
+                              ? "bg-blue-100 text-blue-700"
+                              : "bg-amber-100 text-amber-700"
+                          }`}
+                        >
+                          {assignment.status === "complete" ? (
+                            <FiCheckSquare className="text-xl" />
+                          ) : (
+                            <FiClipboard className="text-xl" />
                           )}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h4 className="font-medium text-gray-800">
+                                {assignment.title}
+                              </h4>
+                              <p className="text-sm text-gray-500">
+                                {assignment.course}
+                              </p>
+                            </div>
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                assignment.status === "complete"
+                                  ? "bg-green-100 text-green-800"
+                                  : assignment.status === "in-progress"
+                                  ? "bg-blue-100 text-blue-800"
+                                  : "bg-amber-100 text-amber-800"
+                              }`}
+                            >
+                              {assignment.status.replace("-", " ")}
+                            </span>
+                          </div>
+                          <div className="mt-2 flex items-center text-sm text-gray-500">
+                            <FiClock className="mr-1" />
+                            <span>
+                              Due {formatDateTime(assignment.dueDate)}
+                            </span>
+                          </div>
+                          <div className="mt-3 flex space-x-3">
+                            <Link
+                              to={`/student/assignments/${assignment.id}`}
+                              className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
+                            >
+                              <FiFileText className="mr-1" />
+                              View Details
+                            </Link>
+                            {assignment.status !== "complete" && (
+                              <Link
+                                to={`/student/assignments/${assignment.id}/submit`}
+                                className="text-green-600 hover:text-green-800 text-sm font-medium flex items-center"
+                              >
+                                <FiUpload className="mr-1" />
+                                Submit
+                              </Link>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-                {upcomingAssignments?.length > 3 && (
+                  ))}
+                {assignments?.assignment
+                  ?.filter((el) => el?.ClassId?._id === id)
+                  ?.map((el) => ({
+                    id: el?._id,
+                    title: el?.title,
+                    course: el?.subject?.SubjectName,
+                    dueDate: new Date(el?.dueDate).toLocaleString(),
+                    status: "started",
+                  }))?.length > 3 && (
                   <div className="pt-4 text-sm text-gray-500 font-medium">
-                    +{upcomingAssignments.length - 3} more assignment
-                    {upcomingAssignments.length - 3 > 1 ? "s" : ""}
+                    +
+                    {assignments?.assignment
+                      ?.filter((el) => el?.ClassId?._id === id)
+                      ?.map((el) => ({
+                        id: el?._id,
+                        title: el?.title,
+                        course: el?.subject?.SubjectName,
+                        dueDate: new Date(el?.dueDate).toLocaleString(),
+                        status: "started",
+                      }))?.length - 3}{" "}
+                    more assignment
+                    {assignments?.assignment
+                      ?.filter((el) => el?.ClassId?._id === id)
+                      ?.map((el) => ({
+                        id: el?._id,
+                        title: el?.title,
+                        course: el?.subject?.SubjectName,
+                        dueDate: new Date(el?.dueDate).toLocaleString(),
+                        status: "started",
+                      }))?.length -
+                      3 >
+                    1
+                      ? "s"
+                      : ""}
                   </div>
                 )}
               </div>
