@@ -18,23 +18,7 @@ function StudentDashboard() {
   const { classes } = useSelector((state) => state.Class);
   const { assignments, isLoading } = useSelector((state) => state.Assignment);
 
-  let yourClass = classes?.find(
-    (item) => item?._id === Authuser?.classId
-  );
-  let mysubjects = yourClass?.subject?.map((el) => ({
-    id: el?._id,
-    name: el?.SubjectName,
-    progress: 75,
-    grade: "A-",
-  }));
-  classes
-    ?.find((item) => item?._id === Authuser?.classId)
-    .subject?.map((el) => ({
-      id: el?._id,
-      name: el?.SubjectName,
-      progress: 75,
-      grade: "A-",
-    }));
+  
   
   // Mock data - would be replaced with actual data from API
 
@@ -43,12 +27,7 @@ function StudentDashboard() {
     dispatch(getAllAssignments())
   }, [dispatch])
 
-  console.log(assignments);
-  console.log(Authuser)
   const [stats, setStats] = useState({
-    courses: classes?.find((item) => item?._id === Authuser?.classId)?.subject
-      ?.length,
-    assignments: assignments?.assignment?.length,
     completedAssignments: 5,
     averageGrade: 87.5,
   });
@@ -235,7 +214,8 @@ function StudentDashboard() {
                     Enrolled Courses
                   </p>
                   <p className="text-3xl font-bold text-black">
-                    {stats.courses}
+                    {classes?.find((item) => item?._id === Authuser?.classId)
+                      ?.subject?.length || 0}
                   </p>
                 </div>
               </div>
@@ -264,7 +244,7 @@ function StudentDashboard() {
                 <div>
                   <p className="text-black text-sm font-medium">Assignments</p>
                   <p className="text-3xl font-bold text-black">
-                    {stats.assignments}
+                    {assignments?.assignment?.length || 0}
                   </p>
                 </div>
               </div>
@@ -273,7 +253,9 @@ function StudentDashboard() {
                   <span className="text-sm text-black">Completion</span>
                   <span className="text-sm font-medium text-black">
                     {Math.round(
-                      (stats.completedAssignments / stats.assignments) * 100
+                      (stats.completedAssignments /
+                        assignments?.assignment?.length) *
+                        100
                     )}
                     %
                   </span>
@@ -283,7 +265,9 @@ function StudentDashboard() {
                     className="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full"
                     style={{
                       width: `${
-                        (stats.completedAssignments / stats.assignments) * 100
+                        (stats.completedAssignments /
+                          assignments?.assignment?.length) *
+                        100
                       }%`,
                     }}
                   ></div>
@@ -298,7 +282,8 @@ function StudentDashboard() {
                 </div>
                 <div>
                   <span className="text-red-500 font-semibold">
-                    {stats.assignments - stats.completedAssignments}
+                    {assignments?.assignment?.length -
+                      stats.completedAssignments}
                   </span>
                   <span className="text-gray-500 text-sm ml-1">Pending</span>
                 </div>
@@ -419,7 +404,7 @@ function StudentDashboard() {
               <div className="divide-y divide-gray-100">
                 {classes
                   ?.find((item) => item?._id === Authuser?.classId)
-                  .subject?.map((el) => ({
+                  ?.subject?.map((el) => ({
                     id: el?._id,
                     name: el?.SubjectName,
                     progress: 75,

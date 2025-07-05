@@ -59,9 +59,12 @@ export const submitAssignment = createAsyncThunk(
       payload.append("student_id", formData.student_id);
       payload.append("AssignmentId", formData.AssignmentId);
       payload.append("comment", formData.comment);
-      formData.attachments?.forEach((file) => {
-        payload.append("attachments", file); // backend should accept multiple
-      });
+      if (formData.attachments?.length > 0) {
+        payload.append("attachments", formData.attachments[0]);
+      }      
+      for (const pair of payload.entries()) {
+        console.log(`${pair[0]}:`, pair[1]);
+      }      
 
       const response = await axiosInstance.post(
         "/assignment/submitAssgiment",

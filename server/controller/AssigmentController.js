@@ -128,7 +128,7 @@ exports.submitAssignment = async (req, res) => {
 
     const assignmentSubmitted = new AssignmentSub({
       student_id,
-      AssignmentId,
+      assignment_id: AssignmentId,
       comment,
       answerUrl: attachmentUrl,
     });

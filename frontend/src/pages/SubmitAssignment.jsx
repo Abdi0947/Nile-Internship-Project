@@ -41,13 +41,15 @@ function SubmitAssignment() {
       comment,
       attachments: files,
     };
-    console.log(formData)
     setIsSubmitting(true);
+    
 
     try {
       // Here you would typically upload files and submit the assignment
       dispatch(submitAssignment(formData))
       toast.success("Assignment submitted successfully!");
+      setFiles([]);
+      setComment("");
     } catch (error) {
       console.error("Error submitting assignment:", error);
     } finally {

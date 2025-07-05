@@ -45,6 +45,14 @@ app.use("/api/student",Studentrouter)
 app.use("/api/Subject",Subjectrouter)
 app.use("/api/class", ClassRouter)
 
+// app.use((err, req, res, next) => {
+//   console.error(
+//     "🔥 Global error handler caught:",
+//     JSON.stringify(err, null, 2)
+//   );
+//   res.status(500).json({ error: err.message || "Internal server error" });
+// });
+
 app.listen(PORT, () => {
   MongoDBconfig();
   console.log(`The server is running at port ${PORT}`);
