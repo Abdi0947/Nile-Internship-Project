@@ -143,6 +143,23 @@ export const getAssignmentsByTeacherId = createAsyncThunk(
     }
   }
 );
+export const deleteAssignment = createAsyncThunk(
+  "/assignment/deleteAssignment/",
+  async (teacherId, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.delete(
+        `/assignment/deleteAssignment/${teacherId}`,
+        { withCredentials: true }
+      );
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch assignments"
+      );
+    }
+  }
+);
 
 const assignmentSlice = createSlice({
   name: "Assignment",

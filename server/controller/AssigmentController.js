@@ -2,7 +2,6 @@ const Assignment = require("../model/Assignmentmodel");
 const AssignmentSub = require("../model/AssignmentSubModel");
 
 exports.createAssgiment = async (req, res) => {
-  console.log(req.body);
   try {
     const {
       title,
@@ -33,7 +32,6 @@ exports.createAssgiment = async (req, res) => {
     });
 
     await assignment.save();
-    console.log(assignment);
 
     res.status(201).json({
       message: "Assignment created successfully",
@@ -59,7 +57,6 @@ exports.getAssignmentsByTeacherId = async (req, res) => {
       .populate("ClassId")
       .populate("subject");
 
-    console.log(assignments);
 
     res.status(200).json({
       message: "Assignments retrieved successfully",
@@ -88,7 +85,7 @@ exports.getAssignmentById = async (req, res) => {
     if (!assignment) {
       return res.status(404).json({ error: "Assignment not found." });
     }
-    console.log(assignment);
+    
     res.status(200).json({
       message: "Assignment retrieved successfully",
       assignment,
@@ -144,5 +141,21 @@ exports.submitAssignment = async (req, res) => {
     res
       .status(400)
       .json({ error: "Error during Assignment: " + error.message });
+  }
+};
+module.exports.deleteAssignment = async (req, res) => {
+  const { teacherId } = req.params;
+
+  console.log(req.body);
+
+  try {
+    const deletedGrade = await Assignment.findByIdAndDelete({ _id: teacherId });
+
+    if (!deletedGrade)
+      return res.status(404).json({ message: "Assignment not found" });
+
+    res.status(200).json({ message: "Assignment deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
