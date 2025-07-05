@@ -225,7 +225,11 @@ function TeacherDashboardpage() {
                 </div>
                 <div>
                   <p className="text-sm font-medium">Total Students</p>
-                  <p className="text-3xl font-bold">{stats.students}</p>
+                  <p className="text-3xl font-bold">
+                    {students?.filter(
+                      (item) => item?.classId?._id === Authuser?.classId
+                    ).length}
+                  </p>
                 </div>
               </div>
               <div className="flex justify-between items-center bg-gray-50 -mx-6 px-6 py-3 border-t">
@@ -317,8 +321,6 @@ function TeacherDashboardpage() {
               </div>
             </div>
           </motion.div>
-
-          
         </div>
 
         {/* Main Dashboard Content */}
@@ -341,39 +343,40 @@ function TeacherDashboardpage() {
             </div>
             <div className="p-6">
               <div className="divide-y divide-gray-100">
-                {Array.isArray(assignments) && assignments?.map((assignment) => {
-                  
-                  return(
-                  <div
-                    key={assignment?._id}
-                    className="py-4 first:pt-0 last:pb-0"
-                  >
-                    <div className="flex items-start">
-                      <div className="p-2 rounded-lg bg-purple-100 text-purple-700 mr-4">
-                        <FiClipboard className="text-xl" />
-                      </div>
-                      <div className="flex-grow">
-                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-                          <h4 className="font-medium mb-1 sm:mb-0">
-                            {assignment?.title}
-                          </h4>
-                          <span className="text-sm">
-                            Due: {formatDateTime(assignment?.dueDate)}
-                          </span>
-                        </div>
-                        <p className="text-sm mt-1">
-                          {assignment?.ClassId?.ClassName}
-                        </p>
-                      </div>
-                      <Link
-                        to={`/teacher/TeachersAssignmentpage/${assignment?._id}`}
-                        className="ml-4 text-blue-600 hover:text-blue-800 text-sm"
+                {Array.isArray(assignments) &&
+                  assignments?.map((assignment) => {
+                    return (
+                      <div
+                        key={assignment?._id}
+                        className="py-4 first:pt-0 last:pb-0"
                       >
-                        Review
-                      </Link>
-                    </div>
-                  </div>
-                )})}
+                        <div className="flex items-start">
+                          <div className="p-2 rounded-lg bg-purple-100 text-purple-700 mr-4">
+                            <FiClipboard className="text-xl" />
+                          </div>
+                          <div className="flex-grow">
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+                              <h4 className="font-medium mb-1 sm:mb-0">
+                                {assignment?.title}
+                              </h4>
+                              <span className="text-sm">
+                                Due: {formatDateTime(assignment?.dueDate)}
+                              </span>
+                            </div>
+                            <p className="text-sm mt-1">
+                              {assignment?.ClassId?.ClassName}
+                            </p>
+                          </div>
+                          <Link
+                            to={`/teacher/TeachersAssignmentpage/${assignment?._id}`}
+                            className="ml-4 text-blue-600 hover:text-blue-800 text-sm"
+                          >
+                            Review
+                          </Link>
+                        </div>
+                      </div>
+                    );
+                  })}
               </div>
             </div>
           </motion.div>

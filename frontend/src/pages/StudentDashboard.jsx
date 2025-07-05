@@ -7,24 +7,21 @@ import { FiBookOpen, FiClipboard, FiCalendar, FiClock, FiBarChart2, FiAward, FiF
 import { getGradeById } from "../features/Grade";
 import {getAllClasses} from '../features/Class.js'
 import { getAllAssignments } from "../features/Assignment";
+import { fetchAllTimetables } from "../features/TimeTable";
 
 function StudentDashboard() {
   const dispatch = useDispatch();
   const { Authuser } = useSelector((state) => state.auth);
   const {  grades } = useSelector((state) => state.Grade);
-  
   const id = Authuser?.classId || "";
   const studentId = Authuser?.id;
   const { classes } = useSelector((state) => state.Class);
   const { assignments, isLoading } = useSelector((state) => state.Assignment);
 
-  
-  
-  // Mock data - would be replaced with actual data from API
-
   useEffect(()=> {
     dispatch(getAllClasses())
     dispatch(getAllAssignments())
+    dispatch(fetchAllTimetables());
   }, [dispatch])
 
   const [stats, setStats] = useState({
@@ -115,16 +112,7 @@ function StudentDashboard() {
     });
   };
   
-  // Get days remaining helper function
-  const getDaysRemaining = (dueDate) => {
-    const now = new Date();
-    const diffTime = dueDate - now;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays <= 0) return "Due today";
-    if (diffDays === 1) return "Due tomorrow";
-    return `Due in ${diffDays} days`;
-  };
+
   
   // Get current time of day for greeting
   const getGreeting = () => {
@@ -185,12 +173,6 @@ function StudentDashboard() {
                     day: "numeric",
                   })}
                 </p>
-                <div className="mt-2 flex items-center">
-                  <span className="inline-block w-2 h-2 bg-green-400 rounded-full mr-2"></span>
-                  <p className="text-sm">
-                    Next Class: {upcomingClasses[0]?.title || "None Today"}
-                  </p>
-                </div>
               </div>
             </div>
           </div>
@@ -417,12 +399,7 @@ function StudentDashboard() {
                           <h4 className="font-medium text-black">
                             {course.name}
                           </h4>
-                          <p className="text-sm text-black">
-                            Current Grade:{" "}
-                            <span className="font-medium text-blue-600">
-                              {course.grade}
-                            </span>
-                          </p>
+                          
                         </div>
                         <div className="text-right">
                           <span className="font-medium text-black">

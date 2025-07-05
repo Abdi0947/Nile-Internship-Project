@@ -178,7 +178,7 @@ export const updateUserInfo = createAsyncThunk(
       // If profile image update is needed
       if (userData.ProfilePic && userRole === "admin") {
         await axiosInstance.put(
-          "auth/updateProfile",
+          "/auth/updateUserInfo",
           { ProfilePic: userData.ProfilePic },
           {
             headers: {
@@ -187,6 +187,11 @@ export const updateUserInfo = createAsyncThunk(
             },
           }
         );
+        localStorage.setItem(
+          "profileImage",
+          response?.data?.updatedUser?.ProfilePic
+        );
+        toast.success("Profile picture updated successfully");
       }
       // If profile image update is needed
       if (userData.ProfilePic && userRole === "Student") {
@@ -236,6 +241,7 @@ export const updateUserInfo = createAsyncThunk(
           toast.error("Profile picture error");
         }
       }
+      
 
       const updatedUser = response.data?.updatedUser || response.data;
 

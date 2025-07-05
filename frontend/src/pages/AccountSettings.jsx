@@ -59,12 +59,12 @@ const AccountSettings = () => {
 
   const handleProfileImageUpdate = async (imageData) => {
     try {
-      const updatedUserData = {
+      const userData = {
         ...profileForm.values,
-        ProfilePic: imageData
+        ProfilePic: imageData,
       };
       
-      await dispatch(updateUserInfo(updatedUserData)).unwrap();
+      await dispatch(updateUserInfo(userData)).unwrap();
       setProfileImageKey(Date.now());
       toast.success('Profile picture updated successfully');
     } catch (error) {

@@ -1,7 +1,7 @@
 const express = require("express");
 const { MongoDBconfig } = require('./lib/mongodbconfig');
 const cors = require('cors');
-const authrouter = require('./routes/Authroutes');
+const authrouter = require('./router/Authrouter');
 const Teacherrouter = require('./router/Teacherrouter');
 const Graderouter=require('./router/Graderouter')
 const Notificationrouter=require('./router/Notificationrouter')

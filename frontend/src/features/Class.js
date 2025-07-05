@@ -6,7 +6,7 @@ const initialState = {
   classes: [],
   isLoading: false,
   error: null,
-  currentClass: null,
+  currentClass: [],
   isCurrentLoading: false,
 };
 
@@ -30,11 +30,11 @@ export const getAllClasses = createAsyncThunk(
 
 // Get class by ID
 export const getClassById = createAsyncThunk(
-  "/Class/getsingleClass",
+  "/class/getClassById",
   async (classId, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(
-        `/Class/getsingleClass/${classId}`,
+        `/class/getClassById/${classId}`,
         { withCredentials: true }
       );
       return response.data;
@@ -49,11 +49,7 @@ export const getClassById = createAsyncThunk(
 const ClassSlice = createSlice({
   name: "Class",
   initialState,
-  reducers: {
-    clearCurrentClass: (state) => {
-      state.currentClass = null;
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(getAllClasses.pending, (state) => {

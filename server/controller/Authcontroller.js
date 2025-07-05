@@ -360,6 +360,7 @@ module.exports.updateProfile = async (req, res) => {
   try {
     const { ProfilePic } = req.body;
     const userId = req.user?._id;
+    
 
     if (!userId) {
       return res.status(400).json({ message: "User not authenticated" });
@@ -570,11 +571,89 @@ module.exports.ResetPassword = async (req, res) => {
 
 module.exports.updateUserInfo = async (req, res) => {
   try {
-    const { firstName, lastName, email, phone, address } = req.body;
+    const { firstName, lastName, email, phone, address, ProfilePic } = req.body;
     const userId = req.user?._id;
 
     if (!userId) {
       return res.status(400).json({ message: "User not authenticated" });
+    }
+
+    if (ProfilePic) {
+      try {
+        console.log("Processing profile image upload...");
+
+        // Check if Cloudinary is properly configured
+        const isCloudinaryConfigured =
+          process.env.CLOUD_NAME &&
+          process.env.CLOUD_NAME !== "your_cloud_name" &&
+          process.env.API_KEY &&
+          process.env.API_KEY !== "your_cloudinary_api_key" &&
+          process.env.API_SECRET &&
+          process.env.API_SECRET !== "your_cloudinary_api_secret";
+
+        let imageUrl = "";
+
+        if (isCloudinaryConfigured) {
+          // Use Cloudinary if properly configured
+          const uploadResponse = await Cloudinary.uploader.upload(ProfilePic, {
+            folder: "profile_school_managment_system",
+            transformation: [{ quality: "auto" }],
+            fetch_format: "auto",
+          });
+
+          imageUrl = uploadResponse.secure_url;
+          console.log("Image uploaded to Cloudinary:", imageUrl);
+        } else {
+          // Fallback for local development - store image in user session
+          console.log(
+            "Cloudinary not configured correctly - using direct image data"
+          );
+          // Store the image data directly temporarily (not ideal for production)
+          imageUrl = ProfilePic;
+        }
+
+        // Add a unique identifier to prevent caching issues
+        const timestampedUrl = imageUrl.includes("?")
+          ? `${imageUrl}&t=${Date.now()}`
+          : `${imageUrl}?t=${Date.now()}`;
+
+        const updatedUser = await User.findOneAndUpdate(
+          { _id: userId },
+          { ProfilePic: imageUrl }, // Store the URL in DB
+          { new: true }
+        ).select("-password"); // Exclude password from response
+
+        if (!updatedUser) {
+          return res.status(404).json({ message: "User not found" });
+        }
+
+        console.log("User profile updated successfully");
+
+        return res.status(200).json({
+          message: "Profile updated successfully",
+          updatedUser: {
+            ...updatedUser.toObject(),
+            ProfilePic: timestampedUrl, // Send back timestamped URL to client
+          },
+        });
+      } catch (cloudinaryError) {
+        console.error("Cloudinary upload failed:", cloudinaryError);
+
+        // Provide more specific error message
+        let errorMessage = "Image upload failed";
+        if (
+          cloudinaryError.message &&
+          cloudinaryError.message.includes("Unknown API key")
+        ) {
+          errorMessage =
+            "Cloudinary credentials not configured. Please update your .env file with valid Cloudinary credentials.";
+        }
+
+        return res.status(500).json({
+          message: errorMessage,
+          error: cloudinaryError.message,
+        });
+      }
     }
 
     // Update the user information
