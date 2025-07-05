@@ -64,7 +64,7 @@ export const storeUserData = (userData, rememberMe = false) => {
     // Store remember me preference
     setRememberMePreference(rememberMe);
     
-    // Use appropriate storage based on remember me preference
+    
     const storage = rememberMe ? localStorage : sessionStorage;
     console.log('Using storage:', rememberMe ? 'localStorage' : 'sessionStorage');
     
