@@ -9,8 +9,8 @@ import {
   fetchAllStudents
 } from "../features/Student";
 import {
-  createAssignment,
-  getAssignmentsByTeacherId,
+  
+  getAssignmentsByTeacherId
 } from "../features/Assignment";
 import { fetchAllTimetables } from "../features/TimeTable";
 
@@ -18,9 +18,8 @@ function TeacherDashboardpage() {
   const { Authuser } = useSelector((state) => state.auth);
   const teacheId = Authuser?.id || Authuser?._id || "";
   const { students } = useSelector((state) => state.Student);
-  const { assignments, isLoading } = useSelector((state) => state.Assignment);
+  const { assignments,  isLoading } = useSelector((state) => state.Assignment);
   const dispatch = useDispatch();
-  const { getallTeachers } = useSelector((state) => state.Teacher);
   const { Timetables } = useSelector((state) => state.Timetables);
   const yourStudent = students?.filter(
     (item) => item?.classId?._id === Authuser?.classId
@@ -47,58 +46,9 @@ function TeacherDashboardpage() {
     assignments: assignments.length,
     upcomingClasses: teacherTimetable?.length,
   });
-  console.log(students);
 
-  const [recentAssignments] = useState([
-    {
-      id: 1,
-      title: "Math Homework - Algebra",
-      dueDate: new Date(Date.now() + 86400000 * 2), // 2 days from now
-      submissionsCount: 18,
-      totalStudents: 30,
-      class: "Grade 10 - Math",
-    },
-    {
-      id: 2,
-      title: "Science Project - Photosynthesis",
-      dueDate: new Date(Date.now() + 86400000 * 5), // 5 days from now
-      submissionsCount: 12,
-      totalStudents: 28,
-      class: "Grade 10 - Science",
-    },
-    {
-      id: 3,
-      title: "History Essay - Industrial Revolution",
-      dueDate: new Date(Date.now() + 86400000 * 7), // 7 days from now
-      submissionsCount: 5,
-      totalStudents: 25,
-      class: "Grade 10 - History",
-    },
-  ]);
+  
 
-  const [upcomingClasses] = useState([
-    {
-      id: 1,
-      title: "Math - Advanced Algebra",
-      time: new Date(Date.now() + 3600000 * 2), // 2 hours from now
-      room: "Room 101",
-      students: 30,
-    },
-    {
-      id: 2,
-      title: "Science Lab - Chemical Reactions",
-      time: new Date(Date.now() + 3600000 * 5), // 5 hours from now
-      room: "Science Lab",
-      students: 28,
-    },
-    {
-      id: 3,
-      title: "History - World War II",
-      time: new Date(Date.now() + 3600000 * 24), // 24 hours from now
-      room: "Room 203",
-      students: 25,
-    },
-  ]);
   // Get upcoming events from timetable (next 3 days)
   const today = new Date();
   const threeDaysLater = new Date(today);
@@ -228,19 +178,13 @@ function TeacherDashboardpage() {
                     day: "numeric",
                   })}
                 </p>
-                <div className="mt-2 flex items-center">
-                  <span className="inline-block w-2 h-2 bg-green-400 rounded-full mr-2"></span>
-                  <p className="text-sm">
-                    Next Class: {upcomingClasses[0]?.title || "None Today"}
-                  </p>
-                </div>
               </div>
             </div>
           </div>
         </motion.div>
 
         {/* Stats Overview Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {/* Classes Stats */}
           <motion.div
             className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden"
@@ -374,29 +318,7 @@ function TeacherDashboardpage() {
             </div>
           </motion.div>
 
-          {/* Review Card */}
-          <motion.div
-            className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden"
-            variants={itemVariants}
-          >
-            <div className="p-1 bg-gradient-to-r from-yellow-400 to-yellow-600"></div>
-            <div className="p-6 flex flex-col items-center justify-center">
-              <div className="p-3 rounded-full bg-yellow-100 mb-4">
-                <FiStar className="text-yellow-600 text-2xl" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Review</h3>
-              <p className="text-sm text-gray-600 mb-4 text-center">
-                View and analyze your teaching performance, feedback, and class
-                stats.
-              </p>
-              <Link
-                to="/teacher/review"
-                className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors text-sm font-medium"
-              >
-                Go to Review
-              </Link>
-            </div>
-          </motion.div>
+          
         </div>
 
         {/* Main Dashboard Content */}
@@ -419,7 +341,9 @@ function TeacherDashboardpage() {
             </div>
             <div className="p-6">
               <div className="divide-y divide-gray-100">
-                {Array.isArray(assignments) && assignments?.map((assignment) => (
+                {Array.isArray(assignments) && assignments?.map((assignment) => {
+                  
+                  return(
                   <div
                     key={assignment?._id}
                     className="py-4 first:pt-0 last:pb-0"
@@ -440,20 +364,6 @@ function TeacherDashboardpage() {
                         <p className="text-sm mt-1">
                           {assignment?.ClassId?.ClassName}
                         </p>
-                        <div className="mt-2">
-                          <div className="flex justify-between mb-1">
-                            <span className="text-xs">Submissions</span>
-                            <span className="text-xs">15 / 20</span>
-                          </div>
-                          <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-green-500 rounded-full"
-                              style={{
-                                width: `${(15 / 20) * 100}%`,
-                              }}
-                            ></div>
-                          </div>
-                        </div>
                       </div>
                       <Link
                         to={`/teacher/TeachersAssignmentpage/${assignment?._id}`}
@@ -463,7 +373,7 @@ function TeacherDashboardpage() {
                       </Link>
                     </div>
                   </div>
-                ))}
+                )})}
               </div>
             </div>
           </motion.div>

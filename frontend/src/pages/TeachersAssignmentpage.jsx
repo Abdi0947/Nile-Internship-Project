@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import TopNavbar from "../components/Topnavbar";
 import {
   createAssignment,
@@ -12,20 +12,15 @@ import toast from "react-hot-toast";
 
 function TeachersAssignmentpage() {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const [isLoadings, setIsLoading] = useState(true);
   const { assignmentId } = useParams();
   const { Authuser } = useSelector((state) => state.auth);
   const { teacherDetails } = useSelector((state) => state.Teacher);
   const { assignments, isLoading } = useSelector((state) => state.Assignment);
   const teacheId = Authuser?.id || Authuser?._id;
-  const [assignmentsData, setAssignments] = useState([]);
-  const [activeTab, setActiveTab] = useState("all"); // 'all', 'pending', 'graded'
+  
+  const [activeTab, setActiveTab] = useState("all"); 
   const [showAddModal, setShowAddModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [currentAssignment, setCurrentAssignment] = useState(null);
-  const [submissions, setSubmissions] = useState([]);
-  const [isSubmissionsLoading, setIsSubmissionsLoading] = useState(false);
+
 
   // Form state for new assignment
   const [formData, setFormData] = useState({
@@ -41,68 +36,10 @@ function TeachersAssignmentpage() {
     attachments: [],
   });
 
-  // Mock class and subject options (replace with actual data from your API)
+  
   const classOptions = teacherDetails?.classId;
   const subjectOptions = teacherDetails?.subjects;
 
-  // Mock data for assignmentsData (replace with actual API calls)
-  useEffect(() => {
-    const fetchAssignments = async () => {
-      // setIsLoading(true);
-      try {
-        // Mock API call - replace with actual API call
-        setTimeout(() => {
-          const mockAssignments = [
-            {
-              id: "1",
-              title: "Mathematics Problem Set",
-              description: "Complete problems 1-20 in Chapter 5",
-              class: "Class 3",
-              subject: "Mathematics",
-              dueDate: "2023-12-15",
-              createdAt: "2023-12-01",
-              maxScore: 100,
-              submissionCount: 15,
-              gradedCount: 10,
-            },
-            {
-              id: "2",
-              title: "Science Lab Report",
-              description:
-                "Write a lab report on the photosynthesis experiment",
-              class: "Class 4",
-              subject: "Science",
-              dueDate: "2023-12-20",
-              createdAt: "2023-12-05",
-              maxScore: 50,
-              submissionCount: 8,
-              gradedCount: 0,
-            },
-            {
-              id: "3",
-              title: "English Essay",
-              description: "Write a 500-word essay on your favorite book",
-              class: "Class 5",
-              subject: "English",
-              dueDate: "2023-12-18",
-              createdAt: "2023-12-04",
-              maxScore: 100,
-              submissionCount: 20,
-              gradedCount: 15,
-            },
-          ];
-          setAssignments(mockAssignments);
-          setIsLoading(false);
-        }, 1000);
-      } catch (error) {
-        console.error("Error fetching assignmentsData:", error);
-        toast.error("Failed to load assignmentsData");
-        setIsLoading(false);
-      }
-    };
-
-    fetchAssignments();
-  }, []);
   
   useEffect(() => {
     if (teacheId) {
@@ -112,57 +49,7 @@ function TeachersAssignmentpage() {
   }, [dispatch, teacheId]);
   console.log(assignments);
 
-  // If assignmentId is present, fetch and display only that assignment
-  useEffect(() => {
-    if (assignmentId) {
-      const assignment = assignmentsData.find((a) => a.id === assignmentId);
-      if (assignment) {
-        setCurrentAssignment(assignment);
-        setShowViewModal(true);
-        // Mock API call to fetch submissions for this assignment
-        setIsSubmissionsLoading(true);
-        setTimeout(() => {
-          const mockSubmissions = [
-            {
-              id: "1",
-              studentId: "101",
-              studentName: "John Doe",
-              submittedAt: "2023-12-10T14:30:00",
-              status: "submitted",
-              grade: null,
-              feedback: "",
-              attachments: ["homework1.pdf"],
-            },
-            {
-              id: "2",
-              studentId: "102",
-              studentName: "Jane Smith",
-              submittedAt: "2023-12-11T09:15:00",
-              status: "graded",
-              grade: 85,
-              feedback: "Good work, but could improve on section 3.",
-              attachments: ["assignment.docx", "notes.pdf"],
-            },
-            {
-              id: "3",
-              studentId: "103",
-              studentName: "Michael Johnson",
-              submittedAt: "2023-12-12T16:45:00",
-              status: "submitted",
-              grade: null,
-              feedback: "",
-              attachments: ["michael_homework.pdf"],
-            },
-          ];
-          setSubmissions(mockSubmissions);
-          setIsSubmissionsLoading(false);
-        }, 1000);
-      } else {
-        toast.error("Assignment not found");
-        navigate("/teacher/TeachersAssignmentpage");
-      }
-    }
-  }, [assignmentId, assignmentsData, navigate]);
+ 
 
 
   const handleInputChange = (e) => {
@@ -200,7 +87,7 @@ function TeachersAssignmentpage() {
       return;
     }
 
-    // Mock API call to create assignment
+    
     try {
       const id = Authuser.id || Authuser.id;
       dispatch(createAssignment({ id, formData })).unwrap()
@@ -229,64 +116,10 @@ function TeachersAssignmentpage() {
     }
   };
 
-  const handleViewAssignment = (assignment) => {
-    setCurrentAssignment(assignment);
-    setShowViewModal(true);
-
-    // Mock API call to fetch submissions for this assignment
-    setIsSubmissionsLoading(true);
-    setTimeout(() => {
-      const mockSubmissions = [
-        {
-          id: "1",
-          studentId: "101",
-          studentName: "John Doe",
-          submittedAt: "2023-12-10T14:30:00",
-          status: "submitted",
-          grade: null,
-          feedback: "",
-          attachments: ["homework1.pdf"],
-        },
-        {
-          id: "2",
-          studentId: "102",
-          studentName: "Jane Smith",
-          submittedAt: "2023-12-11T09:15:00",
-          status: "graded",
-          grade: 85,
-          feedback: "Good work, but could improve on section 3.",
-          attachments: ["assignment.docx", "notes.pdf"],
-        },
-        {
-          id: "3",
-          studentId: "103",
-          studentName: "Michael Johnson",
-          submittedAt: "2023-12-12T16:45:00",
-          status: "submitted",
-          grade: null,
-          feedback: "",
-          attachments: ["michael_homework.pdf"],
-        },
-      ];
-      setSubmissions(mockSubmissions);
-      setIsSubmissionsLoading(false);
-    }, 1000);
-  };
-
-  const handleGradeSubmission = (submissionId, grade, feedback) => {
-    // Mock API call to update grade
-    setSubmissions((prev) =>
-      prev.map((sub) =>
-        sub.id === submissionId
-          ? { ...sub, grade, feedback, status: "graded" }
-          : sub
-      )
-    );
-  };
 
   const handleDeleteAssignment = (assignmentId) => {
     if (window.confirm("Are you sure you want to delete this assignment?")) {
-      // Mock API call to delete assignment
+      
       dispatch(deleteAssignment(assignmentId))
       .unwrap()
       .then(() => {
@@ -296,19 +129,9 @@ function TeachersAssignmentpage() {
     }
   };
 
-  // If assignmentId is present, show only that assignment's details
+  
   if (assignmentId) {
-    const assignment = assignmentsData.find((a) => a.id === assignmentId);
-    if (isLoading) {
-      return (
-        <div className="min-h-screen bg-gray-100">
-          <TopNavbar />
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-          </div>
-        </div>
-      );
-    }
+    
     if (!assignments) {
       return (
         <div className="min-h-screen bg-gray-100">
@@ -325,46 +148,6 @@ function TeachersAssignmentpage() {
         </div>
       );
     }
-    return (
-      <div className="min-h-screen bg-gray-100">
-        <TopNavbar />
-        <div className="container mx-auto px-4 py-8">
-          <div className="bg-white rounded-lg shadow-md p-6 max-w-2xl mx-auto">
-            <h1 className="text-2xl font-bold text-gray-800 mb-4">
-              {assignment.title}
-            </h1>
-            <p className="mb-2 text-gray-700">
-              <span className="font-semibold">Class:</span> {assignment.class}
-            </p>
-            <p className="mb-2 text-gray-700">
-              <span className="font-semibold">Subject:</span>{" "}
-              {assignment.subject}
-            </p>
-            <p className="mb-2 text-gray-700">
-              <span className="font-semibold">Due Date:</span>{" "}
-              {assignment.dueDate}
-            </p>
-            <p className="mb-2 text-gray-700">
-              <span className="font-semibold">Max Score:</span>{" "}
-              {assignment.maxScore}
-            </p>
-            <p className="mb-4 text-gray-700">
-              <span className="font-semibold">Description:</span>{" "}
-              {assignment.description}
-            </p>
-            <div className="flex gap-4">
-              <Link
-                to="/teacher/TeachersAssignmentpage"
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-              >
-                Back
-              </Link>
-              {/* You can add more actions here, e.g., view submissions, edit, etc. */}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
   }
 
   return (
@@ -397,26 +180,7 @@ function TeachersAssignmentpage() {
             >
               All Assignments
             </button>
-            <button
-              className={`py-2 px-4 mr-2 ${
-                activeTab === "pending"
-                  ? "border-b-2 border-blue-500 text-blue-600 font-medium"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-              onClick={() => setActiveTab("pending")}
-            >
-              Pending Grading
-            </button>
-            <button
-              className={`py-2 px-4 ${
-                activeTab === "graded"
-                  ? "border-b-2 border-blue-500 text-blue-600 font-medium"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-              onClick={() => setActiveTab("graded")}
-            >
-              Fully Graded
-            </button>
+            
           </div>
 
           {/* Assignments List */}

@@ -2,50 +2,27 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FiX } from "react-icons/fi";
 import {
-  getAllAttendance,
-  addAttendance,
-  removeAttendance,
-  updateAttendance,
-} from "../features/Attendance";
-import {
   createGrade, getAllGrade, deleteGrade, updateGrade
 } from "../features/Grade";
 import { fetchAllStudents } from "../features/Student";
 import TopNavbar from "../components/Topnavbar";
 import { motion, AnimatePresence } from "framer-motion";
-import { format } from "date-fns";
+
 import toast from "react-hot-toast";
 
 function TeacherGradeReport() {
   const dispatch = useDispatch();
-  const { allAttendance, isAttendanceLoading } = useSelector(
-    (state) => state.attendance
-  );
   const { Authuser } = useSelector((state) => state.auth);
   const { students } = useSelector((state) => state.Student);
   const { isLoading, grades } = useSelector((state) => state.Grade);
   const yourStudent = students?.filter(
     (item) => item?.classId?._id === Authuser?.classId
   );
-  const [selectedDate, setSelectedDate] = useState(
-    format(new Date(), "yyyy-MM-dd")
-  );
-  const [selectedClass, setSelectedClass] = useState("");
-  const [selectedSubject, setSelectedSubject] = useState("");
-  const [attendanceData, setAttendanceData] = useState([]);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingAttendanceId, setEditingAttendanceId] = useState(null);
+  
   const [viewMode, setViewMode] = useState("record"); // 'record' or 'view'
   const [isAddTeacherModalOpen, setIsAddTeacherModalOpen] = useState(false);
   const [isEditGradeModalOpen, setIsEditGradeModalOpen] = useState(false);
-  const [filteredAttendance, setFilteredAttendance] = useState([]);
-  const [filterParams, setFilterParams] = useState({
-    startDate: format(new Date(), "yyyy-MM-dd"),
-    endDate: format(new Date(), "yyyy-MM-dd"),
-    class: "",
-    subject: "",
-    status: "",
-  });
+  
   const [newGrade, setNewTeacher] = useState({
     examType: "",
     studentId: "",
@@ -58,7 +35,7 @@ function TeacherGradeReport() {
   });
   const teacherId = Authuser?.id;
 
-  // Class and subject options (replace with actual data from your API)
+ 
   const examLists = [
     { value: "", label: "Select Exam Type" },
     { value: "Assignment", label: "Assignment" },
@@ -79,115 +56,10 @@ function TeacherGradeReport() {
     },
   };
   useEffect(() => {
-    dispatch(getAllAttendance());
+   
     dispatch(fetchAllStudents());
     dispatch(getAllGrade(teacherId));
   }, [dispatch]);
-
-  useEffect(() => {
-    if (yourStudent && yourStudent?.length > 0 && selectedClass) {
-      // In a real app, filter students by class
-      const filteredStudents = yourStudent?.filter(
-        (student) => student?.status === "active" // Only include active students
-      );
-
-      setAttendanceData(
-        filteredStudents.map((student) => ({
-          studentId: student._id,
-          studentName: `${student.firstName} ${student.lastName}`,
-          status: "present",
-          note: "",
-        }))
-      );
-    }
-  }, [students, selectedClass]);
-
-  useEffect(() => {
-    if (allAttendance && viewMode === "view") {
-      filterAttendanceRecords();
-    }
-  }, [allAttendance, filterParams, viewMode]);
-
-  const filterAttendanceRecords = () => {
-    if (!allAttendance) return;
-
-    const filtered = allAttendance.filter((record) => {
-      const recordDate = new Date(record.date);
-      const startDate = new Date(filterParams.startDate);
-      const endDate = new Date(filterParams.endDate);
-
-      // Reset hours to compare dates only
-      recordDate.setHours(0, 0, 0, 0);
-      startDate.setHours(0, 0, 0, 0);
-      endDate.setHours(0, 0, 0, 0);
-
-      const dateMatches = recordDate >= startDate && recordDate <= endDate;
-      const classMatches = filterParams.class
-        ? record.class === filterParams.class
-        : true;
-      const subjectMatches = filterParams.subject
-        ? record.subject === filterParams.subject
-        : true;
-
-      return dateMatches && classMatches && subjectMatches;
-    });
-
-    setFilteredAttendance(filtered);
-  };
-
-  const handleStatusChange = (studentId, status) => {
-    setAttendanceData((prev) =>
-      prev.map((item) =>
-        item.studentId === studentId ? { ...item, status } : item
-      )
-    );
-  };
-
-  const handleNoteChange = (studentId, note) => {
-    setAttendanceData((prev) =>
-      prev.map((item) =>
-        item.studentId === studentId ? { ...item, note } : item
-      )
-    );
-  };
-
-  const handleSubmit = async () => {
-    if (!selectedDate || !selectedClass || !selectedSubject) {
-      toast.error("Please select date, class and subject");
-      return;
-    }
-
-    if (attendanceData.length === 0) {
-      toast.error("No students available for attendance");
-      return;
-    }
-
-    const attendancePayload = {
-      date: selectedDate,
-      class: selectedClass,
-      subject: selectedSubject,
-      attendanceRecords: attendanceData,
-    };
-
-    if (isEditing && editingAttendanceId) {
-      await dispatch(
-        updateAttendance({
-          id: editingAttendanceId,
-          updatedData: attendancePayload,
-        })
-      );
-      setIsEditing(false);
-      setEditingAttendanceId(null);
-    } else {
-      await dispatch(addAttendance(attendancePayload));
-    }
-
-    // Reset form
-    setSelectedDate(format(new Date(), "yyyy-MM-dd"));
-    setSelectedClass("");
-    setSelectedSubject("");
-    setAttendanceData([]);
-  };
 
   const handleEdit = (attendance) => {
     let examType =
@@ -247,6 +119,7 @@ function TeacherGradeReport() {
         grade: editGrade.grade,
         examType: editGrade.examType,
       };
+      console.log(editGradeData);
       dispatch(updateGrade(editGradeData))
         .unwrap()
         .then(() => {
@@ -300,10 +173,7 @@ function TeacherGradeReport() {
     }
   };
 
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setFilterParams((prev) => ({ ...prev, [name]: value }));
-  };
+ 
 
   return (
     <div className="min-h-screen bg-gray-100">

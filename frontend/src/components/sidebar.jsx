@@ -331,19 +331,7 @@ function Sidebar({ isOpen, setIsOpen }) {
                             <span>Attendance</span>
                           </Link>
                         </motion.li>
-                        <motion.li
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.4 }}
-                        >
-                          <Link
-                            to="/teacher/classes"
-                            className="flex items-center space-x-3 text-md hover:text-yellow-300 py-1 px-2 rounded-md transition-colors"
-                          >
-                            <FaChalkboardTeacher className="text-lg text-yellow-300" />
-                            <span>Class Management</span>
-                          </Link>
-                        </motion.li>
+                       
                       </motion.ul>
                     )}
                   </AnimatePresence>

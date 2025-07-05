@@ -134,7 +134,10 @@ module.exports.updateGrade = async (req, res) => {
         .status(400)
         .json({ message: "Please provide all required fields" });
     }
-    const findGradeOfStudent = await Grade.find({ studentId: studentId });
+    const findGradeOfStudent = await Grade.find({
+      studentId: studentId,
+      teacherId: teacherId,
+    });
     if (findGradeOfStudent.length === 0) {
       return res
         .status(404)
@@ -142,6 +145,7 @@ module.exports.updateGrade = async (req, res) => {
     }
     const findGrade = await Grade.find({
       studentId: studentId,
+      teacherId: teacherId,
       examType: examType,
     });
     if (findGrade.length === 0) {
@@ -153,14 +157,15 @@ module.exports.updateGrade = async (req, res) => {
         examType,
       });
       newGrade.save();
-      return res.status(201).json({ message: "Grade updated successfully" });
+      return res.status(201).json({ message: "Grade created successfully" });
     }
 
-    const updatedGrade = await Grade.findOneAndUpdate(
-      { studentId: studentId, examType: examType },
-      { grade },
-      { new: true }
-    );
+    const updatedGrade = await Grade.findOne({
+      studentId: studentId,
+      teacherId: teacherId,
+      examType: examType,
+    });
+    updatedGrade.grade = grade;
     updatedGrade.save();
     res.status(200).json({ message: "Grade updated successfully" });
   } catch (error) {

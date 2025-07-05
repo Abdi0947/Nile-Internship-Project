@@ -15,25 +15,24 @@ import {
   getAssignmentById,
   getSubmitAssignments,
 } from "../features/Assignment";
-import toast from "react-hot-toast";
+import { fetchAllStudents } from "../features/Student";
+
 
 const AssignmentReviewPage = () => {
   const { assignmentId } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { Authuser } = useSelector((state) => state.auth);
+  const { students } = useSelector((state) => state.Student);
+  
 
-  const [assignment, setAssignment] = useState(null);
-  const { currentAssignment, submitAssignments } = useSelector(
+ 
+  const { currentAssignment, submitAssignments, isLoading } = useSelector(
     (state) => state.Assignment
   );
-  const [submissions, setSubmissions] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  
+  
   const [filter, setFilter] = useState("all");
-  const [selectedSubmission, setSelectedSubmission] = useState(null);
-  const [showGradingModal, setShowGradingModal] = useState(false);
-  const [gradeValue, setGradeValue] = useState("");
-  const [feedback, setFeedback] = useState("");
 
   // Animation variants
   const pageVariants = {
@@ -53,77 +52,10 @@ const AssignmentReviewPage = () => {
     in: { opacity: 1, y: 0 },
   };
 
-  useEffect(() => {
-    const fetchAssignmentData = async () => {
-      setIsLoading(true);
-      try {
-        // Mock API call - replace with actual API call
-        setTimeout(() => {
-          const mockAssignment = {
-            id: assignmentId,
-            title: "Mathematics Problem Set",
-            description: "Complete problems 1-20 in Chapter 5",
-            class: "Class 3",
-            subject: "Mathematics",
-            dueDate: "2023-12-15",
-            createdAt: "2023-12-01",
-            maxScore: 100,
-            totalStudents: 30,
-            submissionCount: 15,
-            gradedCount: 10,
-          };
-
-          const mockSubmissions = [
-            {
-              id: "1",
-              studentId: "101",
-              studentName: "John Doe",
-              submittedAt: "2023-12-10T14:30:00",
-              status: "submitted",
-              grade: null,
-              feedback: "",
-              attachments: [{ name: "homework1.pdf", size: "1.2 MB" }],
-            },
-            {
-              id: "2",
-              studentId: "102",
-              studentName: "Jane Smith",
-              submittedAt: "2023-12-11T09:15:00",
-              status: "graded",
-              grade: 85,
-              feedback: "Good work, but could improve on section 3.",
-              attachments: [
-                { name: "assignment.docx", size: "2.1 MB" },
-                { name: "notes.pdf", size: "3.4 MB" },
-              ],
-            },
-            {
-              id: "3",
-              studentId: "103",
-              studentName: "Michael Johnson",
-              submittedAt: "2023-12-12T16:45:00",
-              status: "submitted",
-              grade: null,
-              feedback: "",
-              attachments: [{ name: "michael_homework.pdf", size: "1.5 MB" }],
-            },
-          ];
-
-          setAssignment(mockAssignment);
-          setSubmissions(mockSubmissions);
-          setIsLoading(false);
-        }, 1000);
-      } catch (error) {
-        console.error("Error fetching assignment data:", error);
-        toast.error("Failed to load assignment data");
-        setIsLoading(false);
-      }
-    };
-
-    fetchAssignmentData();
-  }, [assignmentId]);
+  
   useEffect(() => {
     if (assignmentId) {
+      dispatch(fetchAllStudents());
       dispatch(getAssignmentById(assignmentId));
       dispatch(getSubmitAssignments(assignmentId));
     }
@@ -167,30 +99,9 @@ const AssignmentReviewPage = () => {
     return submission.status === filter;
   });
 
-  const handleGradeSubmission = (submission) => {
-    setSelectedSubmission(submission);
-    setGradeValue(submission.grade || "");
-    setFeedback(submission.feedback || "");
-    setShowGradingModal(true);
-  };
+ 
 
-  const handleSubmitGrade = () => {
-    if (!gradeValue || gradeValue < 0 || gradeValue > assignment.maxScore) {
-      toast.error("Please enter a valid grade");
-      return;
-    }
 
-    // Mock API call to update grade
-    const updatedSubmissions = submissions.map((sub) =>
-      sub.id === selectedSubmission.id
-        ? { ...sub, grade: Number(gradeValue), feedback, status: "graded" }
-        : sub
-    );
-
-    setSubmissions(updatedSubmissions);
-    setShowGradingModal(false);
-    toast.success("Grade submitted successfully");
-  };
 
   if (isLoading) {
     return (
@@ -205,7 +116,7 @@ const AssignmentReviewPage = () => {
     );
   }
 
-  if (!assignment) {
+  if (!submitAssignments) {
     return (
       <div className="min-h-screen bg-gray-50">
         <TopNavbar />
@@ -339,8 +250,12 @@ const AssignmentReviewPage = () => {
                     <div className="flex justify-between text-sm mb-1">
                       <span>Submissions</span>
                       <span>
-                        {currentAssignment?.assignment?.submissionCount}/
-                        {currentAssignment?.assignment?.totalStudents}
+                        {submitAssignments?.length}/
+                        {
+                          students?.filter(
+                            (item) => item?.classId?._id === Authuser?.classId
+                          )?.length
+                        }
                       </span>
                     </div>
                     <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -348,18 +263,15 @@ const AssignmentReviewPage = () => {
                         className="h-full bg-green-500 rounded-full"
                         style={{
                           width: `${
-                            (assignment.submissionCount /
-                              assignment.totalStudents) *
+                            (submitAssignments?.length /
+                              students?.filter(
+                                (item) =>
+                                  item?.classId?._id === Authuser?.classId
+                              )?.length) *
                             100
                           }%`,
                         }}
                       ></div>
-                    </div>
-                    <div className="mt-2 flex justify-between text-sm">
-                      <span>Graded</span>
-                      <span>
-                        {assignment.gradedCount}/{assignment.submissionCount}
-                      </span>
                     </div>
                   </div>
                 </div>
@@ -430,7 +342,7 @@ const AssignmentReviewPage = () => {
                       <tr key={key}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">
-                            {key+1}. {submission?.StudentName}
+                            {key + 1}. {submission?.StudentName}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -457,7 +369,6 @@ const AssignmentReviewPage = () => {
                                 </a>
                               </button>
                             )}
-                            
                           </div>
                         </td>
                       </tr>
@@ -469,8 +380,6 @@ const AssignmentReviewPage = () => {
           </motion.div>
         </div>
       </motion.div>
-
-      
     </div>
   );
 };

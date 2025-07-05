@@ -196,14 +196,14 @@ const assignmentSlice = createSlice({
         state.isLoading = false;
       })
       .addCase(createAssignment.rejected, (state, action) => {
-        state.isLoading = false;
+        state.isLoading = true;
         state.error = action.payload;
       })
       .addCase(submitAssignment.fulfilled, (state, action) => {
         state.isLoading = false;
       })
       .addCase(submitAssignment.rejected, (state, action) => {
-        state.isLoading = false;
+        state.isLoading = true;
         state.error = action.payload;
       })
 
@@ -215,7 +215,7 @@ const assignmentSlice = createSlice({
         state.isLoading = false;
       })
       .addCase(getAllAssignments.rejected, (state, action) => {
-        state.isLoading = false;
+        state.isLoading = true;
         state.error = action.payload;
       })
 
@@ -227,7 +227,7 @@ const assignmentSlice = createSlice({
         state.isLoading = false;
       })
       .addCase(getSubmitAssignments.rejected, (state, action) => {
-        state.isLoading = false;
+        state.isLoading = true;
         state.error = action.payload;
       })
       .addCase(getAssignmentById.pending, (state) => {
@@ -238,7 +238,7 @@ const assignmentSlice = createSlice({
         state.isLoading = false;
       })
       .addCase(getAssignmentById.rejected, (state, action) => {
-        state.isLoading = false;
+        state.isLoading = true;
         state.error = action.payload;
       })
       .addCase(getAssignmentsByTeacherId.pending, (state) => {
@@ -249,7 +249,7 @@ const assignmentSlice = createSlice({
         state.isLoading = false;
       })
       .addCase(getAssignmentsByTeacherId.rejected, (state, action) => {
-        state.isLoading = false;
+        state.isLoading = true;
         state.error = action.payload;
       });
 

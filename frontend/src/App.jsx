@@ -5,7 +5,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import Landingpage from './pages/Landingpage';
 import Teacherpage from './pages/Teacherpage';
 import TeacherDashboardpage from './pages/TeacherDashboardpage'; 
-import TeacherAccountdetail from './pages/TeacherAccountdetail';
 import Notificationpage from './pages/Notificationpage';
 import TeacherSubject from './pages/TeacherSubject'
 import Register from './pages/Register';
@@ -14,10 +13,9 @@ import ForgotPassword from './pages/ForgotPassword';
 import AdminDashboard from './pages/AdminDashboard'
 import Attendancepage from './pages/Attendancepage'
 import Timetable from './pages/Timetable';
-import toast, { Toaster } from 'react-hot-toast';
+import  { Toaster } from 'react-hot-toast';
 import { AdminTeacher } from './pages/AdminTeacher';
 import Adminpage from './pages/Adminpage'
-import TimeTable from './features/TimeTable';
 import TeachersAssignmentpage from "./pages/TeachersAssignmentpage"
 import TeacherClass from "./pages/TeacherClass"
 import FeePage from './pages/FeePage';
@@ -35,9 +33,6 @@ import { updateUserInfo } from './features/Authentication';
 import { DarkModeProvider } from './context/DarkModeContext';
 import AddTeacherPage from './pages/AddTeacher';
 import StudentAssignmentDetails from './pages/StudentAssignmentDetails';
-import StudentAssignmentSubmit from './pages/StudentAssignmentSubmit';
-import StudentCourseAssignments from './pages/StudentCourseAssignments';
-import StudentCourseDetails from './pages/StudentCourseDetails';
 import StudentLayout from './layouts/StudentLayout';
 import AssignmentDetails from './pages/AssignmentDetails';
 import SubmitAssignment from './pages/SubmitAssignment';
