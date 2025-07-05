@@ -159,3 +159,33 @@ module.exports.deleteAssignment = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+exports.getSubmitAssignmentById = async (req, res) => {
+  try {
+    const { assignmentId } = req.params;
+    const assignment_id = assignmentId;
+    console.log("Assignment ID:", assignment_id);
+
+    if (!assignmentId) {
+      return res.status(400).json({ error: "Assignment ID is required." });
+    }
+
+    const assignment = await AssignmentSub.find({assignment_id}).populate(
+      "student_id"
+    );
+
+    
+    const transformed = assignment.map((item) => ({
+      StudentName: `${item.student_id.firstName} ${item.student_id.lastName}`,
+      status: "submitted",
+      comment: item.comment,
+      answerUrl: item.answerUrl,
+      date: item.createdAt,
+    }));
+    res.status(200).json(transformed);
+  } catch (error) {
+    console.error("Error retrieving assignment by ID:", error.message);
+    res
+      .status(500)
+      .json({ error: "Error retrieving assignment: " + error.message });
+  }
+};

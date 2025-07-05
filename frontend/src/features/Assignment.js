@@ -7,6 +7,7 @@ const initialState = {
   isLoading: false,
   error: null,
   currentAssignment: null,
+  submitAssignments: [],
 };
 
 // ✅ Create assignment
@@ -141,6 +142,22 @@ export const getAssignmentsByTeacherId = createAsyncThunk(
         error.response?.data?.message || "Failed to fetch assignments"
       );
     }
+  })
+export const getSubmitAssignments = createAsyncThunk(
+  "/assignment/assignment/getSubmitAssignmentbyId/",
+  async (assignmentId, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(
+        `/assignment/getSubmitAssignmentbyId/${assignmentId}`,
+        { withCredentials: true }
+      );
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch assignments"
+      );
+    }
   }
 );
 export const deleteAssignment = createAsyncThunk(
@@ -202,6 +219,17 @@ const assignmentSlice = createSlice({
         state.error = action.payload;
       })
 
+      .addCase(getSubmitAssignments.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getSubmitAssignments.fulfilled, (state, action) => {
+        state.submitAssignments = action.payload;
+        state.isLoading = false;
+      })
+      .addCase(getSubmitAssignments.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
       .addCase(getAssignmentById.pending, (state) => {
         state.isLoading = true;
       })
@@ -225,7 +253,7 @@ const assignmentSlice = createSlice({
         state.error = action.payload;
       });
 
-  },
+  }, 
 });
 
 export const { clearCurrentAssignment } = assignmentSlice.actions;
