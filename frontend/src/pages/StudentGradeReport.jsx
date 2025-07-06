@@ -7,6 +7,8 @@ import {
 import { motion } from 'framer-motion';
 import { FiDownload, FiPrinter, FiShare2, FiFilter, FiCalendar, FiChevronDown, FiBook, FiBarChart2 } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 const StudentGradeReport = () => {
   const dispatch = useDispatch();
@@ -68,6 +70,20 @@ const StudentGradeReport = () => {
       'F': 0
     }
   });
+  const exportPDF = () => {
+    const input = document.getElementById("reportContent"); // ID of the div to export
+
+    html2canvas(input).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF();
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save("report.pdf");
+    });
+  };
 
   useEffect(() => {
       dispatch(getGradeById(studentId));
@@ -144,9 +160,12 @@ const StudentGradeReport = () => {
       }
     }
   };
+  const handlePrint = () => {
+    window.print();
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50" id="reportContent">
       <TopNavbar />
 
       <motion.div
@@ -170,10 +189,16 @@ const StudentGradeReport = () => {
             variants={cardVariants}
             className="flex flex-wrap gap-2 mt-4 md:mt-0"
           >
-            <button className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors">
+            <button
+              className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+              onClick={exportPDF}
+            >
               <FiDownload /> Export PDF
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+            <button
+              onClick={handlePrint}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            >
               <FiPrinter /> Print
             </button>
             <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
@@ -213,12 +238,13 @@ const StudentGradeReport = () => {
                 </div>
               </div>
             )}
-            { grades.length === 0 && (
+            {grades.length === 0 && (
               <div className="mt-4 md:mt-0 text-red-200">
                 {/* create emoji */}
                 <div className="text-4xl mb-2">😞</div>
                 <p className="text-sm">No grades submitted for you.</p>
-              </div>)}
+              </div>
+            )}
           </div>
         </motion.div>
         {/* Course List */}

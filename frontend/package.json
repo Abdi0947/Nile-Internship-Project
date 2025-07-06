@@ -26,6 +26,8 @@
     "dayjs": "^1.11.13",
     "formik": "^2.4.6",
     "framer-motion": "^12.11.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.1",
     "lucide-react": "^0.508.0",
     "motion-utils": "^12.9.4",
     "react": "^18.3.1",
