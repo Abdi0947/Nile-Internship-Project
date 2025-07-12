@@ -39,7 +39,7 @@ export default function ResetPassword() {
 
     setIsLoading(true);
     try {
-      const response = await axios.post(
+      const response = await axios.patch(
         `http://51.21.182.82:5003/api/auth/reset-password/${token}`,
         { password: formData.password }
       );
