@@ -66,7 +66,7 @@ const ForgotPassword = () => {
       // const response = await axiosInstance.post("/auth/forgot-password", { email });
       // Simulating API call for now
       const res = await axios.post(
-        "http://localhost:5003/api/auth/forgot-password",
+        "http://51.21.182.82:5003/api/auth/forgot-password",
         { email }
       );
       

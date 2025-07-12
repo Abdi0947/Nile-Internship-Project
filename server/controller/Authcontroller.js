@@ -44,7 +44,7 @@ const getWelcomeEmailTemplate = (user) => `
             </ul>
             <p>To get started, please click the button below:</p>
             <p style="text-align: center;">
-                <a href="http://localhost:5173/login" class="button">Login to Your Account</a>
+                <a href="http://51.21.182.82/login" class="button">Login to Your Account</a>
             </p>
             <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
         </div>
@@ -482,7 +482,7 @@ module.exports.ForgotPassword = async (req, res) => {
     await foundUser.save({ validateBeforeSave: false });
 
     // Create reset URL
-    const resetURL = `http://localhost:5173/reset-password/${tokens}`;
+    const resetURL = `http://51.21.182.82/reset-password/${tokens}`;
 
     try {
       await sendEmail({
