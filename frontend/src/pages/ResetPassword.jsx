@@ -40,7 +40,7 @@ export default function ResetPassword() {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        `http://localhost:5003/api/auth/reset-password/${token}`,
+        `http://51.21.182.82:5003/api/auth/reset-password/${token}`,
         { password: formData.password }
       );
 
