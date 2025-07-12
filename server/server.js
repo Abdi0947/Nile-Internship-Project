@@ -20,10 +20,11 @@ const app = express();
 
 
 app.use(cors({
-  origin: "*",
-  methods: ["GET", "POST","PUT","DELETE","PATCH"],
+  origin: "http://51.21.182.82", 
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   credentials: true,
 }));
+
 
 
 
